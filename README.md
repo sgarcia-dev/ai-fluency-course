@@ -3,7 +3,7 @@
 Tools change. Providers change. The skills don't. A short, tool-agnostic guide to using AI well:
 how it really works, how to direct it, how to check it, and how to stop overpaying for it.
 
-**Read it here: <https://sgarcia-dev.github.io/ai-fluency-course/>**
+**Read it here: <https://ai-fluency.sergeigarcia.com/>**
 
 ## Where this came from
 
@@ -47,7 +47,8 @@ npm install
 npm run dev
 ```
 
-See [AGENTS.md](./AGENTS.md) for layout and writing rules.
+Deploys go to Cloudflare Workers with `npm run deploy`. See [AGENTS.md](./AGENTS.md) for layout and
+writing rules.
 
 ## License
 

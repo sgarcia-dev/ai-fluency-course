@@ -10,12 +10,13 @@ A short, tool-agnostic course on using AI well. The content is plain Markdown in
 - `src/content/docs/harness/`: the machinery around a model (how).
 - `src/content/docs/appendix/`: practical extras, plus the dated model cheat sheet.
 - `astro.config.mjs`: site config and sidebar order. A new page must be added to the sidebar list there.
-- `.github/workflows/deploy.yml`: builds and deploys to GitHub Pages on every push to `main`.
+- `wrangler.jsonc`: Cloudflare Workers static-assets config. `npm run deploy` builds and publishes.
+- `.github/workflows/ci.yml`: builds every push and pull request so a broken page fails fast.
 
 ## Commands
 
 - `npm run dev`: local dev server (use `astro dev --background` from an agent).
-- `npm run build`: build the static site into `dist/`. Broken builds fail the deploy.
+- `npm run build`: build the static site into `dist/`. CI runs this on every push.
 
 ## Writing rules
 

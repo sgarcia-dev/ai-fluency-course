@@ -23,8 +23,7 @@ const appendix = ['model-cheat-sheet', 'glossary', 'putting-it-together', 'dicta
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://sgarcia-dev.github.io',
-	base: '/ai-fluency-course',
+	site: 'https://ai-fluency.sergeigarcia.com',
 	trailingSlash: 'always',
 	integrations: [
 		starlight({
