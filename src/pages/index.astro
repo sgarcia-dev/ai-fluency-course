@@ -1,13 +1,15 @@
 ---
 import Base from '../preview/designs/subway-v2/Base.astro';
-import { site, paths } from '../preview/content';
-import { goals, starts } from '../preview/route';
+import { site, paths, samples } from '../preview/content';
+import { starts } from '../preview/route';
+import { pickGoals } from '../preview/picker';
 import { stop, colorFor, inkOn, network } from '../preview/designs/subway-v2/data';
 const N = network();
 const colorWord: Record<string, string> = { new: 'Yellow', 'hit-or-miss': 'Tomato', daily: 'Blue', builder: 'Purple' };
 const lessons = Object.fromEntries(N.stations.map((s) => { const { n, ...rest } = stop(s.n); return [n, rest]; }));
 const lineInfo = Object.fromEntries(paths.map((p) => [p.id, { name: p.name, color: colorFor(p.id), ink: inkOn(p.id), word: colorWord[p.id], lessons: p.lessons, story: starts.find((s) => s.id === p.id)?.story ?? p.says }]));
 const data = { lessons, lines: lineInfo };
+const sampleCards = samples.map((s) => ({ ...stop(s.n), ids: paths.filter((p) => p.lessons.includes(s.n)).map((p) => p.id) }));
 const most = [
 	'Most AI courses: one long course for everyone.',
 	'Most AI courses: built around one app that changes every few months.',
@@ -32,16 +34,16 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 		<div class="step" id="step1">
 			<p class="mono">Step 1 of 2</p>
 			<h2 tabindex="-1">Where do you want to get to?</h2>
-			<p>Pick one to three.</p>
+			<p>Pick the one that matters most to you.</p>
 			<ul class="goals">
-				{goals.map((g) => <li><button type="button" class="goal lift" data-goal={g.id} aria-pressed="false">{g.label}</button></li>)}
+				{pickGoals.map((g) => <li><button type="button" class="goal lift" data-goal={g.id} aria-pressed="false">{g.label}</button></li>)}
 			</ul>
-			<p class="tk-act"><button type="button" class="btn ink" id="next1" disabled>Next</button> <span class="mono" id="count">0 of 3 picked</span></p>
+			<p class="mono teaser" id="teaser">Your line and its stops appear here.</p>
 		</div>
 		<div class="step" id="step2" hidden>
 			<p class="mono">Step 2 of 2</p>
-			<h2 tabindex="-1">Where are you today?</h2>
-			<p>Your goal fits these lines. Pick the one that sounds like you.</p>
+			<h2 tabindex="-1">Where are you with that today?</h2>
+			<p>Pick the one that sounds most like you.</p>
 			<ul class="stories" id="stories"></ul>
 			<button type="button" class="linkbtn" id="back1">Back to step 1</button>
 		</div>
@@ -61,7 +63,7 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 		</div>
 	</section>
 
-	<section id="map" class="wrap map" aria-labelledby="map-h">
+	<section id="map" class="wrap map" aria-labelledby="map-h" hidden>
 		<h2 id="map-h">The map</h2>
 		<p class="lede" id="legend">Each colored line is one path through the course. Where lines cross, they share a lesson.</p>
 		<ul class="keys">{paths.map((p) => <li data-line={p.id}><span class="bar" style={`--c:${colorFor(p.id)}`} aria-hidden="true"></span>{colorWord[p.id]} line: {p.name}</li>)}</ul>
@@ -79,11 +81,23 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 
 		<div id="stops" class="chosen" hidden>
 			<h3 id="stops-h">Your stops</h3>
-			<p class="lede">Tap any stop to see what it covers.</p>
+			<p class="lede">Stops marked <span class="ready mono">Sample ready</span> can be read today. Tap any stop to see what it covers.</p>
 			<ol class="vline" id="vlist"></ol>
 		</div>
 	</section>
 
+	{sampleCards.length > 0 && <section class="wrap samples" aria-labelledby="smp-h">
+		<h2 id="smp-h">Sample lessons</h2>
+		<p class="lede">These lessons are ready to read now. The dots show which lines they sit on.</p>
+		<ul class="scards">{sampleCards.map((s) => (
+			<li><a class="scard lift" href={s.href}>
+				<span class="sdots" aria-label={`On the ${s.ids.map((id) => colorWord[id]).join(', ')} line${s.ids.length > 1 ? 's' : ''}`}>{s.ids.map((id) => <span class="sdot" style={`--c:${colorFor(id)}`}></span>)}</span>
+				<span class="t">{s.title}</span>
+				<span>{s.idea}</span>
+				<span class="mono">{s.minutes || 10} min</span>
+			</a></li>
+		))}</ul>
+	</section>}
 	<section class="wrap prose" aria-labelledby="why-h">
 		<h2 id="why-h">Why this exists</h2>
 		{site.why.map((p) => <p>{p}</p>)}
@@ -111,17 +125,19 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 </main>
 
 <script>
-	import { goals } from '../preview/route';
-	import { allowedLines } from '../preview/picker';
+	import { pickGoals } from '../preview/picker';
 	const main = document.getElementById('main')!;
 	const D = JSON.parse(main.dataset.v4!);
 	const $ = (id: string) => document.getElementById(id)!;
 	const get = (k: string) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } };
 	const set = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} };
+	const del = (k: string) => { try { localStorage.removeItem(k); } catch {} };
 	const esc = (t: string) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
-	try { localStorage.removeItem('aip-route'); } catch {}
-	let picked: string[] = [];
-	try { picked = JSON.parse(get('aip-goals') || '[]').filter((g: string) => goals.some((x) => x.id === g)); } catch {}
+	del('aip-route');
+	// One goal only. Older visits may have saved a list; keep the first one we still know.
+	let picked = '';
+	let answer = '';
+	try { const g = JSON.parse(get('aip-goals') || '[]'); const first = (Array.isArray(g) ? g : [g]).find((x: string) => pickGoals.some((p) => p.id === x)); picked = first ?? ''; } catch {}
 
 	function show(step: 'step1' | 'step2' | 'ticket', focus = true) {
 		for (const s of ['step1', 'step2', 'ticket']) { const el = $(s); el.hidden = s !== step; el.classList.toggle('enter', s === step); }
@@ -133,50 +149,62 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 			$(step).scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
 		}
 	}
-	function syncGoals() {
-		document.querySelectorAll<HTMLButtonElement>('.goal').forEach((b) => {
-			const on = picked.includes(b.dataset.goal!);
-			b.setAttribute('aria-pressed', String(on));
-			b.disabled = !on && picked.length >= 3;
-		});
-		($('next1') as HTMLButtonElement).disabled = !picked.length;
-		$('count').textContent = `${picked.length} of 3 picked`;
+	// Map and stops stay hidden until a lane is chosen.
+	function reveal(on: boolean) {
+		$('map').hidden = !on;
+		$('stops').hidden = !on;
+		$('teaser').hidden = on;
+		if (!on) {
+			main.classList.remove('chosen-line');
+			document.querySelectorAll<SVGGElement>('.ln').forEach((g) => g.classList.remove('on', 'draw'));
+			document.querySelectorAll<HTMLElement>('.keys li').forEach((k) => k.classList.remove('off'));
+		}
 	}
-	document.querySelectorAll<HTMLButtonElement>('.goal').forEach((b) => b.addEventListener('click', () => {
-		const g = b.dataset.goal!;
-		picked = picked.includes(g) ? picked.filter((x) => x !== g) : [...picked, g].slice(0, 3);
-		syncGoals();
-	}));
-	$('next1').addEventListener('click', () => {
-		const ls = allowedLines(picked);
-		if (ls.length === 1) { choose(ls[0], true, true); return; }
+	function syncGoals() {
+		document.querySelectorAll<HTMLButtonElement>('.goal').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.goal === picked)));
+	}
+	function step2() {
+		const g = pickGoals.find((x) => x.id === picked); if (!g) { show('step1'); return; }
 		const ul = $('stories'); ul.innerHTML = '';
-		for (const id of ls) {
-			const L = D.lines[id];
+		for (const a of g.answers) {
+			const L = D.lines[a.lane];
 			const li = document.createElement('li');
 			const b = document.createElement('button'); b.type = 'button'; b.className = 'story lift';
 			b.style.setProperty('--c', L.color);
-			b.innerHTML = `<span class="sw" aria-hidden="true"></span><span><span class="mono">${esc(L.word)} line: ${esc(L.name)}</span><q>${esc(L.story)}</q></span>`;
-			b.addEventListener('click', () => choose(id, true));
+			b.innerHTML = `<span class="sw" aria-hidden="true"></span><span><q>${esc(a.text)}</q><span class="mono rec">Recommends: ${esc(L.word)} line, ${esc(L.name)}</span></span>`;
+			b.addEventListener('click', () => { answer = a.text; choose(a.lane, true); });
 			li.append(b); ul.append(li);
 		}
 		show('step2');
-	});
+	}
+	document.querySelectorAll<HTMLButtonElement>('.goal').forEach((b) => b.addEventListener('click', () => {
+		picked = b.dataset.goal!; syncGoals(); step2();
+	}));
 	$('back1').addEventListener('click', () => show('step1'));
-	$('tk-over').addEventListener('click', () => { picked = []; syncGoals(); show('step1'); });
-	document.querySelectorAll<HTMLButtonElement>('.chip').forEach((b) => b.addEventListener('click', () => choose(b.dataset.line!, true, false, false)));
+	$('tk-over').addEventListener('click', () => {
+		picked = ''; answer = '';
+		for (const k of ['aip-path', 'aip-goals', 'aip-world', 'aip-answer']) del(k);
+		document.querySelectorAll<HTMLButtonElement>('.chip').forEach((c) => c.setAttribute('aria-pressed', 'false'));
+		syncGoals(); reveal(false);
+		show('step1', false);
+		($('step1').querySelector('h2') as HTMLElement).focus({ preventScroll: true });
+		const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+		$('plan').scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
+	});
+	document.querySelectorAll<HTMLButtonElement>('.chip').forEach((b) => b.addEventListener('click', () => choose(b.dataset.line!, true, false)));
 
-	function choose(lineId: string, fresh: boolean, only = false, scroll = true) {
+	function choose(lineId: string, fresh: boolean, scroll = true) {
 		const L = D.lines[lineId]; if (!L) { show('step1', false); return; }
-		const gs = picked.map((g) => goals.find((x) => x.id === g)!).filter(Boolean);
-		const world = gs.some((g) => g.world === 'code') ? 'code' : (gs[0]?.world ?? 'everyday');
-		if (fresh) { set('aip-path', lineId); set('aip-goals', JSON.stringify(picked)); set('aip-world', world); }
+		const g = pickGoals.find((x) => x.id === picked);
+		const gs = g ? [g] : [];
+		const world = g?.world ?? 'everyday';
+		if (fresh) { set('aip-path', lineId); set('aip-goals', JSON.stringify(picked ? [picked] : [])); set('aip-world', world); if (answer) set('aip-answer', answer); }
+		const said = (answer && g?.answers.find((a) => a.text === answer && a.lane === lineId)) ? answer : L.story;
 		const keys = new Set<number>(gs.flatMap((g) => g.targets));
 		$('tk-band').style.setProperty('--c', L.color); $('tk-band').style.setProperty('--k', L.ink);
 		$('tk-name').textContent = `${L.word} line: ${L.name}`;
-		$('tk-skip').hidden = !only;
-		$('tk-skip').textContent = 'Only one line fits your goal, so we picked it for you.';
-		$('tk-from').textContent = L.story;
+		$('tk-skip').hidden = true;
+		$('tk-from').textContent = said;
 		$('tk-to').textContent = gs.length ? gs.map((g) => g.label).join('; ') : 'Your own pick';
 		const mins = L.lessons.reduce((t: number, n: number) => t + (D.lessons[n].minutes || 10), 0);
 		$('tk-meta').textContent = `${L.lessons.length} stops · about ${mins} minutes in all`;
@@ -188,12 +216,12 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 			const l = D.lessons[n];
 			const li = document.createElement('li'); li.className = 'vs'; li.style.setProperty('--i', String(i));
 			const pid = `sp-${n}`;
-			li.innerHTML = `<span class="vdot" aria-hidden="true"></span><div class="txt"><button type="button" class="stopb" aria-expanded="false" aria-controls="${pid}"><span class="t">${esc(l.title)}</span><span class="i">${esc(l.idea)}</span>${keys.has(n) ? '<span class="key mono">Key for your goal</span>' : ''}</button><div class="sp" id="${pid}"><div><p class="mono">${l.minutes || 10} min</p>${l.covers.length ? `<ul>${l.covers.map((c: string) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}${l.href ? `<a class="btn" href="${l.href}">Read sample</a>` : '<p class="mono soon">Coming soon</p>'}</div></div></div>`;
+			li.innerHTML = `<span class="vdot" aria-hidden="true"></span><div class="txt"><button type="button" class="stopb" aria-expanded="false" aria-controls="${pid}"><span class="t">${esc(l.title)}</span>${l.href ? '<span class="ready mono">Sample ready</span>' : ''}<span class="i">${esc(l.idea)}</span>${keys.has(n) ? '<span class="key mono">Key for your goal</span>' : ''}</button>${l.href ? `<a class="rs" href="${l.href}">Read sample</a>` : ''}<div class="sp" id="${pid}"><div><p class="mono">${l.minutes || 10} min</p>${l.covers.length ? `<ul>${l.covers.map((c: string) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}${l.href ? '' : '<p class="mono soon">Coming soon</p>'}</div></div></div>`;
 			const b = li.querySelector('button')!;
 			b.addEventListener('click', () => { const o = b.getAttribute('aria-expanded') === 'true'; b.setAttribute('aria-expanded', String(!o)); li.classList.toggle('open', !o); });
 			ol.append(li);
 		});
-		$('stops').hidden = false;
+		reveal(true);
 		// Map
 		main.classList.add('chosen-line');
 		document.querySelectorAll<SVGGElement>('.ln').forEach((g) => {
@@ -215,8 +243,9 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 
 	// Return visit: show the saved line directly.
 	syncGoals();
+	answer = get('aip-answer');
 	const saved = get('aip-path');
-	if (saved && D.lines[saved]) choose(saved, false);
+	if (saved && D.lines[saved]) choose(saved, false); else reveal(false);
 </script>
 <style is:global>
 	.wrap{max-width:68rem;margin:0 auto;padding:3.5rem 1.25rem}
@@ -308,6 +337,19 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 	.face.b .ft{font-weight:900}
 	.flip[aria-pressed=true]{background:#FFD400}
 	.flip[aria-pressed=false] .face.b,.flip[aria-pressed=true] .face.a{opacity:0;transform:rotateX(90deg);visibility:hidden}
+	#map[hidden],#stops[hidden],.teaser[hidden]{display:none!important}
+	.teaser{margin-top:1.5rem;border-left:6px solid #0A0A0A;padding:.2rem 0 .2rem .8rem}
+	.rec{display:block;margin-top:.5rem}
+	.ready{display:inline-block;background:#FFD400;color:#0A0A0A;border:2px solid #0A0A0A;padding:0 .35rem;font-size:.78rem;line-height:1.5;vertical-align:middle}
+	.stopb .ready{align-self:flex-start;margin-top:.3rem}
+	.rs{display:inline-block;margin:.3rem .6rem .4rem;font-weight:700;color:#0A0A0A}
+	.samples{border-top:3px solid #0A0A0A}
+	.scards{list-style:none;padding:0;margin:0;display:grid;gap:1.2rem;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr))}
+	.scard{display:flex;flex-direction:column;gap:.5rem;height:100%;color:#0A0A0A;text-decoration:none;background:#fff;border:3px solid #0A0A0A;box-shadow:4px 4px 0 #0A0A0A;padding:1rem}
+	.scard:hover{background:#FFF6C2}
+	.scard .t{font:900 1.3rem/1.2 'Fraunces',serif}
+	.sdots{display:flex;gap:.35rem}
+	.sdot{width:16px;height:16px;border-radius:50%;background:var(--c);border:2px solid #0A0A0A}
 	.prose p{max-width:40rem;font-size:1.1rem}
 	@media (max-width:48rem){.map{display:flex;flex-direction:column}#stops{order:-1;margin-bottom:2rem}}
 	@media (prefers-reduced-motion: reduce){.lift:hover:not(:disabled),.chip:hover{transform:none}.ln.draw .trk,.ln.draw .edge{stroke-dasharray:none}}
