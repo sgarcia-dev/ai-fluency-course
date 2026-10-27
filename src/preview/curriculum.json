@@ -1,0 +1,310 @@
+{
+ "parts": [
+  {
+   "n": 1,
+   "title": "First steps",
+   "lessons": [
+    {
+     "n": 1,
+     "slug": "what-is-this-thing",
+     "title": "What is this thing?",
+     "idea": "It is a very well-read guesser, not a search engine or a person."
+    },
+    {
+     "n": 2,
+     "slug": "your-first-real-conversation",
+     "title": "Your first real conversation",
+     "idea": "Try it now on something you need today."
+    },
+    {
+     "n": 3,
+     "slug": "what-not-to-share",
+     "title": "What not to share",
+     "idea": "What happens to what you type, and simple rules."
+    },
+    {
+     "n": 4,
+     "slug": "sure-of-itself-still-wrong",
+     "title": "Sure of itself, still wrong",
+     "idea": "It sounds confident even when it makes things up."
+    },
+    {
+     "n": 5,
+     "slug": "spotting-ai-scams-and-fakes",
+     "title": "Spotting AI scams and fakes",
+     "idea": "Fake voices, fake photos, fake urgency."
+    },
+    {
+     "n": 6,
+     "slug": "five-everyday-jobs-it-does-well",
+     "title": "Five everyday jobs it does well",
+     "idea": "Rewrite, summarize, explain, plan, brainstorm."
+    },
+    {
+     "n": 7,
+     "slug": "talk-instead-of-type",
+     "title": "Talk instead of type",
+     "idea": "Speaking gives it better context, faster."
+    },
+    {
+     "n": 8,
+     "slug": "which-app-should-i-use",
+     "title": "Which app should I use?",
+     "idea": "The free ones are fine. Skills carry over between them."
+    }
+   ],
+   "for": "People new to AI"
+  },
+  {
+   "n": 2,
+   "title": "Getting good results",
+   "lessons": [
+    {
+     "n": 9,
+     "slug": "say-what-done-looks-like",
+     "title": "Say what “done” looks like",
+     "idea": "A vague ask gets confident work on the wrong thing."
+    },
+    {
+     "n": 10,
+     "slug": "the-right-context-not-all-of-it",
+     "title": "The right context, not all of it",
+     "idea": "Too little and it guesses; too much buries what mattered."
+    },
+    {
+     "n": 11,
+     "slug": "show-one-good-example",
+     "title": "Show one good example",
+     "idea": "One example beats a paragraph of description."
+    },
+    {
+     "n": 12,
+     "slug": "check-it-with-real-proof",
+     "title": "Check it with real proof",
+     "idea": "Trust a source, a test or a calculator, not its tone."
+    },
+    {
+     "n": 13,
+     "slug": "ask-for-the-plan-first",
+     "title": "Ask for the plan first",
+     "idea": "Fixing a plan costs one sentence; fixing work costs an hour."
+    },
+    {
+     "n": 14,
+     "slug": "when-to-start-a-fresh-chat",
+     "title": "When to start a fresh chat",
+     "idea": "Long chats get muddled. Start clean, bring a summary."
+    },
+    {
+     "n": 15,
+     "slug": "how-it-actually-works",
+     "title": "How it actually works",
+     "idea": "Ten minutes on what is happening inside, and why it matters."
+    },
+    {
+     "n": 16,
+     "slug": "bigger-isn-t-better",
+     "title": "Bigger isn't better",
+     "idea": "Use the cheapest, fastest model that does the job."
+    },
+    {
+     "n": 17,
+     "slug": "read-the-hype",
+     "title": "Read the hype",
+     "idea": "Benchmarks can be gamed. Test on your own work."
+    },
+    {
+     "n": 18,
+     "slug": "save-what-works",
+     "title": "Save what works",
+     "idea": "Write it down once so next time takes one line."
+    },
+    {
+     "n": 19,
+     "slug": "ai-at-work-who-owns-the-result",
+     "title": "AI at work: who owns the result",
+     "idea": "You do. What to tell your team and your manager."
+    }
+   ],
+   "for": "Everyone"
+  },
+  {
+   "n": 3,
+   "title": "Handing off bigger work",
+   "lessons": [
+    {
+     "n": 20,
+     "slug": "stop-prompting-start-delegating",
+     "title": "Stop prompting, start delegating",
+     "idea": "Hand over the goal and the finish line, not the steps."
+    },
+    {
+     "n": 21,
+     "slug": "instructions-it-always-reads",
+     "title": "Instructions it always reads",
+     "idea": "Set your context once, for every chat."
+    },
+    {
+     "n": 22,
+     "slug": "saved-procedures",
+     "title": "Saved procedures",
+     "idea": "Turn a job you repeat into a recipe it follows."
+    },
+    {
+     "n": 23,
+     "slug": "connecting-it-to-your-tools",
+     "title": "Connecting it to your tools",
+     "idea": "Email, calendar, files: what connecting means and the risks."
+    },
+    {
+     "n": 24,
+     "slug": "helpers-working-in-parallel",
+     "title": "Helpers working in parallel",
+     "idea": "Split big work into pieces that do not depend on each other."
+    },
+    {
+     "n": 25,
+     "slug": "letting-it-act-safely",
+     "title": "Letting it act safely",
+     "idea": "Permissions, limits and when to say stop."
+    },
+    {
+     "n": 26,
+     "slug": "the-real-cost-math",
+     "title": "The real cost math",
+     "idea": "Where the money goes, and how to spend less for the same result."
+    },
+    {
+     "n": 27,
+     "slug": "switch-tools-without-starting-over",
+     "title": "Switch tools without starting over",
+     "idea": "Learn the method, not the buttons."
+    }
+   ],
+   "for": "People who use AI daily"
+  },
+  {
+   "n": 4,
+   "title": "Building with AI",
+   "lessons": [
+    {
+     "n": 28,
+     "slug": "what-a-harness-is",
+     "title": "What a harness is",
+     "idea": "The model is the engine; the harness is the car."
+    },
+    {
+     "n": 29,
+     "slug": "the-file-it-always-reads",
+     "title": "The file it always reads",
+     "idea": "A project file that makes every session start smart."
+    },
+    {
+     "n": 30,
+     "slug": "plan-act-check",
+     "title": "Plan, act, check",
+     "idea": "The loop every coding agent runs, and where you step in."
+    },
+    {
+     "n": 31,
+     "slug": "tests-are-the-quality-gate",
+     "title": "Tests are the quality gate",
+     "idea": "Proof outside the AI, made automatic."
+    },
+    {
+     "n": 32,
+     "slug": "let-it-set-itself-up",
+     "title": "Let it set itself up",
+     "idea": "Have the AI write its own config and skills."
+    },
+    {
+     "n": 33,
+     "slug": "running-agent-teams",
+     "title": "Running agent teams",
+     "idea": "A lead that directs cheap helpers."
+    },
+    {
+     "n": 34,
+     "slug": "test-models-on-your-own-work",
+     "title": "Test models on your own work",
+     "idea": "Your own small benchmark beats any leaderboard."
+    }
+   ],
+   "for": "Engineers"
+  }
+ ],
+ "paths": [
+  {
+   "id": "new",
+   "says": "I've never really used AI",
+   "name": "First steps",
+   "lessons": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    12,
+    16
+   ]
+  },
+  {
+   "id": "hit-or-miss",
+   "says": "I use it, but results are hit or miss",
+   "name": "Getting good results",
+   "lessons": [
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ]
+  },
+  {
+   "id": "daily",
+   "says": "I use it daily and want it to do more",
+   "name": "Handing off bigger work",
+   "lessons": [
+    12,
+    16,
+    17,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27
+   ]
+  },
+  {
+   "id": "builder",
+   "says": "I build software with it",
+   "name": "Building with AI",
+   "lessons": [
+    12,
+    16,
+    20,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ]
+  }
+ ]
+}

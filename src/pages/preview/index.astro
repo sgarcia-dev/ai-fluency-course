@@ -1,0 +1,34 @@
+---
+// Hub for the preview prototypes. Each link is one design or one path-picker idea.
+import { site } from '../../preview/content';
+const designs = [
+	{ href: 'a-family/', name: 'A. Your site’s family', note: 'Fonts, color bands and textures from sergeigarcia.com.' },
+	{ href: 'b-picture-book/', name: 'B. Picture book', note: 'Soft colors, hand-drawn diagrams, recurring characters.' },
+	{ href: 'c-subway/', name: 'C. Subway map', note: 'The course drawn as a transit map. Paths are lines, lessons are stations.' },
+];
+const pickers = [
+	{ href: 'pickers/1/', name: '1. Which sounds like you?', note: 'Four short stories. Pick one.' },
+	{ href: 'pickers/2/', name: '2. Three quick questions', note: 'What have you actually done? One question at a time.' },
+	{ href: 'pickers/3/', name: '3. Start from your goal', note: 'Pick what you want to get done, then one question.' },
+];
+---
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>{site.name}: preview prototypes</title>
+		<style>
+			body { font: 17px/1.5 system-ui, sans-serif; max-width: 42rem; margin: 3rem auto; padding: 0 1rem; color: #222; background: #fff; }
+			a { color: #1a4fd6; } li { margin: 0.6rem 0; } small { color: #555; display: block; }
+		</style>
+	</head>
+	<body>
+		<h1>{site.name}: preview prototypes</h1>
+		<p>Three designs and three path pickers, built on the same content. Pick what you like; mix and match is fine.</p>
+		<h2>Designs</h2>
+		<ul>{designs.map((d) => <li><a href={d.href}>{d.name}</a><small>{d.note}</small></li>)}</ul>
+		<h2>Path pickers</h2>
+		<ul>{pickers.map((d) => <li><a href={d.href}>{d.name}</a><small>{d.note}</small></li>)}</ul>
+	</body>
+</html>
