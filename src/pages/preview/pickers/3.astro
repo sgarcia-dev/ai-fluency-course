@@ -1,0 +1,421 @@
+---
+// Path picker 3: "Start from your goal".
+// Step 1: pick one or two concrete goals. Step 2: one question about real behavior.
+// Step 3: a path, a reason that echoes the goal, and the lesson list.
+// No self-rating anywhere. Content comes from src/preview/content.ts.
+import { paths, lessonByNumber, allLessons, worlds, site } from '../../../preview/content';
+
+const SAMPLE_NUMBERS = [4, 9]; // lessons that are written and readable now
+const LESSON_MINUTES = 10; // planning figure: about 10 minutes per lesson
+
+// Each goal: label, icon (simple shapes), the world it implies, the path it leans to,
+// "tied" lessons (highlight candidates, best first), and wording for the reason sentence.
+const goals = [
+	{
+		id: 'understand', label: 'Understand what all this AI talk is about', world: 'everyday', lean: 'new',
+		tied: [1, 15, 8, 17], want: 'to understand what all this AI talk is about', focus: 'what AI is and how it really works',
+		icon: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/>',
+	},
+	{
+		id: 'emails', label: 'Write emails and messages faster', world: 'office', lean: 'hit-or-miss',
+		tied: [6, 9, 11, 10, 18], want: 'to write emails and messages faster', focus: 'asking clearly and reusing what works',
+		icon: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+	},
+	{
+		id: 'trust', label: 'Get answers I can actually trust', world: 'everyday', lean: 'hit-or-miss',
+		tied: [4, 12, 5, 17], want: 'answers you can trust', focus: 'checking what the AI tells you',
+		icon: '<path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+	},
+	{
+		id: 'money', label: 'Stop wasting money on the wrong AI plan', world: 'everyday', lean: 'daily',
+		tied: [26, 16, 8, 17], want: 'to stop wasting money on the wrong AI plan', focus: 'picking the right model and plan',
+		icon: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5C14 8.5 13 8 12 8c-1.4 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-2-.5-2.5-1.500M12 6.500V8M12 16v1.5"/>',
+	},
+	{
+		id: 'handoff', label: 'Hand off a whole task, not just a question', world: 'office', lean: 'daily',
+		tied: [20, 22, 25, 12, 13], want: 'to hand off a whole task, not just a question', focus: 'handing over the goal and the finish line',
+		icon: '<rect x="3" y="4" width="8" height="8" rx="1.5"/><path d="M15 8h6M18 5l3 3-3 3"/><path d="M3 17h18M3 21h12"/>',
+	},
+	{
+		id: 'connect', label: 'Connect AI to my email, calendar or files', world: 'office', lean: 'daily',
+		tied: [23, 25, 3, 12], want: 'to connect AI to your email, calendar or files', focus: 'connecting your tools safely',
+		icon: '<rect x="2.5" y="8" width="7" height="8" rx="2"/><rect x="14.5" y="8" width="7" height="8" rx="2"/><path d="M9.5 12h5"/>',
+	},
+	{
+		id: 'code', label: 'Write or fix code with AI', world: 'code', lean: 'builder',
+		tied: [30, 31, 29, 13, 12], want: 'to write or fix code with AI', focus: 'plan, act, check and tests',
+		icon: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 5l-4 14"/>',
+	},
+	{
+		id: 'team', label: 'Run a team of AI helpers', world: 'office', lean: 'daily',
+		tied: [24, 33, 25, 16], want: 'to run a team of AI helpers', focus: 'helpers working in parallel',
+		icon: '<circle cx="12" cy="6" r="2.5"/><circle cx="5.5" cy="17" r="2.5"/><circle cx="18.5" cy="17" r="2.5"/><path d="M11 8.300L6.5 14.800M13 8.300l4.5 6.5"/>',
+	},
+];
+
+const usage = [
+	{ id: 'never', label: 'Never', hint: 'Not once, or only a quick look.' },
+	{ id: 'few', label: 'A few times', hint: 'I have tried it, but not as a habit.' },
+	{ id: 'most', label: 'Most days', hint: 'It is part of my week.' },
+];
+
+// Only what the page script needs.
+const data = {
+	paths,
+	goals: goals.map(({ icon, ...g }) => g),
+	lessons: allLessons.map((l) => ({ n: l.n, title: l.title, idea: l.idea, slug: l.slug })),
+	samples: SAMPLE_NUMBERS,
+	minutes: LESSON_MINUTES,
+	worlds,
+	base: '/preview/a-family/',
+};
+// Make sure the samples exist in the curriculum (throws at build time if not).
+SAMPLE_NUMBERS.forEach((n) => lessonByNumber(n));
+---
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>{site.name}: start from your goal</title>
+		<style>
+			:root { --accent: #1a4fd6; --ink: #1d2230; --muted: #4f5666; --line: #d5d9e2; --soft: #f3f5fa; }
+			* { box-sizing: border-box; }
+			body { margin: 0; font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: #fff; }
+			main { max-width: 46rem; margin: 0 auto; padding: 1rem 1rem 4rem; }
+			a { color: var(--accent); }
+			a, button, input, summary { -webkit-tap-highlight-color: transparent; }
+			:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+			.back { display: inline-flex; align-items: center; min-height: 44px; }
+			h1 { font-size: 1.75rem; line-height: 1.2; margin: 0.5rem 0; }
+			h2 { font-size: 1.35rem; line-height: 1.25; margin: 0 0 0.5rem; }
+			h2:focus { outline: none; }
+			.lead { color: var(--muted); margin: 0 0 1.25rem; }
+			.steps { color: var(--muted); font-size: 0.9rem; margin: 0 0 0.5rem; }
+			[hidden] { display: none !important; }
+
+			/* Goal grid */
+			.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: 0.75rem; list-style: none; padding: 0; margin: 0 0 1rem; }
+			.goal { width: 100%; height: 100%; min-height: 7.5rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; text-align: left; font: inherit; color: inherit;
+				background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 0.8rem; cursor: pointer; position: relative; }
+			.goal:hover { border-color: var(--accent); }
+			.goal svg { width: 30px; height: 30px; fill: none; stroke: var(--accent); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+			.goal[aria-pressed="true"] { border-color: var(--accent); background: #eef2fd; }
+			.goal .tick { position: absolute; top: 0.6rem; right: 0.6rem; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); background: #fff; }
+			.goal[aria-pressed="true"] .tick { background: var(--accent); border-color: var(--accent); }
+			.goal[aria-pressed="true"] .tick::after { content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+			.hintline { color: var(--muted); font-size: 0.95rem; margin: 0 0 1rem; min-height: 1.5em; }
+
+			/* Buttons */
+			.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 1.4rem; border-radius: 10px; font: inherit; font-weight: 600; cursor: pointer; text-decoration: none; border: 2px solid var(--accent); background: var(--accent); color: #fff; }
+			.btn:hover { background: #153fae; border-color: #153fae; }
+			.btn[disabled] { background: #c7cde0; border-color: #c7cde0; color: #fff; cursor: not-allowed; }
+			.btn.ghost { background: #fff; color: var(--accent); }
+			.btn.ghost:hover { background: #eef2fd; }
+			.row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 1rem; }
+			.linkbtn { background: none; border: 0; padding: 0 0.25rem; min-height: 44px; min-width: 44px; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
+
+			/* Question */
+			fieldset { border: 0; padding: 0; margin: 0; }
+			legend { font-size: 1.35rem; font-weight: 700; line-height: 1.25; padding: 0; margin-bottom: 0.75rem; }
+			.opt { display: flex; gap: 0.75rem; align-items: flex-start; min-height: 56px; padding: 0.7rem 0.9rem; margin-bottom: 0.6rem; border: 2px solid var(--line); border-radius: 12px; cursor: pointer; }
+			.opt:hover { border-color: var(--accent); }
+			.opt input { width: 22px; height: 22px; margin: 0.15rem 0 0; accent-color: var(--accent); flex: none; }
+			.opt:has(input:checked) { border-color: var(--accent); background: #eef2fd; }
+			.opt:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+			.opt b { display: block; }
+			.opt span { color: var(--muted); font-size: 0.95rem; }
+
+			/* Result */
+			.pathname { font-size: 2rem; line-height: 1.15; margin: 0.25rem 0 0.5rem; }
+			.kicker { color: var(--muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.04em; margin: 0; }
+			.reason { font-size: 1.15rem; margin: 0 0 0.5rem; }
+			.note { color: var(--muted); margin: 0 0 0.75rem; }
+			.facts { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; margin: 0.75rem 0; }
+			.facts li { background: var(--soft); border-radius: 999px; padding: 0.25rem 0.8rem; font-size: 0.95rem; }
+			.worldline { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; color: var(--muted); margin: 0.25rem 0 0.5rem; }
+			.worldpick { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 0.75rem; }
+			.worldpick label { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; padding: 0 0.9rem; border: 2px solid var(--line); border-radius: 999px; cursor: pointer; }
+			.worldpick label:has(input:checked) { border-color: var(--accent); background: #eef2fd; }
+			.worldpick label:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+			.worldpick input { accent-color: var(--accent); width: 18px; height: 18px; }
+			ol.lessons { list-style: none; padding: 0; margin: 1.25rem 0; display: grid; gap: 0.5rem; }
+			.lesson { display: grid; grid-template-columns: 2.25rem 1fr; gap: 0.5rem; padding: 0.7rem 0.8rem; border: 2px solid var(--line); border-radius: 12px; }
+			.lesson.hot { border-color: var(--accent); background: #eef2fd; }
+			.lesson .num { font-weight: 700; color: var(--muted); }
+			.lesson.hot .num { color: var(--accent); }
+			.lesson h3 { margin: 0; font-size: 1.05rem; line-height: 1.3; }
+			.lesson p { margin: 0.1rem 0 0; color: var(--muted); font-size: 0.95rem; }
+			.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.3rem; align-items: center; }
+			.tag { font-size: 0.8rem; font-weight: 700; padding: 0.05rem 0.55rem; border-radius: 999px; background: var(--accent); color: #fff; }
+			.tag.read { background: #fff; color: var(--accent); border: 2px solid var(--accent); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.8rem; font-size: 0.9rem; }
+			.tag.read:hover { background: #eef2fd; }
+			.tag.read { margin: -0.1rem 0; }
+
+			@media (prefers-reduced-motion: no-preference) {
+				.panel { animation: rise 0.18s ease-out; }
+				@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+			}
+			@media (max-width: 400px) {
+				.grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+				.goal { padding: 0.65rem; font-size: 0.95rem; }
+				.pathname { font-size: 1.65rem; }
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<a class="back" href="/preview/">Back to the previews</a>
+			<p class="steps">{site.name} · Picker 3 of 3</p>
+			<h1>Start from your goal</h1>
+
+			<!-- Step 1: goals -->
+			<section class="panel" id="step-goals" aria-labelledby="h-goals">
+				<h2 id="h-goals" tabindex="-1">What would you like AI to help you with?</h2>
+				<p class="lead">Pick one, or up to two.</p>
+				<ul class="grid">
+					{goals.map((g) => (
+						<li>
+							<button type="button" class="goal" data-goal={g.id} aria-pressed="false">
+								<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" set:html={g.icon}></svg>
+								<span>{g.label}</span>
+								<span class="tick" aria-hidden="true"></span>
+							</button>
+						</li>
+					))}
+				</ul>
+				<p class="hintline" id="goal-status" role="status" aria-live="polite">Nothing picked yet.</p>
+				<div class="row"><button type="button" class="btn" id="to-question" disabled>Next</button></div>
+			</section>
+
+			<!-- Step 2: one question about real behavior -->
+			<section class="panel" id="step-usage" aria-labelledby="h-usage" hidden>
+				<form id="usage-form">
+					<fieldset>
+						<legend id="h-usage" tabindex="-1">Have you used an AI chat app in the last month?</legend>
+						{usage.map((u) => (
+							<label class="opt">
+								<input type="radio" name="usage" value={u.id} required />
+								<div><b>{u.label}</b><span>{u.hint}</span></div>
+							</label>
+						))}
+					</fieldset>
+					<div class="row">
+						<button type="submit" class="btn">Show my path</button>
+						<button type="button" class="btn ghost" id="usage-back">Back</button>
+					</div>
+				</form>
+			</section>
+
+			<!-- Step 3: result, filled in by the script below -->
+			<section class="panel" id="step-result" aria-labelledby="h-result" hidden>
+				<p class="kicker">Your path</p>
+				<h2 class="pathname" id="h-result" tabindex="-1"></h2>
+				<p class="reason" id="r-reason"></p>
+				<p class="note" id="r-note" hidden></p>
+				<ul class="facts" id="r-facts"></ul>
+				<div class="worldline">
+					<span id="r-world"></span>
+					<button type="button" class="linkbtn" id="world-change" aria-expanded="false" aria-controls="world-pick">change</button>
+				</div>
+				<fieldset class="worldpick" id="world-pick" hidden>
+					<legend class="sr">Examples to show</legend>
+					{worlds.map((w) => (
+						<label><input type="radio" name="world" value={w.id} />{w.label}</label>
+					))}
+				</fieldset>
+				<div class="row">
+					<a class="btn" id="r-start" href={data.base}>Start</a>
+					<button type="button" class="btn ghost" id="r-again">Pick another goal</button>
+				</div>
+				<ol class="lessons" id="r-lessons" aria-label="Lessons on this path"></ol>
+				<p class="note">Lessons marked “Read now” are written. The others are on the map and coming soon.</p>
+			</section>
+		</main>
+
+		<script type="application/json" id="picker-data" set:html={JSON.stringify(data)}></script>
+		<script is:inline>
+			(function () {
+				var D = JSON.parse(document.getElementById('picker-data').textContent);
+				var LADDER = ['new', 'hit-or-miss', 'daily', 'builder'];
+				var $ = function (id) { return document.getElementById(id); };
+				var picked = []; // goal ids, oldest first (max 2)
+				var world = 'everyday';
+				var worldTouched = false;
+				var current = null; // last result
+
+				var byId = function (list, id) { return list.filter(function (x) { return x.id === id; })[0]; };
+				var lesson = function (n) { return D.lessons.filter(function (l) { return l.n === n; })[0]; };
+
+				/* ---- MAPPING RULES (goal + usage answer -> path) ----
+				   1. Every goal leans to one path (goal.lean), the path that teaches it most directly.
+				   2. "Never" used a chat app in the last month -> First steps ("new"), whatever the goal.
+				      The goal's own path is mentioned in a note, so nobody is stuck on the basics.
+				   3. "A few times" -> the goal's path, but nobody lands past Getting good results
+				      ("hit-or-miss") yet, and "new" stays "new" (understand-type goals).
+				   4. "Most days" -> the goal's path. A goal that leans to "new" moves up to
+				      "hit-or-miss", because a daily user is past the first steps.
+				   5. Two goals: work out the path for each, and use the further one on the ladder
+				      new < hit-or-miss < daily < builder. If tied, the goal picked first wins.
+				   6. The world (everyday, office, code) comes from the goal that decided the path.
+				      The reader can change it.
+				   Honest limit: these are plain rules, not a score. Easy to read, easy to change. */
+				function pathFor(goal, usage) {
+					var lean = LADDER.indexOf(goal.lean);
+					if (usage === 'never') return 0; // rule 2
+					if (usage === 'few') return lean === 0 ? 0 : Math.min(lean, 1); // rule 3
+					return Math.max(lean, 1); // rule 4
+				}
+				function decide(goalIds, usage) {
+					var best = null;
+					goalIds.forEach(function (id) {
+						var g = byId(D.goals, id);
+						var idx = pathFor(g, usage);
+						if (!best || idx > best.idx) best = { goal: g, idx: idx }; // rule 5, ties keep the first
+					});
+					return best;
+				}
+				/* Highlights: lessons tied to the goals AND on the chosen path, taking one
+				   from each goal in turn, up to 3. If none match, highlight the first lesson. */
+				function highlights(goalIds, pathLessons) {
+					var lists = goalIds.map(function (id) {
+						return byId(D.goals, id).tied.filter(function (n) { return pathLessons.indexOf(n) > -1; });
+					});
+					var out = [];
+					for (var i = 0; i < 4 && out.length < 3; i++) {
+						lists.forEach(function (l) { if (l[i] != null && out.indexOf(l[i]) < 0 && out.length < 3) out.push(l[i]); });
+					}
+					if (!out.length) out.push(pathLessons[0]);
+					return out;
+				}
+				function duration(count) {
+					var m = count * D.minutes, h = Math.floor(m / 60), r = m % 60;
+					if (!h) return 'about ' + m + ' minutes';
+					return 'about ' + h + (h === 1 ? ' hour' : ' hours') + (r ? ' ' + r + ' minutes' : '');
+				}
+				function join(arr) { return arr.length > 1 ? arr[0] + ', and ' + arr[1] : arr[0]; }
+				function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+				function save(key, val) { try { localStorage.setItem(key, val); } catch (e) { /* storage may be blocked; the page still works */ } }
+
+				function show(id) {
+					['step-goals', 'step-usage', 'step-result'].forEach(function (s) { $(s).hidden = s !== id; });
+					var h = id === 'step-goals' ? 'h-goals' : id === 'step-usage' ? 'h-usage' : 'h-result';
+					$(h).focus({ preventScroll: false });
+					window.scrollTo(0, 0);
+				}
+
+				/* ---- Step 1 ---- */
+				var buttons = Array.prototype.slice.call(document.querySelectorAll('.goal'));
+				function renderGoals() {
+					buttons.forEach(function (b) { b.setAttribute('aria-pressed', picked.indexOf(b.dataset.goal) > -1 ? 'true' : 'false'); });
+					$('to-question').disabled = picked.length === 0;
+					$('goal-status').textContent = picked.length === 0 ? 'Nothing picked yet.'
+						: picked.length === 1 ? 'Picked 1 of 2. You can add one more, or press Next.'
+						: 'Picked 2 of 2. Picking another replaces the first.';
+				}
+				buttons.forEach(function (b) {
+					b.addEventListener('click', function () {
+						var id = b.dataset.goal, i = picked.indexOf(id);
+						if (i > -1) picked.splice(i, 1);
+						else { picked.push(id); if (picked.length > 2) picked.shift(); }
+						renderGoals();
+					});
+				});
+				$('to-question').addEventListener('click', function () { show('step-usage'); });
+				$('usage-back').addEventListener('click', function () { show('step-goals'); });
+
+				/* ---- Step 3 ---- */
+				function render() {
+					var usage = document.querySelector('input[name="usage"]:checked').value;
+					var res = decide(picked, usage);
+					var path = D.paths[res.idx];
+					if (!worldTouched) world = res.goal.world;
+					var hot = highlights(picked, path.lessons);
+					current = { path: path, usage: usage, deciding: res.goal };
+
+					$('h-result').textContent = path.name;
+					var wants = picked.map(function (id) { return byId(D.goals, id).want; });
+					var focuses = picked.map(function (id) { return byId(D.goals, id).focus; });
+					var native = res.goal.lean === path.id;
+					var reason = 'You want ' + join(wants) + ', so ';
+					reason += native ? 'this path puts ' + join(focuses) + ' up front.'
+						: 'this path starts with the basics, and gets to ' + join(focuses) + ' along the way.';
+					$('r-reason').textContent = reason;
+
+					var note = $('r-note');
+					var leanPath = byId(D.paths, res.goal.lean);
+					if (!native && leanPath && res.idx < LADDER.indexOf(res.goal.lean)) {
+						note.textContent = 'Your goal is covered most fully in “' + leanPath.name + '”. Come back to it when this feels easy.';
+						note.hidden = false;
+					} else { note.hidden = true; }
+
+					var facts = $('r-facts'); facts.textContent = '';
+					[path.lessons.length + ' lessons', duration(path.lessons.length) + ' in total', 'About ' + D.minutes + ' minutes each']
+						.forEach(function (t) { facts.appendChild(el('li', null, t)); });
+
+					var list = $('r-lessons'); list.textContent = '';
+					path.lessons.forEach(function (n, i) {
+						var l = lesson(n), isHot = hot.indexOf(n) > -1, isSample = D.samples.indexOf(n) > -1;
+						var li = el('li', 'lesson' + (isHot ? ' hot' : ''));
+						li.appendChild(el('div', 'num', String(i + 1) + '.'));
+						var body = el('div');
+						body.appendChild(el('h3', null, l.title));
+						body.appendChild(el('p', null, l.idea));
+						if (isHot || isSample) {
+							var tags = el('div', 'tags');
+							if (isHot) tags.appendChild(el('span', 'tag', 'Tied to your goal'));
+							if (isSample) {
+								var a = el('a', 'tag read', 'Read now');
+								a.href = D.base + l.slug + '/';
+								a.setAttribute('aria-label', 'Read now: ' + l.title);
+								tags.appendChild(a);
+							}
+							body.appendChild(tags);
+						}
+						li.appendChild(body);
+						list.appendChild(li);
+					});
+					renderWorld();
+					save('aip-path', path.id);
+					save('aip-world', world);
+				}
+				function renderWorld() {
+					var w = byId(D.worlds, world);
+					$('r-world').textContent = 'We will show examples from ' + w.label.toLowerCase() + '.';
+					Array.prototype.forEach.call(document.querySelectorAll('input[name="world"]'), function (r) { r.checked = r.value === world; });
+				}
+
+				$('usage-form').addEventListener('submit', function (e) {
+					e.preventDefault();
+					worldTouched = false;
+					render();
+					show('step-result');
+				});
+				$('world-change').addEventListener('click', function () {
+					var box = $('world-pick'), open = box.hidden;
+					box.hidden = !open;
+					this.setAttribute('aria-expanded', open ? 'true' : 'false');
+				});
+				Array.prototype.forEach.call(document.querySelectorAll('input[name="world"]'), function (r) {
+					r.addEventListener('change', function () {
+						world = r.value; worldTouched = true; renderWorld(); save('aip-world', world);
+					});
+				});
+				$('r-again').addEventListener('click', function () {
+					picked = []; worldTouched = false;
+					Array.prototype.forEach.call(document.querySelectorAll('input[name="usage"]'), function (r) { r.checked = false; });
+					renderGoals();
+					$('world-pick').hidden = true; $('world-change').setAttribute('aria-expanded', 'false');
+					show('step-goals');
+				});
+				$('r-start').addEventListener('click', function () {
+					if (current) { save('aip-path', current.path.id); save('aip-world', world); }
+				});
+				renderGoals();
+			})();
+		</script>
+		<style>
+			.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+		</style>
+	</body>
+</html>
