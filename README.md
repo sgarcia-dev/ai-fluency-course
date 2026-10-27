@@ -1,7 +1,11 @@
-# AI Fluency
+# AI, Plainly (working name)
 
-Tools change. Providers change. The skills don't. A short, tool-agnostic guide to using AI well:
-how it really works, how to direct it, how to check it, and how to stop overpaying for it.
+Tools change. Providers change. The skills don't. A free, tool-agnostic course on using AI well,
+in short lessons. Answer two questions and get your own line through the course, from "what is
+this thing?" to running teams of AI helpers.
+
+The new course is a preview: 6 sample lessons of 34 are written. The original guide is at
+[/legacy/](https://ai-fluency.sergeigarcia.com/legacy/).
 
 **Read it here: <https://ai-fluency.sergeigarcia.com/>**
 
@@ -39,16 +43,15 @@ and I would love your help making it better.
 
 ## Contributing
 
-Corrections, better examples and new chapters are welcome. Pages are Markdown in
-`src/content/docs/`. Run it locally:
+Corrections, better examples and new lessons are welcome. See [AGENTS.md](./AGENTS.md) for the
+layout, how to add a lesson, and the writing rules. Run it locally:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Deploys go to Cloudflare Workers with `npm run deploy`. See [AGENTS.md](./AGENTS.md) for layout and
-writing rules.
+Deploys go to Cloudflare Workers with `npm run deploy`.
 
 ## License
 
