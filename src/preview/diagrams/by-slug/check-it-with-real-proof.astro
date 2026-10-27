@@ -1,0 +1,74 @@
+---
+// Check it with real proof: proof comes from outside tools, matched to the stakes.
+import { samples } from '../../content';
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'check-it-with-real-proof')?.diagram.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const head = (x1: number, y1: number, x2: number, y2: number) => {
+	const a = Math.atan2(y2 - y1, x2 - x1);
+	const p = (d: number, o: number) => `${x2 - Math.cos(a) * d - Math.sin(a) * o},${y2 - Math.sin(a) * d + Math.cos(a) * o}`;
+	return { shaft: `M${x1},${y1} L${x2},${y2}`, head: `${x2},${y2} ${p(12, 6)} ${p(12, -6)}` };
+};
+const arrows = [head(70, 80, 112, 104), head(150, 52, 150, 76), head(230, 80, 188, 104)];
+// Dial: semicircle centered at (150, 300), radius 70. Needle near high end.
+const na = (-180 + 150) * (Math.PI / 180);
+const needle = `M150,300 L${150 + Math.cos(na) * 58},${300 + Math.sin(na) * 58}`;
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 300 360" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="7" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<!-- Source: open book, top left -->
+			<path class="paper line" d="M14 40 Q38 32 60 42 L60 76 Q38 66 14 74 Z" />
+			<path class="paper line" d="M60 42 Q82 32 106 40 L106 74 Q82 66 60 76 Z" />
+			<text class="t b" x="60" y="24" text-anchor="middle">Source</text>
+			<!-- Math: calculator, top center -->
+			<rect class="acc line" x="130" y="4" width="40" height="44" />
+			<rect class="paper line thin" x="136" y="9" width="28" height="11" />
+			{[0, 1].map((r) => [0, 1, 2].map((c) => <circle class="line thin paper" cx={140 + c * 10} cy={29 + r * 10} r="3" />))}
+			<text class="t b" x="206" y="24">Math</text>
+			<!-- Test: check box, top right -->
+			<rect class="paper line" x="216" y="38" width="34" height="34" />
+			<path class="tick big" d="M222 55 l8 9 l14 -18" />
+			<text class="t b" x="262" y="60">Test</text>
+			{arrows.map((a) => (<g><path class="line" d={a.shaft} /><polygon class="ink line thin" points={a.head} /></g>))}
+			<!-- AI answer card -->
+			<rect class="paper line" x="80" y="104" width="140" height="80" />
+			<text class="t b" x="96" y="132">AI answer</text>
+			<line class="line thin muted-s" x1="96" y1="148" x2="176" y2="148" />
+			<line class="line thin muted-s" x1="96" y1="166" x2="160" y2="166" />
+			<circle class="acc line" cx="198" cy="160" r="13" />
+			<text class="t b" x="198" y="166" text-anchor="middle">?</text>
+			<!-- Stakes dial -->
+			<text class="t b" x="150" y="216" text-anchor="middle">How bad if wrong?</text>
+			<path class="good-s" d="M80,300 A70,70 0 0 1 150,230" />
+			<path class="bad-s" d="M150,230 A70,70 0 0 1 220,300" />
+			<path class="line" d={needle} />
+			<circle class="ink line" cx="150" cy="300" r="5" />
+			<text class="t b good-t" x="10" y="326">Low:</text>
+			<text class="t" x="10" y="346">glance</text>
+			<text class="t b bad-t" x="290" y="326" text-anchor="end">High: check</text>
+			<text class="t" x="290" y="346" text-anchor="end">twice, ask a person</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 26rem; margin: 0 auto; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.thin { stroke-width: 1.5; }
+	.muted-s { stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.ink { fill: var(--dg-ink, #1f2a37); }
+	.good-s { fill: none; stroke: var(--dg-good, #2e8b57); stroke-width: 12; }
+	.bad-s { fill: none; stroke: var(--dg-bad, #c0392b); stroke-width: 12; }
+	.tick { fill: none; stroke: var(--dg-good, #2e8b57); stroke-width: 2.5; stroke-linecap: round; }
+	.big { stroke-width: 4; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 16px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
