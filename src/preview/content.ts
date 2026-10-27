@@ -19,7 +19,7 @@ export const worlds = [
 ] as const;
 
 export const site = {
-	name: 'Your AI Path',
+	name: 'AI, Plainly',
 	nameNote: 'Working title.',
 	tagline: 'Start where you are.',
 	pitch:
