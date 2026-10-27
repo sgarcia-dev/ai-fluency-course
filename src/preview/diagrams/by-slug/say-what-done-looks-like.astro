@@ -1,5 +1,5 @@
 ---
-// Lesson 9: same polished arrow; only the aim differs.
+// Same ask, same target. Only the "Done when" checklist differs.
 import { samples } from '../../content';
 interface Props { wobble?: boolean }
 const { wobble = false } = Astro.props;
@@ -8,61 +8,55 @@ const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
 const arrow = (x1: number, y1: number, x2: number, y2: number) => {
 	const a = Math.atan2(y2 - y1, x2 - x1);
 	const p = (d: number, o: number) => `${x2 - Math.cos(a) * d - Math.sin(a) * o},${y2 - Math.sin(a) * d + Math.cos(a) * o}`;
-	const t = (d: number, o: number) => `${x1 + Math.cos(a) * d - Math.sin(a) * o},${y1 + Math.sin(a) * d + Math.cos(a) * o}`;
-	return { shaft: `M${x1},${y1} L${x2},${y2}`, head: `${x2},${y2} ${p(16, 7)} ${p(16, -7)}`, fl: `M${t(0, 0)} L${t(-8, 8)} M${t(0, 0)} L${t(-8, -8)} M${t(8, 0)} L${t(0, 8)} M${t(8, 0)} L${t(0, -8)}` };
+	return { shaft: `M${x1},${y1} L${x2},${y2}`, head: `${x2},${y2} ${p(16, 7)} ${p(16, -7)}` };
 };
-const target = (cx: number, cy: number, r: number) => [1, 2 / 3, 1 / 3].map((k) => ({ cx, cy, r: r * k }));
-const left = arrow(40, 100, 216, 180);
-const right = arrow(40, 108, 196, 186);
-const ticks = ['Short', 'Date of birth', 'Call back'];
+const T = { cx: 200, cy: 250, r: 48 };
+const rings = [1, 2 / 3, 1 / 3].map((k) => T.r * k);
+const miss = arrow(30, 215, 282, 168);
+const hit = arrow(30, 215, T.cx, T.cy);
+const ticks = ['Under 100 words', 'Mentions the date', 'Asks to call back'];
 ---
 <div class="dg-pair" role="img" aria-label={label}>
-	<svg class="dg" viewBox="0 0 300 280" width="100%" aria-hidden="true">
+	<svg class="dg" viewBox="0 0 300 340" width="100%" aria-hidden="true">
 		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
 		<g filter={wobble ? `url(#${fid})` : undefined}>
 			<text class="t b" x="10" y="22">Vague ask</text>
-			<rect class="paper line" x="10" y="34" width="180" height="52" />
-			<text class="t" x="22" y="56">Write something</text>
-			<text class="t" x="22" y="76">for the doctor</text>
-			{target(70, 200, 30).map((c) => <circle class="line dash none" cx={c.cx} cy={c.cy} r={c.r} />)}
-			{target(220, 182, 42).map((c, i) => <circle class={i % 2 ? 'paper line' : 'bad line'} cx={c.cx} cy={c.cy} r={c.r} />)}
-			<path class="line arrow" d={left.shaft} />
-			<path class="line arrow" d={left.fl} />
-			<polygon class="acc line" points={left.head} />
-			<text class="t muted" x="70" y="252" text-anchor="middle">what you meant</text>
-			<text class="t b bad-t" x="220" y="252" text-anchor="middle">Wrong target</text>
+			<rect class="paper line" x="10" y="34" width="170" height="54" />
+			<text class="t" x="22" y="57">"Write something</text>
+			<text class="t" x="22" y="78">for the doctor"</text>
+			{rings.map((r, i) => <circle class={i % 2 ? 'paper line' : 'tg line'} cx={T.cx} cy={T.cy} r={r} />)}
+			<path class="line" d={miss.shaft} />
+			<polygon class="ink line" points={miss.head} />
+			<path class="xm" d="M274 150 l16 16 M290 150 l-16 16" />
+			<text class="t b bad-t" x="150" y="330" text-anchor="middle">Polished. Wrong thing.</text>
 		</g>
 	</svg>
-	<svg class="dg" viewBox="0 0 300 280" width="100%" aria-hidden="true">
+	<svg class="dg" viewBox="0 0 300 340" width="100%" aria-hidden="true">
 		<g filter={wobble ? `url(#${fid})` : undefined}>
 			<text class="t b" x="10" y="22">Clear ask</text>
-			<rect class="paper line" x="10" y="34" width="138" height="52" />
-			<text class="t" x="22" y="56">A note for my</text>
-			<text class="t" x="22" y="76">doctor, please</text>
-			<g transform="rotate(3 225 85)">
-				<rect class="acc line" x="160" y="30" width="132" height="106" />
-				<text class="t b" x="170" y="52">Done when:</text>
-				{ticks.map((k, i) => (
-					<g>
-						<rect class="paper line thin" x="170" y={62 + i * 22} width="13" height="13" />
-						<path class="tick" d={`M172 ${69 + i * 22} l4 4 l6 -8`} />
-						<text class="t" x="190" y={74 + i * 22}>{k}</text>
-					</g>
-				))}
-			</g>
-			{target(200, 190, 42).map((c, i) => <circle class={i % 2 ? 'paper line' : 'good line'} cx={c.cx} cy={c.cy} r={c.r} />)}
-			<path class="line arrow" d={right.shaft} />
-			<path class="line arrow" d={right.fl} />
-			<polygon class="acc line" points={right.head} />
-			<text class="t b good-t" x="200" y="252" text-anchor="middle">Right target</text>
-			<text class="t muted" x="200" y="272" text-anchor="middle">what you meant</text>
+			<rect class="paper line" x="10" y="34" width="170" height="54" />
+			<text class="t" x="22" y="57">"Write something</text>
+			<text class="t" x="22" y="78">for the doctor"</text>
+			{rings.map((r, i) => <circle class={i % 2 ? 'paper line' : 'tg line'} cx={T.cx} cy={T.cy} r={r} />)}
+			<rect class="acc line" x="10" y="96" width="190" height="98" />
+			<text class="t b" x="20" y="118">Done when:</text>
+			{ticks.map((k, i) => (
+				<g>
+					<rect class="paper line thin" x="20" y={128 + i * 21} width="14" height="14" />
+					<path class="tick" d={`M22 ${135 + i * 21} l4 4 l7 -9`} />
+					<text class="t" x="42" y={141 + i * 21}>{k}</text>
+				</g>
+			))}
+			<path class="line" d={hit.shaft} />
+			<polygon class="ink line" points={hit.head} />
+			<text class="t b good-t" x="150" y="330" text-anchor="middle">Exactly what you meant</text>
 		</g>
 	</svg>
 </div>
 <style>
 	.dg-pair { display: flex; gap: 1rem; font-family: var(--dg-font, system-ui, sans-serif); }
 	.dg-pair > svg { flex: 1 1 0; min-width: 0; }
-	@media (max-width: 40rem) { .dg-pair { flex-direction: column; } }
+	@media (max-width: 40rem) { .dg-pair { flex-direction: column; } .dg-pair > svg { flex: none; } }
 	.dg { display: block; width: 100%; height: auto; }
 	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
 	.thin { stroke-width: 1.5; }
@@ -71,6 +65,9 @@ const ticks = ['Short', 'Date of birth', 'Call back'];
 	.acc { fill: var(--dg-accent, #f2c14e); }
 	.good { fill: var(--dg-good, #2e8b57); }
 	.bad { fill: var(--dg-bad, #c0392b); }
+	.tg { fill: var(--dg-muted, #5b6573); fill-opacity: 0.25; }
+	.ink { fill: var(--dg-ink, #1f2a37); }
+	.xm { fill: none; stroke: var(--dg-bad, #c0392b); stroke-width: 3.5; stroke-linecap: round; }
 	.tick { fill: none; stroke: var(--dg-good, #2e8b57); stroke-width: 2.5; stroke-linecap: round; }
 	.t { fill: var(--dg-ink, #1f2a37); font-size: 16px; font-family: var(--dg-font, system-ui, sans-serif); }
 	.b { font-weight: 700; }

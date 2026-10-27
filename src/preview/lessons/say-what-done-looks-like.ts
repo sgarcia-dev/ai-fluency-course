@@ -10,38 +10,47 @@ export const lesson: Lesson = {
 		{
 			heading: 'It aims at what you said',
 			body: [
-				'AI does not know what is in your head. It only knows what you typed. So when you ask for something vague, it fills in the blanks with a guess, and then does the guess very well.',
-				'That is the trap. You get something polished, quick and confident. It just is not what you wanted. Now you have to read it, notice the problem, and ask again.',
+				'AI cannot see what is in your head. It only sees what you typed. Ask for something vague and it fills the gaps with a guess. Then it does the guess very well.',
+				'That is the trap. The answer looks polished and sure of itself. It is just not what you wanted, so you read it, spot the problem, and ask again.',
 			],
 		},
 		{
 			heading: 'Three things to say',
 			body: [
 				'What you want: the thing itself. A short message, a list, a plan, a fix.',
-				'Who it is for: your doctor, your boss, your grandkids, other engineers. This changes the words, the length and the tone.',
-				'How you will know it is done: the finish line. "Under 100 words." "Fits on one page." "Includes the date and my phone number." "All the tests pass." If you can check it, the AI can aim for it.',
+				'Who it is for: your doctor, your boss, your grandkids, other engineers. This sets the words, the length and the tone.',
+				'Done when: the finish line. "Under 100 words." "Includes the date." "All the tests pass." If you can check it, the AI can aim for it.',
 			],
 		},
 		{
 			heading: 'The "done when" line',
 			body: [
-				'Here is a simple trick. End your ask with "Done when:" and two or three plain checks. It takes ten seconds to write.',
-				'It helps twice. The AI aims at the right target. And when the answer comes back, you already have a checklist to judge it with. No more "hmm, is this good?"',
+				'End your ask with "Done when:" and two or three plain checks. It takes ten seconds.',
+				'It helps twice. The AI aims at the right target. And when the answer comes back, you already have a checklist to judge it. No more "hmm, is this good?"',
 			],
 		},
 		{
 			heading: 'You do not need fancy words',
 			body: [
-				'There are no magic phrases. Talk to the AI the way you would brief a helpful person who has never met you. Say what you need, who it is for, and what a good result looks like.',
+				'There are no magic phrases. Brief the AI the way you would brief a helpful stranger: what you need, who it is for, and what good looks like.',
 				'If the first answer misses, do not just say "try again". Say which check it missed. That is how you get there fast.',
 			],
 		},
 	],
 	diagram: {
-		caption: 'Vague ask, wrong target. Clear ask, right target.',
+		caption: 'Same ask, same target. Only the checklist changes where it lands.',
 		describe:
-			'Two panels side by side. Left panel: a short speech bubble with a vague ask ("Write something for the doctor"). From it flies a shiny, well-made arrow that hits the center of the wrong target, labeled "not what you meant". Right panel: a speech bubble with a clear ask, plus a small sticky note titled "Done when:" with three ticked boxes (short, has my date of birth, asks for a call back). From it flies the same shiny arrow, hitting the center of the right target, labeled "what you meant". The arrows look equally polished in both panels; only the aim differs.',
+			'Two panels with the same target. Left, "Vague ask": a card says "Write something for the doctor". The arrow flies past and lands well outside the target, marked with a red X and the words "Polished. Wrong thing." Right, "Clear ask": the same card plus a "Done when" checklist, all ticked: under 100 words, mentions the date, asks to call back. The arrow hits the bullseye, labeled "Exactly what you meant".',
 	},
+	figures: [
+		{
+			id: 'three',
+			afterSection: 1,
+			caption: 'A good ask has three slots. Fill each one.',
+			describe:
+				'A fill-in card with three slots. What: a note to move my checkup. Who it is for: the front desk. Done when: under 100 words, has the date.',
+		},
+	],
 	examples: {
 		everyday: {
 			before: 'Write a message to my doctor.',
