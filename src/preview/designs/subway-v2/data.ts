@@ -6,7 +6,7 @@ export const lineColors: Record<string, string> = {
 	new: '#FFD400',
 	'hit-or-miss': '#FF6A44',
 	daily: '#1A34B0',
-	builder: '#0A0A0A',
+	builder: '#7B2FBE',
 };
 export const colorFor = (id: string) => lineColors[id] ?? '#0A0A0A';
 // Text color that reads on top of a line color.

@@ -1,12 +1,21 @@
 ---
 import Base from '../preview/designs/subway-v2/Base.astro';
 import { site, paths } from '../preview/content';
-import { goals } from '../preview/route';
+import { goals, starts } from '../preview/route';
 import { stop, colorFor, inkOn, network } from '../preview/designs/subway-v2/data';
 const N = network();
-const lessons = Object.fromEntries(N.stations.map((s) => [s.n, { ...stop(s.n), ids: s.ids }]));
-const lineInfo = Object.fromEntries(paths.map((p) => [p.id, { name: p.name, color: colorFor(p.id), ink: inkOn(p.id) }]));
-const data = { lessons, lines: lineInfo, laneOf: N.laneOf, xs: Object.fromEntries(N.stations.map((s) => [s.n, s.x])) };
+const colorWord: Record<string, string> = { new: 'Yellow', 'hit-or-miss': 'Tomato', daily: 'Blue', builder: 'Purple' };
+const lessons = Object.fromEntries(N.stations.map((s) => { const { n, ...rest } = stop(s.n); return [n, rest]; }));
+const lineInfo = Object.fromEntries(paths.map((p) => [p.id, { name: p.name, color: colorFor(p.id), ink: inkOn(p.id), word: colorWord[p.id], lessons: p.lessons, story: starts.find((s) => s.id === p.id)?.story ?? p.says }]));
+const data = { lessons, lines: lineInfo };
+const most = [
+	'Most AI courses: one long course for everyone.',
+	'Most AI courses: built around one app that changes every few months.',
+	'Most AI courses: hours of video before you try anything.',
+	'Most AI courses: always reach for the biggest, priciest model.',
+	'Most AI courses: a paywall or an upsell at the end.',
+];
+const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 ---
 <Base title={`${site.name}: the map`}>
 <header class="hero wrap">
@@ -15,70 +24,62 @@ const data = { lessons, lines: lineInfo, laneOf: N.laneOf, xs: Object.fromEntrie
 	<p class="tag display">{site.tagline}</p>
 	<p class="pitch">{site.pitch}</p>
 	<p class="status"><span class="mono">Status</span> {site.status}</p>
-	<p><a class="btn ink" href="#plan">Plan your route</a></p>
+	<p><a class="btn ink" href="#plan">Find your line</a></p>
 </header>
 
-<main id="main" data-v3={JSON.stringify(data)}>
+<main id="main" data-v4={JSON.stringify(data)}>
 	<section id="plan" class="wrap pick" aria-live="polite">
 		<div class="step" id="step1">
 			<p class="mono">Step 1 of 2</p>
-			<h2>Where do you want to get to?</h2>
+			<h2 tabindex="-1">Where do you want to get to?</h2>
 			<p>Pick one to three.</p>
 			<ul class="goals">
-				{goals.map((g) => <li><button type="button" class="goal" data-goal={g.id} aria-pressed="false">{g.label}</button></li>)}
+				{goals.map((g) => <li><button type="button" class="goal lift" data-goal={g.id} aria-pressed="false">{g.label}</button></li>)}
 			</ul>
 			<p class="tk-act"><button type="button" class="btn ink" id="next1" disabled>Next</button> <span class="mono" id="count">0 of 3 picked</span></p>
 		</div>
 		<div class="step" id="step2" hidden>
 			<p class="mono">Step 2 of 2</p>
-			<h2>Where are you today?</h2>
+			<h2 tabindex="-1">Where are you today?</h2>
+			<p>Your goal fits these lines. Pick the one that sounds like you.</p>
 			<ul class="stories" id="stories"></ul>
 			<button type="button" class="linkbtn" id="back1">Back to step 1</button>
 		</div>
 		<div class="ticket" id="ticket" hidden>
-			<div class="tk-band"><span class="mono">Your route</span><span class="tk-name display" id="tk-name" tabindex="-1">Ready to go</span></div>
+			<div class="tk-band" id="tk-band"><span class="mono">Your line</span><span class="tk-name display" id="tk-name" tabindex="-1"></span></div>
 			<div class="tk-body">
-				<p id="tk-skip" class="mono" hidden></p>
-				<p><span class="mono">From</span><br /><span id="tk-from"></span></p>
-				<p><span class="mono">To</span><br /><span id="tk-to"></span></p>
+				<p id="tk-skip" hidden></p>
+				<p><span class="mono">You said</span><br /><q id="tk-from"></q></p>
+				<p><span class="mono">Heading for</span><br /><span id="tk-to"></span></p>
 				<p class="mono" id="tk-meta"></p>
-				<p id="tk-reason"></p>
-				<p class="tk-act"><a class="btn ink" id="tk-start" href="#stops">Start your route</a> <button type="button" class="linkbtn" id="tk-change">Change</button></p>
+				<p class="tk-act"><a class="btn ink" id="tk-start" href="#stops">See your stops</a> <button type="button" class="linkbtn" id="tk-over">Start over</button></p>
+				<p class="mono">Try another line</p>
+				<div class="chips" id="chips">
+					{paths.map((p) => <button type="button" class="chip" data-line={p.id} aria-pressed="false" style={`--c:${colorFor(p.id)};--k:${inkOn(p.id)}`}>{p.name}</button>)}
+				</div>
 			</div>
 		</div>
 	</section>
 
 	<section id="map" class="wrap map" aria-labelledby="map-h">
 		<h2 id="map-h">The map</h2>
-		<p class="lede" id="legend">Each line is a path through the course. Where lines meet, they share a lesson. Hover, focus or tap any stop to preview it.</p>
-		<ul class="keys">{paths.map((p) => <li><span class="bar" style={`--c:${colorFor(p.id)}`} aria-hidden="true"></span>{p.name}</li>)}</ul>
-		<figure class="net" id="net">
-			<svg viewBox={`0 0 ${N.width} ${N.height}`} role="group" aria-label="Network map of all lessons">
-				<g class="tracks">
-					{N.tracks.map((t) => (
-						<polyline class="trk" data-line={t.id} points={`${Math.min(...t.pts)},${t.y} ${Math.max(...t.pts)},${t.y}`} stroke={t.color} stroke-width="10" fill="none" />
-					))}
-					{N.tracks.filter((t) => t.id === 'new').map((t) => (
-						<polyline class="trk edge" points={`${Math.min(...t.pts)},${t.y} ${Math.max(...t.pts)},${t.y}`} stroke="#0A0A0A" stroke-width="12" fill="none" />
-					))}
-				</g>
-				<g id="routeg"></g>
-				{N.stations.map((s) => (
-					<g class="st" tabindex="0" role="button" data-n={s.n} aria-label={`${s.title}. Preview`}>
-						{s.lanes.length > 1 ? (
-							<rect x={s.x - 10} y={s.y0 - 10} width="20" height={s.y1 - s.y0 + 20} fill="#fff" stroke="#0A0A0A" stroke-width="4" />
-						) : (
-							<circle cx={s.x} cy={s.y0} r="8" fill="#fff" stroke="#0A0A0A" stroke-width="4" />
-						)}
-						<text class="lbl" transform={`translate(${s.x + 4},${N.baseY}) rotate(60)`}>{s.title.length > 30 ? s.title.slice(0, 29) + '...' : s.title}</text>
+		<p class="lede" id="legend">Each colored line is one path through the course. Where lines cross, they share a lesson.</p>
+		<ul class="keys">{paths.map((p) => <li data-line={p.id}><span class="bar" style={`--c:${colorFor(p.id)}`} aria-hidden="true"></span>{colorWord[p.id]} line: {p.name}</li>)}</ul>
+		<figure class="net" aria-hidden="true">
+			<svg viewBox={`0 0 ${N.width + 40} ${N.baseY + 10}`}>
+				{N.tracks.map((t) => (
+					<g class="ln" data-line={t.id} style={`--c:${t.color}`}>
+						{t.id === 'new' && <polyline class="edge" points={`${Math.min(...t.pts)},${t.y} ${xEnd(t)},${t.y}`} />}
+						<polyline class="trk" pathLength="1" points={`${Math.min(...t.pts)},${t.y} ${xEnd(t)},${t.y}`} />
+						{t.pts.map((x, i) => <circle class="dot" cx={x} cy={t.y} r="8" style={`--i:${i}`} />)}
 					</g>
 				))}
 			</svg>
-			<div class="card" id="card" role="tooltip" hidden></div>
 		</figure>
 
 		<div id="stops" class="chosen" hidden>
-			<h3>Your stops</h3>
+			<h3 id="stops-h">Your stops</h3>
+			<p class="lede">Tap any stop to see what it covers.</p>
 			<ol class="vline" id="vlist"></ol>
 		</div>
 	</section>
@@ -89,7 +90,13 @@ const data = { lessons, lines: lineInfo, laneOf: N.laneOf, xs: Object.fromEntrie
 	</section>
 	<section class="wrap" aria-labelledby="diff-h">
 		<h2 id="diff-h">How it is different</h2>
-		<ul class="diff">{site.different.map((d) => <li><h3>{d.title}</h3><p>{d.body}</p></li>)}</ul>
+		<p class="lede">Tap a card to compare.</p>
+		<ul class="diff">{site.different.map((d, i) => (
+			<li><button type="button" class="flip lift" aria-pressed="false">
+				<span class="face a"><span class="mono">Most AI courses</span><span class="ft">{most[i] ?? ''}</span></span>
+				<span class="face b"><span class="mono">This one</span><span class="ft display">{d.title}</span><span>{d.body}</span></span>
+			</button></li>
+		))}</ul>
 	</section>
 	<section class="wrap prose author" aria-labelledby="au-h">
 		<h2 id="au-h">Who made this</h2>
@@ -104,19 +111,21 @@ const data = { lessons, lines: lineInfo, laneOf: N.laneOf, xs: Object.fromEntrie
 </main>
 
 <script>
-	import { goals, startsFor, planRoute } from '../preview/route';
+	import { goals } from '../preview/route';
+	import { allowedLines } from '../preview/picker';
 	const main = document.getElementById('main')!;
-	const D = JSON.parse(main.dataset.v3!);
+	const D = JSON.parse(main.dataset.v4!);
 	const $ = (id: string) => document.getElementById(id)!;
 	const get = (k: string) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } };
 	const set = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} };
-	const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
-	const NS = 'http://www.w3.org/2000/svg';
+	const esc = (t: string) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+	try { localStorage.removeItem('aip-route'); } catch {}
 	let picked: string[] = [];
 	try { picked = JSON.parse(get('aip-goals') || '[]').filter((g: string) => goals.some((x) => x.id === g)); } catch {}
 
-	function show(step: 'step1' | 'step2' | 'ticket') {
-		for (const s of ['step1', 'step2', 'ticket']) $(s).hidden = s !== step;
+	function show(step: 'step1' | 'step2' | 'ticket', focus = true) {
+		for (const s of ['step1', 'step2', 'ticket']) { const el = $(s); el.hidden = s !== step; el.classList.toggle('enter', s === step); }
+		if (focus) { const h = $(step).querySelector<HTMLElement>('h2, #tk-name'); h?.focus({ preventScroll: true }); }
 	}
 	function syncGoals() {
 		document.querySelectorAll<HTMLButtonElement>('.goal').forEach((b) => {
@@ -133,124 +142,75 @@ const data = { lessons, lines: lineInfo, laneOf: N.laneOf, xs: Object.fromEntrie
 		syncGoals();
 	}));
 	$('next1').addEventListener('click', () => {
-		const ss = startsFor(picked);
-		if (ss.length === 1) { plan(ss[0].id, true, true); return; }
+		const ls = allowedLines(picked);
+		if (ls.length === 1) { choose(ls[0], true, true); return; }
 		const ul = $('stories'); ul.innerHTML = '';
-		for (const s of ss) {
+		for (const id of ls) {
+			const L = D.lines[id];
 			const li = document.createElement('li');
-			const b = document.createElement('button'); b.type = 'button'; b.className = 'story';
-			b.innerHTML = `<q>${esc(s.story)}</q>`;
-			b.addEventListener('click', () => plan(s.id, true));
+			const b = document.createElement('button'); b.type = 'button'; b.className = 'story lift';
+			b.style.setProperty('--c', L.color);
+			b.innerHTML = `<span class="sw" aria-hidden="true"></span><span><span class="mono">${esc(L.word)} line: ${esc(L.name)}</span><q>${esc(L.story)}</q></span>`;
+			b.addEventListener('click', () => choose(id, true));
 			li.append(b); ul.append(li);
 		}
 		show('step2');
-		const h = $('step2').querySelector('h2') as HTMLElement; h.tabIndex = -1; h.focus();
 	});
 	$('back1').addEventListener('click', () => show('step1'));
-	$('tk-change').addEventListener('click', () => { syncGoals(); show('step1'); (document.querySelector('.goal') as HTMLElement).focus(); });
+	$('tk-over').addEventListener('click', () => { picked = []; syncGoals(); show('step1'); });
+	document.querySelectorAll<HTMLButtonElement>('.chip').forEach((b) => b.addEventListener('click', () => choose(b.dataset.line!, true, false, false)));
 
-	function plan(startId: string, fresh: boolean, skipped = false) {
-		let r;
-		try { r = planRoute(picked, startId); } catch { show('step1'); return; }
-		if (fresh) {
-			set('aip-goals', JSON.stringify(picked)); set('aip-start', startId);
-			set('aip-route', JSON.stringify(r.segments)); set('aip-world', r.world);
-		}
-		const start = startsFor(picked).concat([]).find((s) => s.id === startId);
-		$('tk-skip').hidden = !skipped;
-		$('tk-skip').textContent = 'Your goal starts from the basics, so we start there too.';
-		$('tk-from').textContent = start ? start.story : '';
-		$('tk-to').textContent = picked.map((g) => goals.find((x) => x.id === g)!.label).join('; ');
-		$('tk-meta').textContent = `${r.lessons.length} stops · about ${r.minutes} minutes in all`;
-		$('tk-reason').textContent = r.reason;
-		const first = r.lessons.map((n) => D.lessons[n]).find((l: any) => l.href);
-		($('tk-start') as HTMLAnchorElement).href = first ? first.href : '#stops';
-		// List of stops by segment
+	function choose(lineId: string, fresh: boolean, only = false, scroll = true) {
+		const L = D.lines[lineId]; if (!L) { show('step1', false); return; }
+		const gs = picked.map((g) => goals.find((x) => x.id === g)!).filter(Boolean);
+		const world = gs.some((g) => g.world === 'code') ? 'code' : (gs[0]?.world ?? 'everyday');
+		if (fresh) { set('aip-path', lineId); set('aip-goals', JSON.stringify(picked)); set('aip-world', world); }
+		const keys = new Set<number>(gs.flatMap((g) => g.targets));
+		$('tk-band').style.setProperty('--c', L.color); $('tk-band').style.setProperty('--k', L.ink);
+		$('tk-name').textContent = `${L.word} line: ${L.name}`;
+		$('tk-skip').hidden = !only;
+		$('tk-skip').textContent = 'Only one line fits your goal, so we picked it for you.';
+		$('tk-from').textContent = L.story;
+		$('tk-to').textContent = gs.length ? gs.map((g) => g.label).join('; ') : 'Your own pick';
+		const mins = L.lessons.reduce((t: number, n: number) => t + (D.lessons[n].minutes || 10), 0);
+		$('tk-meta').textContent = `${L.lessons.length} stops · about ${mins} minutes in all`;
+		document.querySelectorAll<HTMLButtonElement>('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.line === lineId)));
+		// Stops
 		const ol = $('vlist'); ol.innerHTML = '';
-		r.segments.forEach((seg, i) => {
-			const L = D.lines[seg.line];
-			if (i > 0) {
-				const li = document.createElement('li'); li.className = 'chg';
-				li.innerHTML = `<span class="mono">Change to the ${esc(L.name)} line</span>`;
-				li.style.setProperty('--c', L.color); ol.append(li);
-			}
-			for (const n of seg.lessons) {
-				const l = D.lessons[n];
-				const li = document.createElement('li'); li.className = 'vs'; li.style.setProperty('--c', L.color);
-				li.innerHTML = `<span class="vdot" aria-hidden="true"></span><span class="txt"><span class="t">${l.href ? `<a href="${l.href}">${esc(l.title)}</a>` : esc(l.title)}</span><span class="i">${esc(l.idea)}</span><span class="mono">${l.minutes || 10} min${l.href ? '' : ' · Coming soon'}</span></span>`;
-				ol.append(li);
-			}
+		ol.style.setProperty('--c', L.color);
+		L.lessons.forEach((n: number, i: number) => {
+			const l = D.lessons[n];
+			const li = document.createElement('li'); li.className = 'vs'; li.style.setProperty('--i', String(i));
+			const pid = `sp-${n}`;
+			li.innerHTML = `<span class="vdot" aria-hidden="true"></span><div class="txt"><button type="button" class="stopb" aria-expanded="false" aria-controls="${pid}"><span class="t">${esc(l.title)}</span><span class="i">${esc(l.idea)}</span>${keys.has(n) ? '<span class="key mono">Key for your goal</span>' : ''}</button><div class="sp" id="${pid}"><div><p class="mono">${l.minutes || 10} min</p>${l.covers.length ? `<ul>${l.covers.map((c: string) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}${l.href ? `<a class="btn" href="${l.href}">Read sample</a>` : '<p class="mono soon">Coming soon</p>'}</div></div></div>`;
+			const b = li.querySelector('button')!;
+			b.addEventListener('click', () => { const o = b.getAttribute('aria-expanded') === 'true'; b.setAttribute('aria-expanded', String(!o)); li.classList.toggle('open', !o); });
+			ol.append(li);
 		});
 		$('stops').hidden = false;
-		drawRoute(r.segments);
-		show('ticket');
-		if (fresh) { $('plan').scrollIntoView({ block: 'start' }); $('tk-name').focus({ preventScroll: true }); }
-	}
-
-	function drawRoute(segs: { line: string; lessons: number[] }[]) {
-		const g = $('routeg'); g.innerHTML = '';
-		main.classList.add('routed');
-		$('legend').textContent = 'Your route is the thick line. Everything else is faded. Hover, focus or tap any stop to preview it.';
-		const on = new Set<number>();
-		let prev: [number, number] | null = null;
-		segs.forEach((seg, i) => {
-			const L = D.lines[seg.line];
-			const y = D.laneOf[seg.line];
-			const pts: [number, number][] = seg.lessons.map((n) => [D.xs[n], y]);
-			if (prev) pts.unshift(prev);
-			const pl = document.createElementNS(NS, 'polyline');
-			pl.setAttribute('points', pts.map((p) => p.join(',')).join(' '));
-			pl.setAttribute('stroke', L.color); pl.setAttribute('stroke-width', '16'); pl.setAttribute('fill', 'none');
-			pl.setAttribute('stroke-linejoin', 'round');
-			if (seg.line === 'new') { const o = pl.cloneNode() as SVGElement; o.setAttribute('stroke', '#0A0A0A'); o.setAttribute('stroke-width', '20'); g.append(o); }
-			g.append(pl);
-			if (i > 0) {
-				const [x0, y0] = pts[1];
-				const t = document.createElementNS(NS, 'text');
-				t.setAttribute('x', String(x0 + 12)); t.setAttribute('y', String(y0 - 14)); t.setAttribute('class', 'chgl');
-				t.textContent = 'change'; g.append(t);
-			}
-			seg.lessons.forEach((n) => on.add(n));
-			prev = pts[pts.length - 1];
+		// Map
+		main.classList.add('chosen-line');
+		document.querySelectorAll<SVGGElement>('.ln').forEach((g) => {
+			const on = g.dataset.line === lineId;
+			g.classList.toggle('on', on);
+			if (on) { g.parentNode!.append(g); g.classList.remove('draw'); void (g as any).getBBox(); g.classList.add('draw'); }
 		});
-		document.querySelectorAll<SVGGElement>('.st').forEach((s) => s.classList.toggle('in', on.has(Number(s.dataset.n))));
+		document.querySelectorAll<HTMLElement>('.keys li').forEach((k) => k.classList.toggle('off', k.dataset.line !== lineId));
+		$('legend').textContent = `Your line is in color. The other lines are grey.`;
+		const first = L.lessons.map((n: number) => D.lessons[n]).find((l: any) => l.href);
+		($('tk-start') as HTMLAnchorElement).href = first ? first.href : '#stops';
+		($('tk-start') as HTMLAnchorElement).textContent = first ? 'Read a sample stop' : 'See your stops';
+		show('ticket', fresh);
+		if (fresh && scroll) $('plan').scrollIntoView({ block: 'start' });
 	}
 
-	// Preview card, shared by all stations. Hover, focus or tap opens it. Escape closes.
-	const card = $('card'); const net = $('net');
-	let pinned: SVGGElement | null = null;
-	function open(st: SVGGElement) {
-		const l = D.lessons[st.dataset.n!];
-		const names = l.ids.map((id: string) => D.lines[id].name);
-		const where = names.length > 1 ? `On the ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]} lines` : names.length ? `On the ${names[0]} line` : '';
-		card.innerHTML = `<p class="mono">${esc(where)} · ${l.minutes || 10} min</p><p class="ct">${esc(l.title)}</p><p>${esc(l.idea)}</p>${l.covers.length ? `<ul>${l.covers.map((c: string) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}${l.href ? `<a class="btn" href="${l.href}">Read sample</a>` : '<p class="mono soon">Coming soon</p>'}`;
-		card.hidden = false;
-		const nb = net.getBoundingClientRect(), sb = st.getBoundingClientRect();
-		const w = card.offsetWidth, vw = document.documentElement.clientWidth;
-		let left = sb.left + sb.width / 2 - w / 2;
-		left = Math.max(8, Math.min(left, vw - w - 8));
-		card.style.left = `${left - nb.left}px`;
-		card.style.top = `${sb.bottom - nb.top + 6}px`;
-	}
-	const close = () => { card.hidden = true; pinned = null; };
-	document.querySelectorAll<SVGGElement>('.st').forEach((st) => {
-		st.addEventListener('mouseenter', () => { if (!pinned) open(st); });
-		st.addEventListener('mouseleave', () => { if (!pinned && !card.matches(':hover')) setTimeout(() => { if (!pinned && !card.matches(':hover')) card.hidden = true; }, 150); });
-		st.addEventListener('focus', () => open(st));
-		st.addEventListener('click', (e) => { e.stopPropagation(); if (pinned === st) close(); else { pinned = st; open(st); } });
-		st.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pinned = st; open(st); const a = card.querySelector('a'); if (a) a.focus(); }
-			if (e.key === 'Escape') close();
-		});
-	});
-	card.addEventListener('mouseleave', () => { if (!pinned) card.hidden = true; });
-	card.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const s = pinned; close(); s?.focus(); } });
-	document.addEventListener('click', (e) => { if (!card.contains(e.target as Node)) close(); });
+	// How it is different: flip cards
+	document.querySelectorAll<HTMLButtonElement>('.flip').forEach((b) => b.addEventListener('click', () => b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true'))));
 
-	// Return visit: show the saved route directly.
+	// Return visit: show the saved line directly.
 	syncGoals();
-	const savedStart = get('aip-start');
-	if (picked.length && savedStart && get('aip-route')) plan(savedStart, false, startsFor(picked).length === 1);
+	const saved = get('aip-path');
+	if (saved && D.lines[saved]) choose(saved, false);
 </script>
 <style is:global>
 	.wrap{max-width:68rem;margin:0 auto;padding:3.5rem 1.25rem}
@@ -262,61 +222,88 @@ const data = { lessons, lines: lineInfo, laneOf: N.laneOf, xs: Object.fromEntrie
 	.status{max-width:36rem;border-left:6px solid #FFD400;padding:.2rem 0 .2rem .8rem}
 	.status .mono{display:block}
 	h2{font-size:clamp(2rem,6vw,3.2rem);margin-bottom:1.2rem}
+	h2:focus{outline:none}
 	.pick{border-top:3px solid #0A0A0A}
 	.goals,.stories{list-style:none;margin:0 0 1rem;padding:0;display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))}
-	.goal,.story{width:100%;height:100%;text-align:left;font:500 1.05rem/1.4 'Space Grotesk',sans-serif;color:#0A0A0A;background:#fff;border:3px solid #0A0A0A;box-shadow:4px 4px 0 #0A0A0A;padding:1rem;cursor:pointer;min-height:5rem}
-	.goal:hover,.story:hover{background:#FFF6C2}
-	.goal:active,.story:active{box-shadow:none;transform:translate(4px,4px)}
+	.goal,.story,.flip{width:100%;height:100%;text-align:left;font:500 1.05rem/1.4 'Space Grotesk',sans-serif;color:#0A0A0A;background:#fff;border:3px solid #0A0A0A;box-shadow:4px 4px 0 #0A0A0A;padding:1rem;cursor:pointer;min-height:5rem}
+	.lift{transition:transform .15s ease,box-shadow .15s ease,background-color .15s}
+	.lift:hover:not(:disabled){transform:translate(-2px,-2px);box-shadow:6px 6px 0 #0A0A0A}
+	.lift:active:not(:disabled){box-shadow:none;transform:translate(4px,4px)}
+	.goal:hover{background:#FFF6C2}
+	.goal[aria-pressed=true]{background:#FFD400}
+	.goal:disabled,.btn:disabled{opacity:.45;cursor:not-allowed}
 	.stories{grid-template-columns:repeat(auto-fill,minmax(20rem,1fr))}
 	@media (max-width:30rem){.stories{grid-template-columns:1fr}}
-	.story{display:flex;gap:.8rem}
-	.story q{quotes:none}
-	.sw{flex:none;width:12px;align-self:stretch;background:var(--c);outline:1px solid #0A0A0A}
-	.ticket{max-width:34rem;border:3px solid #0A0A0A;box-shadow:4px 4px 0 #0A0A0A}
-	.tk-band{padding:1rem 1.2rem;border-bottom:3px solid #0A0A0A;display:flex;flex-direction:column}
+	.story{display:flex;gap:.9rem}
+	.story q{quotes:none;display:block;margin-top:.3rem}
+	.sw{flex:none;width:14px;align-self:stretch;background:var(--c);outline:1px solid #0A0A0A}
+	.enter{animation:stepin .35s ease both}
+	@keyframes stepin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+	.ticket{max-width:36rem;border:3px solid #0A0A0A;box-shadow:4px 4px 0 #0A0A0A;overflow:hidden}
+	.ticket.enter{animation:print .5s ease-out both}
+	@keyframes print{from{clip-path:inset(0 0 100% 0);transform:translateY(-10px)}to{clip-path:inset(0 0 0 0);transform:none}}
+	.tk-band{padding:1rem 1.2rem;border-bottom:3px solid #0A0A0A;display:flex;flex-direction:column;background:var(--c,#fff);color:var(--k,#0A0A0A)}
 	.tk-name{font-size:clamp(1.8rem,7vw,2.6rem)}
-	.tk-body{padding:.4rem 1.2rem 1rem;border-top:3px dashed #0A0A0A;margin-top:6px}
+	.tk-name:focus{outline:none}
+	.tk-body{padding:.4rem 1.2rem 1.2rem;border-top:3px dashed #0A0A0A;margin-top:6px}
+	.tk-body p{margin:.6rem 0}
+	.tk-body q{quotes:none}
+	#tk-skip{font-weight:700}
 	.tk-act{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}
+	.chips{display:flex;flex-wrap:wrap;gap:.6rem}
+	.chip{font:700 .95rem/1.2 'Space Grotesk',sans-serif;min-height:44px;padding:.4rem .8rem;border:3px solid #0A0A0A;background:var(--c);color:var(--k);box-shadow:4px 4px 0 #0A0A0A;cursor:pointer;transition:transform .15s,box-shadow .15s}
+	.chip:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #0A0A0A}
+	.chip[aria-pressed=true]{box-shadow:none;transform:translate(4px,4px);outline:3px solid #0A0A0A;outline-offset:2px}
 	.map{border-top:3px solid #0A0A0A}
 	.lede{max-width:40rem}
-	.goal[aria-pressed=true]{background:#FFD400}
-	.goal:disabled{opacity:.45;cursor:not-allowed}
-	.btn:disabled{opacity:.45;cursor:not-allowed}
-	.tk-body p{margin:.6rem 0}
 	.keys{list-style:none;padding:0;margin:0 0 1rem;display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;font-weight:700}
-	.keys li{display:flex;align-items:center;gap:.5rem}
+	.keys li{display:flex;align-items:center;gap:.5rem;transition:opacity .3s}
+	.keys li.off{opacity:.4}
 	.bar{display:inline-block;width:2.5rem;height:12px;background:var(--c);outline:1px solid #0A0A0A}
-	.net{position:relative;margin:0 0 2.5rem}
+	.net{margin:0 0 2.5rem}
 	.net svg{display:block;width:100%;height:auto}
-	.lbl{font:500 11px 'Space Grotesk',sans-serif;fill:#0A0A0A}
-	.chgl{font:700 12px 'JetBrains Mono',monospace;fill:#0A0A0A;paint-order:stroke;stroke:#fff;stroke-width:4px}
-	.st{cursor:pointer;outline:none}
-	.st:hover rect,.st:hover circle,.st:focus rect,.st:focus circle{fill:#FFD400}
-	.st:focus-visible rect,.st:focus-visible circle{stroke:#1A34B0}
-	.routed .tracks{opacity:.18}
-	.routed .st:not(.in){opacity:.3}
-	.routed .st.in .lbl{font-weight:700}
-	.card{position:absolute;z-index:5;width:18rem;max-width:calc(100vw - 16px);background:#fff;border:3px solid #0A0A0A;box-shadow:4px 4px 0 #0A0A0A;padding:.8rem 1rem;font-size:.95rem}
-	.card p{margin:0 0 .4rem}.ct{font-weight:700;font-size:1.05rem}
-	.card ul{margin:.2rem 0 .7rem;padding-left:1.1rem}
-	.soon{color:#3a3a3a}
-	.chosen h3{font-size:clamp(1.8rem,5vw,2.6rem);margin-bottom:1.2rem}
+	.ln .trk{stroke:var(--c);stroke-width:10;fill:none;transition:stroke .4s}
+	.ln .edge{stroke:#0A0A0A;stroke-width:13;fill:none}
+	.ln .dot{fill:#fff;stroke:#0A0A0A;stroke-width:4;transition:stroke .4s}
+	.chosen-line .ln:not(.on) .trk{stroke:#D6D6D6}
+	.chosen-line .ln:not(.on) .edge{stroke:#D6D6D6}
+	.chosen-line .ln:not(.on) .dot{stroke:#D6D6D6;fill:#F2F2F2}
+	.chosen-line .ln.on .trk{stroke-width:14}
+	.chosen-line .ln.on .edge{stroke-width:17}
+	.chosen-line .ln.on .dot{r:10px;stroke:var(--c);stroke-width:5}
+	.chosen-line .ln.on[data-line=new] .dot{stroke:#0A0A0A}
+	.ln.draw .trk,.ln.draw .edge{stroke-dasharray:1;animation:draw 1.1s ease-out both}
+	@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+	.ln.draw .dot{transform-box:fill-box;transform-origin:center;animation:pop .3s ease-out both;animation-delay:calc(.25s + var(--i) * .08s)}
+	@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.3)}100%{transform:scale(1)}}
+	.chosen h3{font-size:clamp(1.8rem,5vw,2.6rem);margin-bottom:.4rem}
 	.vline{list-style:none;margin:0;padding:0;max-width:44rem}
-	.vs{display:flex;gap:1rem;padding:.5rem 0 .5rem 1rem;border-left:14px solid var(--c);outline-offset:0;position:relative}
-	.vdot{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;border:5px solid #0A0A0A;margin-left:-34px;margin-top:.2rem}
-	.chg{border-left:14px dashed var(--c);padding:.6rem 0 .6rem 1rem}
-	.chg .mono{background:var(--c);color:#fff;padding:.15rem .5rem;border:2px solid #0A0A0A;color:#0A0A0A;background:#fff}
-	.txt{display:flex;flex-direction:column}
-	.txt .t{font:900 1.25rem/1.2 'Fraunces',serif;letter-spacing:-.01em}
-	.txt .i{color:#333}
+	.vs{display:flex;gap:1rem;padding:.4rem 0 .4rem 1rem;border-left:14px solid var(--c);animation:stepin .35s ease both;animation-delay:calc(var(--i) * .04s)}
+	.vdot{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;border:5px solid #0A0A0A;margin-left:-34px;margin-top:.6rem}
+	.txt{flex:1;min-width:0}
+	.stopb{display:flex;flex-direction:column;width:100%;text-align:left;font:inherit;color:#0A0A0A;background:#fff;border:3px solid transparent;padding:.4rem .6rem;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+	.stopb:hover,.stopb[aria-expanded=true]{border-color:#0A0A0A;box-shadow:4px 4px 0 #0A0A0A}
+	.stopb .t{font:900 1.25rem/1.2 'Fraunces',serif;letter-spacing:-.01em}
+	.stopb .t::after{content:" +";font-family:'JetBrains Mono',monospace;font-size:1rem}
+	.stopb[aria-expanded=true] .t::after{content:" -"}
+	.stopb .i{color:#333}
+	.key{align-self:flex-start;margin-top:.3rem;background:#0A0A0A;color:#fff;padding:.1rem .4rem}
+	.sp{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+	.sp>div{overflow:hidden;padding:0 .6rem}
+	.vs.open .sp{grid-template-rows:1fr}
+	.vs:not(.open) .sp>div{visibility:hidden}
+	.sp ul{margin:.2rem 0 .7rem;padding-left:1.1rem}
+	.sp .btn{margin-bottom:.6rem}
+	.soon{color:#3a3a3a}
 	.diff{list-style:none;padding:0;margin:0;display:grid;gap:1.2rem;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr))}
-	.diff li{border:3px solid #0A0A0A;padding:1rem}
-	.diff h3{font-size:1.4rem;margin-bottom:.4rem}
+	.flip{display:grid;min-height:11rem}
+	.face{grid-area:1/1;display:flex;flex-direction:column;gap:.4rem;transition:opacity .25s,transform .25s}
+	.face .ft{font-size:1.3rem;font-weight:700}
+	.face.b .ft{font-weight:900}
+	.flip[aria-pressed=true]{background:#FFD400}
+	.flip[aria-pressed=false] .face.b,.flip[aria-pressed=true] .face.a{opacity:0;transform:rotateX(90deg);visibility:hidden}
 	.prose p{max-width:40rem;font-size:1.1rem}
-	@media (max-width:48rem){
-		.map{display:flex;flex-direction:column}
-		#stops{order:-1;margin-bottom:2rem}
-		.lbl{font-size:13px}
-	}
+	@media (max-width:48rem){.map{display:flex;flex-direction:column}#stops{order:-1;margin-bottom:2rem}}
+	@media (prefers-reduced-motion: reduce){.lift:hover:not(:disabled),.chip:hover{transform:none}.ln.draw .trk,.ln.draw .edge{stroke-dasharray:none}}
 </style>
 </Base>

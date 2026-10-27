@@ -8,10 +8,10 @@ export function getStaticPaths() {
 	return samples.map((s) => ({ params: { slug: s.slug }, props: { lesson: s } }));
 }
 const { lesson } = Astro.props;
-const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l) => { const s = stop(l.n); return [l.n, { title: s.title, href: s.href }]; })), lines: Object.fromEntries(paths.map((p) => [p.id, { name: p.name, color: colorFor(p.id) }])) };
+const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l) => { const s = stop(l.n); return [l.n, { title: s.title, href: s.href }]; })), lines: Object.fromEntries(paths.map((p) => [p.id, { name: p.name, color: colorFor(p.id), lessons: p.lessons }])) };
 ---
 <Base title={`${lesson.title} | ${site.name}`}>
-<nav class="strip" id="strip" data-strip={JSON.stringify(strip)} aria-label="Your route">
+<nav class="strip" id="strip" data-strip={JSON.stringify(strip)} aria-label="Your line">
 	<a href={`${base}#map`} class="mono">Map</a>
 	<ol class="sline"></ol>
 </nav>
@@ -78,39 +78,40 @@ const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l
 	const nav = document.getElementById('strip')!;
 	const data = JSON.parse(nav.dataset.strip!);
 	const ol = nav.querySelector('ol')!;
-	let segs: { line: string; lessons: number[] }[] = [];
-	try { segs = JSON.parse(localStorage.getItem('aip-route') || '[]'); } catch {}
-	const flat = Array.isArray(segs) ? segs.flatMap((g, si) => (g.lessons || []).map((n) => ({ n, si, line: g.line }))) : [];
-	const at = flat.findIndex((x) => x.n === data.current);
-	if (flat.length) {
+	let lineId = '';
+	try { lineId = localStorage.getItem('aip-path') || ''; } catch {}
+	const L = data.lines[lineId];
+	if (L) {
+		nav.style.setProperty('--c', L.color);
+		const list: number[] = L.lessons;
+		const at = list.indexOf(data.current);
 		const h = document.createElement('li'); h.className = 'lname mono';
-		h.textContent = at >= 0 ? `Stop ${at + 1} of ${flat.length}` : 'Not on your route'; ol.append(h);
-		flat.forEach((x, i) => {
-			const s = data.lessons[x.n]; if (!s) return;
-			const L = data.lines[x.line] || { color: '#0A0A0A' };
-			const li = document.createElement('li'); li.style.setProperty('--c', L.color);
-			if (i > 0 && flat[i - 1].si !== x.si) li.className = 'xfer';
+		if (at >= 0) h.textContent = `Stop ${at + 1} of ${list.length} on the ${L.name} line`;
+		else h.innerHTML = `Not on your line. <a href="/#stops">Back to the ${L.name} line</a>`;
+		ol.append(h);
+		list.forEach((n, i) => {
+			const s = data.lessons[n]; if (!s) return;
+			const li = document.createElement('li');
 			const cur = i === at;
 			const el = document.createElement(s.href && !cur ? 'a' : 'span');
 			if (el instanceof HTMLAnchorElement) el.href = s.href;
 			el.className = 'sdot' + (cur ? ' cur' : '');
-			el.style.background = cur ? L.color : '#fff';
 			el.title = s.title;
 			el.setAttribute('aria-label', `${s.title}${cur ? ', you are here' : ''}`);
 			if (cur) el.setAttribute('aria-current', 'step');
 			li.append(el); ol.append(li);
 		});
-		const nx = at >= 0 ? flat[at + 1] : undefined;
 		const t = document.getElementById('nexttxt')!;
-		if (nx && data.lessons[nx.n]) {
-			const s = data.lessons[nx.n];
+		const nx = at >= 0 ? list[at + 1] : undefined;
+		if (nx !== undefined && data.lessons[nx]) {
+			const s = data.lessons[nx];
 			t.textContent = '';
 			if (s.href) { const a = document.createElement('a'); a.href = s.href; a.textContent = s.title; t.append(a); }
 			else t.textContent = `${s.title} (coming soon)`;
-		} else if (at === flat.length - 1) t.textContent = 'This is the last stop on your route. Well done.';
+		} else if (at === list.length - 1) t.textContent = 'This is the last stop on your line. Well done.';
 	} else {
 		const li = document.createElement('li');
-		li.innerHTML = 'No route yet. <a href="/#plan">Plan your route</a>';
+		li.innerHTML = '<a href="/#plan">Find your line</a>';
 		ol.append(li);
 	}
 	// World switch
@@ -149,10 +150,10 @@ const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l
 	.sline li{display:flex;align-items:center}
 	.sline .lname{margin-right:.6rem}
 	.sline li+li:not(:nth-child(2))::before{content:"";width:.7rem;height:6px;background:var(--c);outline:1px solid #0A0A0A}
-	.sline li.xfer::before{width:1rem;background:#fff;border-left:3px solid #0A0A0A;border-right:3px solid #0A0A0A;outline:none}
 	.sdot{display:block;width:1rem;height:1rem;border-radius:50%;border:3px solid #0A0A0A;background:#fff}
 	a.sdot:hover{background:#FFD400}
-	.sdot.cur{width:1.6rem;height:1.6rem;background:var(--c);border-width:4px}
+	.sdot{background:var(--c)}
+	.sdot.cur{width:1.6rem;height:1.6rem;border-width:4px;box-shadow:0 0 0 3px #fff,0 0 0 5px #0A0A0A}
 </style>
 <style>
 	.read{max-width:40rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
