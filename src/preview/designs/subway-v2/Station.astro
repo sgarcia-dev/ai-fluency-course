@@ -1,0 +1,25 @@
+---
+// One stop with its preview card. Opens on hover, keyboard focus or tap.
+import { minutesLabel } from './data';
+interface Props { s: { n: number; title: string; idea: string; covers: string[]; minutes: number; href: string }; line: string; big?: boolean }
+const { s, line, big = false } = Astro.props;
+const id = `card-${line}-${s.n}`;
+---
+<li class:list={['st', big && 'big']} data-n={s.n}>
+	<button type="button" class="stb" aria-describedby={id} aria-expanded="false">
+		<span class="dot" aria-hidden="true"></span>
+		<span class="num mono">{String(s.n).padStart(2, '0')}</span>
+		{big ? (
+			<span class="txt"><span class="t">{s.title}</span><span class="i">{s.idea}</span><span class="goalmark mono">Most useful for your goal</span></span>
+		) : (
+			<span class="sr">Lesson {s.n}: {s.title}</span>
+		)}
+	</button>
+	<div class="card" id={id}>
+		<p class="mono cn">Lesson {s.n} · {minutesLabel(s.minutes)}</p>
+		<p class="ct">{s.title}</p>
+		<p class="ci">{s.idea}</p>
+		{s.covers.length > 0 && <ul>{s.covers.map((c) => <li>{c}</li>)}</ul>}
+		{s.href ? <a class="btn" href={s.href}>Read sample</a> : <p class="mono soon">Coming soon</p>}
+	</div>
+</li>

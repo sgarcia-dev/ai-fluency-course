@@ -1,0 +1,170 @@
+---
+import Diagram from '../../../preview/diagrams/Diagram.astro';
+import Base from '../../../preview/designs/subway-v2/Base.astro';
+import { site, samples, worlds } from '../../../preview/content';
+import { lines, base } from '../../../preview/designs/subway-v2/data';
+export function getStaticPaths() {
+	return samples.map((s) => ({ params: { slug: s.slug }, props: { lesson: s } }));
+}
+const { lesson } = Astro.props;
+const strip = { current: lesson.n, lines: lines.map((l) => ({ id: l.id, name: l.name, color: l.color, stops: l.stops.map((s) => ({ n: s.n, title: s.title, href: s.href })) })) };
+---
+<Base title={`${lesson.title} | ${site.name}`}>
+<nav class="strip" id="strip" data-strip={JSON.stringify(strip)} aria-label="Your line">
+	<a href={`${base}#map`} class="mono">Map</a>
+	<ol class="sline"></ol>
+</nav>
+<main class="read">
+	<p class="mono">Stop {lesson.n} · {lesson.minutes} min read</p>
+	<h1>{lesson.title}</h1>
+	<aside class="idea"><p class="mono">The one idea</p><p>{lesson.idea}</p></aside>
+
+	{lesson.sections.map((s, i) => (
+		<section>
+			<h2>{s.heading}</h2>
+			{s.body.map((p) => <p>{p}</p>)}
+			{i === 0 && (
+				<figure class="diagram" style="--dg-ink:#0A0A0A;--dg-paper:#FFFFFF;--dg-accent:#FFD400;--dg-good:#1A34B0;--dg-bad:#D9411C;--dg-muted:#4a4a4a;--dg-pair:#FF6A44;--dg-stroke:3;--dg-radius:0px;--dg-font:'Space Grotesk',sans-serif">
+					<Diagram slug={lesson.slug} />
+					<figcaption>{lesson.diagram.caption}</figcaption>
+				</figure>
+			)}
+		</section>
+	))}
+
+	{lesson.examples && (
+		<section class="ex" id="ex">
+			<h2>An example</h2>
+			<p class="wline mono">Examples: <span id="wname">{worlds[0].label}</span> · <button type="button" class="linkbtn" id="wchange" aria-expanded="false" aria-controls="wpick">change</button></p>
+			<div id="wpick" class="wpick" hidden>
+				<p>Examples follow what you use AI for. The lesson stays the same.</p>
+				<div class="wopts">{worlds.map((w) => <button type="button" class="btn" data-w={w.id}>{w.label}</button>)}</div>
+			</div>
+			{worlds.map((w, i) => {
+				const e = lesson.examples![w.id];
+				return (
+					<div class="panel" data-panel={w.id} hidden={i !== 0}>
+						<p class="mono lbl">Before</p><p class="q">{e.before}</p>
+						<p class="mono lbl">After</p><p class="q after">{e.after}</p>
+						<p><strong>Why it works:</strong> {e.why}</p>
+					</div>
+				);
+			})}
+		</section>
+	)}
+
+	<section class="try">
+		<p class="mono">Try this now</p>
+		<h2>{lesson.tryThis.title}</h2>
+		<ol>{lesson.tryThis.steps.map((s) => <li>{s}</li>)}</ol>
+	</section>
+
+	<section class="check">
+		<h2>Quick check</h2>
+		<p><strong>{lesson.check.question}</strong></p>
+		<div class="opts">
+			{lesson.check.options.map((o, i) => <button type="button" data-right={String(i === lesson.check.answer)}>{o}</button>)}
+		</div>
+		<p class="result" aria-live="polite"></p>
+		<p class="explain" hidden>{lesson.check.explain}</p>
+	</section>
+
+	<p class="next"><span class="mono">Next stop</span> {lesson.next}</p>
+	<p><a href={`${base}#map`}>Back to the map</a> · <a href={site.feedbackUrl}>Send feedback on this lesson</a></p>
+</main>
+
+<script>
+	const nav = document.getElementById('strip')!;
+	const data = JSON.parse(nav.dataset.strip!);
+	const ol = nav.querySelector('ol')!;
+	let id = '';
+	try { id = localStorage.getItem('aip-path') || ''; } catch {}
+	const p = data.lines.find((x: any) => x.id === id && x.stops.some((s: any) => s.n === data.current));
+	if (p) {
+		nav.style.setProperty('--c', p.color);
+		const h = document.createElement('li'); h.className = 'lname mono'; h.textContent = p.name; ol.append(h);
+		for (const s of p.stops) {
+			const li = document.createElement('li');
+			const cur = s.n === data.current;
+			const el = document.createElement(s.href && !cur ? 'a' : 'span');
+			if (el instanceof HTMLAnchorElement) el.href = s.href;
+			el.className = 'sdot' + (cur ? ' cur' : '') + (s.href ? ' ready' : '');
+			el.title = `${s.n}. ${s.title}`;
+			el.setAttribute('aria-label', `Stop ${s.n}: ${s.title}${cur ? ', you are here' : ''}`);
+			if (cur) el.setAttribute('aria-current', 'step');
+			li.append(el); ol.append(li);
+		}
+	} else {
+		const li = document.createElement('li');
+		li.innerHTML = 'No line yet. <a href="/preview/subway-v2/#pick">Find your line on the map</a>.';
+		ol.append(li);
+	}
+	// World switch
+	const labels: Record<string, string> = {};
+	const opts = [...document.querySelectorAll<HTMLButtonElement>('[data-w]')];
+	opts.forEach((b) => (labels[b.dataset.w!] = b.textContent || ''));
+	const pick = document.getElementById('wpick');
+	const ch = document.getElementById('wchange');
+	function setWorld(w: string) {
+		if (!labels[w]) return;
+		document.querySelectorAll<HTMLElement>('[data-panel]').forEach((x) => (x.hidden = x.dataset.panel !== w));
+		document.getElementById('wname')!.textContent = labels[w];
+		opts.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.w === w)));
+	}
+	ch?.addEventListener('click', () => { pick!.hidden = !pick!.hidden; ch.setAttribute('aria-expanded', String(!pick!.hidden)); });
+	opts.forEach((b) => b.addEventListener('click', () => {
+		setWorld(b.dataset.w!);
+		try { localStorage.setItem('aip-world', b.dataset.w!); } catch {}
+		pick!.hidden = true; ch!.setAttribute('aria-expanded', 'false'); ch!.focus();
+	}));
+	try { setWorld(localStorage.getItem('aip-world') || 'everyday'); } catch {}
+	// Check
+	const res = document.querySelector<HTMLElement>('.result')!;
+	document.querySelectorAll<HTMLButtonElement>('.opts button').forEach((b, _, all) => b.addEventListener('click', () => {
+		all.forEach((x) => x.classList.remove('right', 'wrong'));
+		const ok = b.dataset.right === 'true';
+		b.classList.add(ok ? 'right' : 'wrong');
+		res.textContent = ok ? 'Right.' : 'Not quite. Try another one.';
+		document.querySelector<HTMLElement>('.explain')!.hidden = !ok;
+	}));
+</script>
+
+<style is:global>
+	.strip{--c:#0A0A0A;border-bottom:3px solid #0A0A0A;padding:.6rem 1.25rem;display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;align-items:center;font-size:.9rem}
+	.sline{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;row-gap:.4rem}
+	.sline li{display:flex;align-items:center}
+	.sline .lname{margin-right:.6rem}
+	.sline li+li:not(:nth-child(2))::before{content:"";width:.7rem;height:6px;background:var(--c);outline:1px solid #0A0A0A}
+	.sdot{display:block;width:1rem;height:1rem;border-radius:50%;border:3px solid #0A0A0A;background:#fff}
+	a.sdot:hover{background:#FFD400}
+	.sdot.cur{width:1.6rem;height:1.6rem;background:var(--c);border-width:4px}
+</style>
+<style>
+	.read{max-width:40rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+	h1{font-size:clamp(2.4rem,9vw,3.6rem);margin:.4rem 0 1.4rem}
+	h2{font-size:1.7rem;margin:2.4rem 0 .6rem}
+	.idea{border:3px solid #0A0A0A;background:#FFD400;padding:.8rem 1rem}
+	.idea p{margin:0}.idea p+p{font-size:1.2rem;font-weight:500;margin-top:.3rem}
+	.diagram{margin:1.5rem 0;padding:1rem;border:3px solid #0A0A0A}
+	.diagram :global(svg){width:100%;height:auto;display:block}
+	figcaption{font-weight:700;margin-top:.6rem}
+	.wline{margin:0 0 .6rem}
+	.wline .linkbtn{font:inherit;text-transform:inherit}
+	.wpick{border:3px solid #0A0A0A;padding:.6rem 1rem 1rem;margin-bottom:1rem}
+	.wopts{display:flex;flex-wrap:wrap;gap:.7rem}
+	.wopts .btn[aria-pressed=true]{background:#0A0A0A;color:#fff}
+	.lbl{margin:.9rem 0 .2rem}
+	.q{border-left:6px solid #FF6A44;background:#f4f4f4;padding:.6rem .8rem;margin:0;overflow-wrap:anywhere}
+	.q.after{border-left-color:#1A34B0}
+	.try{border:3px solid #0A0A0A;box-shadow:4px 4px 0 #0A0A0A;padding:1rem 1.2rem;margin-top:2.4rem}
+	.try h2{margin-top:.2rem}.try p{margin:0}
+	.opts{display:grid;gap:.6rem}
+	.opts button{font:inherit;text-align:left;padding:.6rem .9rem;border:3px solid #0A0A0A;background:#fff;color:#0A0A0A;cursor:pointer;box-shadow:4px 4px 0 #0A0A0A}
+	.opts button:active{box-shadow:none;transform:translate(4px,4px)}
+	.opts button.right{background:#FFD400}
+	.opts button.wrong{background:#FFE1D8;text-decoration:line-through}
+	.result{font-weight:700}
+	.next{border-top:6px solid #0A0A0A;padding-top:1rem;margin-top:2.5rem;font-weight:500}
+	.next .mono{display:block}
+</style>
+</Base>
