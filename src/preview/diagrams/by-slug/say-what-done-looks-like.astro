@@ -1,6 +1,6 @@
 ---
 // Lesson 9: same polished arrow; only the aim differs.
-import { samples } from '../content';
+import { samples } from '../../content';
 interface Props { wobble?: boolean }
 const { wobble = false } = Astro.props;
 const label = samples.find((s) => s.slug === 'say-what-done-looks-like')?.diagram.describe ?? '';

@@ -1,6 +1,6 @@
 ---
 // Lesson 4: same confident AI, two answers, only the source decides.
-import { samples } from '../content';
+import { samples } from '../../content';
 interface Props { wobble?: boolean }
 const { wobble = false } = Astro.props;
 const label = samples.find((s) => s.slug === 'sure-of-itself-still-wrong')?.diagram.describe ?? '';
