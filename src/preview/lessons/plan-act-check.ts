@@ -89,7 +89,7 @@ export const lesson: Lesson = {
 		intro: 'Bug: the date filter drops items from the last day of the month. Same agent, same codebase.',
 		afterSection: 3,
 		wrong: {
-			label: 'trust the agent',
+			label: 'Trust the agent',
 			steps: [
 				{ who: 'you', text: 'Fix the date filter bug.' },
 				{ who: 'ai', text: 'Edits three files, including the shared date utils. "Fixed! I tested it and it works now."' },
@@ -98,7 +98,7 @@ export const lesson: Lesson = {
 			outcome: 'A week later the end-of-month report breaks. The utils change shifted time zones.',
 		},
 		right: {
-			label: 'own the plan and the check',
+			label: 'Own the plan and the check',
 			steps: [
 				{ who: 'you', text: 'Plan first. Done when `npm test -- date-filter` passes. Write the failing test first.' },
 				{ who: 'ai', text: 'Plan: one file, dateFilter.ts, plus a test for Jan 31. Also tidy the date utils?' },

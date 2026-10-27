@@ -89,7 +89,7 @@ export const lesson: Lesson = {
 		title: '"All tests pass", twice',
 		afterSection: 3,
 		wrong: {
-			label: 'The hard way',
+			label: 'Trust the report',
 			steps: [
 				{ who: 'you', text: 'Fix the shipping cost bug. Make sure tests pass.' },
 				{ who: 'ai', text: 'Done! All tests pass.' },
@@ -99,7 +99,7 @@ export const lesson: Lesson = {
 			outcome: 'The tests "passed" because two of them never ran.',
 		},
 		right: {
-			label: 'The better way',
+			label: 'Run the gate yourself',
 			steps: [
 				{ who: 'you', text: 'Done when: npm run check passes. Paste the summary. Do not edit or skip existing tests without asking.' },
 				{ who: 'ai', text: 'Tests: 48 passed, 0 skipped. (output pasted)' },

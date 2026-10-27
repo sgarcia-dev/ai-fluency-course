@@ -42,6 +42,6 @@ export const site = {
 		story:
 			'I first built this for my colleagues at Reddit as a hackathon project. People kept asking for more, from meetup friends to people who had barely touched ChatGPT. So I am rebuilding it for everyone.',
 	},
-	status: 'Preview. Six sample lessons are ready. The rest is on the map below, and I would love your feedback on it.',
+	status: 'Preview. Twelve sample lessons are ready. The rest is on the map below, and I would love your feedback on it.',
 	feedbackUrl: 'mailto:hello@sergeigarcia.com?subject=AI%2C%20Plainly%20feedback',
 };
