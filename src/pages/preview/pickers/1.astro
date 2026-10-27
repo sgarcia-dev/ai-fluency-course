@@ -1,0 +1,228 @@
+---
+// Path picker 1: "Which sounds like you?"
+// Four short first-person stories, one click picks. Then one tiny question, then the result.
+import { paths, lessonByNumber, worlds, site } from '../../../preview/content';
+
+const MIN_PER_LESSON = 10;
+const readableNow = [4, 9];
+// Where a readable lesson lives. Change this one line when the lesson pages move.
+const lessonHref = (slug: string) => `/preview/a-family/${slug}/`;
+
+const stories: Record<string, string> = {
+	new: 'I have heard a lot about ChatGPT and tools like it, but I have hardly used one. Maybe I tried it once and was not sure what to type.',
+	'hit-or-miss': 'I use AI for emails, summaries or quick questions. Sometimes the answer is great. Sometimes it is wrong or off, and I do not know why.',
+	daily: 'I use AI almost every day. Now I want it to take on whole jobs for me, not just answer one question at a time.',
+	builder: 'I write software, and I use AI coding tools to do it. I want to run them better and trust what they produce.',
+};
+const defaultWorld: Record<string, string> = { builder: 'code' };
+
+const fmt = (min: number) => {
+	const h = Math.floor(min / 60);
+	const m = min % 60;
+	if (h === 0) return `${m} minutes`;
+	return m === 0 ? `${h} ${h === 1 ? 'hour' : 'hours'}` : `${h} h ${m} min`;
+};
+
+const results = paths.map((p) => {
+	const lessons = p.lessons.map((n) => lessonByNumber(n));
+	const sample = lessons.find((l) => readableNow.includes(l.n));
+	return {
+		...p,
+		story: stories[p.id] ?? p.says,
+		lessons,
+		total: fmt(lessons.length * MIN_PER_LESSON),
+		startHref: sample ? lessonHref(sample.slug) : '',
+		startTitle: sample ? sample.title : '',
+	};
+});
+---
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>Which sounds like you? | {site.name}</title>
+		<style>
+			:root { --accent: #1a4fd6; --ink: #1c1f24; --muted: #555b66; --line: #d5d9e0; --soft: #f3f5fa; }
+			* { box-sizing: border-box; }
+			body { margin: 0; font: 18px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: #fff; }
+			main { max-width: 40rem; margin: 0 auto; padding: 1rem 1rem 4rem; }
+			a { color: var(--accent); }
+			a, button, input { -webkit-tap-highlight-color: transparent; }
+			:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+			.back { display: inline-flex; align-items: center; min-height: 44px; }
+			h1 { font-size: clamp(1.7rem, 6vw, 2.3rem); line-height: 1.15; margin: 0.5rem 0 0.5rem; }
+			h2 { font-size: 1.35rem; line-height: 1.25; margin: 0 0 0.5rem; }
+			h2[tabindex="-1"]:focus { outline: none; }
+			.lead { color: var(--muted); margin: 0 0 1.5rem; }
+			.steps { color: var(--muted); font-size: 0.9rem; margin: 0 0 0.5rem; }
+			[hidden] { display: none !important; }
+
+			.cards { display: grid; gap: 0.75rem; padding: 0; margin: 1rem 0 0; list-style: none; }
+			.card { display: block; width: 100%; min-height: 44px; text-align: left; font: inherit; color: inherit; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; cursor: pointer; }
+			.card:hover { border-color: var(--accent); background: var(--soft); }
+			.card q { quotes: "\201C" "\201D"; }
+
+			.worlds { border: 0; padding: 0; margin: 1rem 0 0; display: grid; gap: 0.75rem; }
+			.world { position: relative; display: block; }
+			.world input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+			.world span { display: flex; align-items: center; gap: 0.75rem; min-height: 56px; padding: 0.75rem 1.1rem; border: 2px solid var(--line); border-radius: 12px; }
+			.world span::before { content: ""; flex: none; width: 1.25rem; height: 1.25rem; border: 2px solid var(--muted); border-radius: 50%; }
+			.world input:checked + span { border-color: var(--accent); background: var(--soft); }
+			.world input:checked + span::before { border-color: var(--accent); background: radial-gradient(var(--accent) 0 45%, #fff 50%); }
+			.world input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 3px; }
+			.world:hover span { border-color: var(--accent); }
+
+			.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0.5rem 1.4rem; font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 2px solid var(--accent); border-radius: 10px; text-decoration: none; cursor: pointer; }
+			.btn:hover { background: #153fae; border-color: #153fae; }
+			.btn.ghost { color: var(--accent); background: #fff; }
+			.btn.ghost:hover { background: var(--soft); }
+			.linkbtn { min-height: 44px; padding: 0 0.25rem; font: inherit; color: var(--accent); background: none; border: 0; text-decoration: underline; cursor: pointer; }
+			.row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; margin-top: 1.25rem; }
+			.err { color: #a11; margin: 0.75rem 0 0; }
+
+			.summary { background: var(--soft); border-radius: 12px; padding: 1rem 1.1rem; margin: 0.75rem 0 1.25rem; }
+			.summary p { margin: 0.25rem 0; }
+			.facts { font-weight: 600; }
+			.lessons { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+			.lessons li { display: grid; grid-template-columns: 2.25rem 1fr; gap: 0 0.5rem; padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+			.num { color: var(--muted); font-variant-numeric: tabular-nums; }
+			.lt { font-weight: 600; }
+			.idea { color: var(--muted); font-size: 0.95rem; display: block; }
+			.tag { display: inline-block; margin-left: 0.4rem; padding: 0 0.5rem; font-size: 0.8rem; font-weight: 600; color: #fff; background: var(--accent); border-radius: 99px; vertical-align: 0.1em; }
+			.note { color: var(--muted); font-size: 0.95rem; }
+
+			@media (prefers-reduced-motion: no-preference) {
+				.card, .btn, .world span { transition: border-color 0.15s, background-color 0.15s; }
+				.step:not([hidden]) { animation: fade 0.25s ease-out; }
+				@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<a class="back" href="/preview/">&larr; Back to the preview</a>
+			<h1>Which sounds like you?</h1>
+			<p class="lead">There are no wrong answers and no levels. Pick the one that sounds most like what you do now. You can change it any time.</p>
+
+			<section class="step" id="step-1" aria-labelledby="h-1">
+				<p class="steps">Step 1 of 2</p>
+				<h2 id="h-1" tabindex="-1">Which sounds most like you?</h2>
+				<ul class="cards">
+					{results.map((r) => (
+						<li><button type="button" class="card" data-path={r.id}><q>{r.story}</q></button></li>
+					))}
+				</ul>
+			</section>
+
+			<section class="step" id="step-2" aria-labelledby="h-2" hidden>
+				<p class="steps">Step 2 of 2</p>
+				<h2 id="h-2" tabindex="-1">Where will you use it most?</h2>
+				<p class="note">This picks the examples you will see. It does not change your lessons.</p>
+				<form id="world-form" novalidate>
+					<fieldset class="worlds">
+						<legend class="note">Choose one</legend>
+						{worlds.map((w) => (
+							<label class="world"><input type="radio" name="world" value={w.id} /><span>{w.label}</span></label>
+						))}
+					</fieldset>
+					<p class="err" id="world-err" role="alert" hidden>Pick one to go on.</p>
+					<div class="row">
+						<button type="submit" class="btn">Show my path</button>
+						<button type="button" class="linkbtn" id="back-1">Back</button>
+					</div>
+				</form>
+			</section>
+
+			<section class="step" id="step-3" aria-labelledby="h-3" hidden>
+				{results.map((r) => (
+					<div class="result" data-result={r.id} hidden>
+						<p class="steps">Your path</p>
+						<h2 id={r.id === results[0].id ? 'h-3' : undefined} tabindex="-1" data-result-heading>{r.name}</h2>
+						<div class="summary">
+							<p class="facts">{r.lessons.length} lessons, about {r.total} in all</p>
+							<p class="note">About {MIN_PER_LESSON} minutes each. Examples tuned for: <strong data-world-label>everyday life</strong>.</p>
+							<p class="note">Why this one: <q>{r.story}</q></p>
+						</div>
+						<ol class="lessons" style="list-style:none">
+							{r.lessons.map((l) => (
+								<li>
+									<span class="num">{l.n}</span>
+									<span>
+										{readableNow.includes(l.n)
+											? <a class="lt" href={lessonHref(l.slug)}>{l.title}</a>
+											: <span class="lt">{l.title}</span>}
+										{readableNow.includes(l.n) && <span class="tag">Read now</span>}
+										<span class="idea">{l.idea}</span>
+									</span>
+								</li>
+							))}
+						</ol>
+						<div class="row">
+							{r.startHref
+								? <a class="btn" href={r.startHref}>Start: {r.startTitle}</a>
+								: <a class="btn" href="/preview/">Start</a>}
+							<button type="button" class="linkbtn" data-again>Not quite right? Pick again</button>
+						</div>
+						{!r.startHref && <p class="note">The lessons on this path are still being written. The two sample lessons, 4 and 9, are on other paths.</p>}
+						{r.startHref && <p class="note">Only lessons marked "Read now" are written so far.</p>}
+					</div>
+				))}
+			</section>
+		</main>
+
+		<script is:inline define:vars={{ defaults: defaultWorld, worldLabels: Object.fromEntries(worlds.map((w) => [w.id, w.label.toLowerCase()])) }}>
+			(function () {
+				var KEY_P = 'aip-path', KEY_W = 'aip-world';
+				var steps = [1, 2, 3].map(function (n) { return document.getElementById('step-' + n); });
+				var form = document.getElementById('world-form');
+				var err = document.getElementById('world-err');
+				var path = null;
+				function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+				function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+				function pathOk(id) { return !!document.querySelector('[data-result="' + id + '"]'); }
+				function show(n, focus) {
+					steps.forEach(function (s, i) { s.hidden = i !== n - 1; });
+					if (focus) {
+						var h = steps[n - 1].querySelector(n === 3 ? '[data-result]:not([hidden]) h2' : 'h2');
+						if (h) { h.focus({ preventScroll: true }); h.scrollIntoView({ block: 'start' }); }
+					}
+				}
+				function setWorld(id) {
+					var radios = form.elements['world'];
+					for (var i = 0; i < radios.length; i++) radios[i].checked = radios[i].value === id;
+				}
+				function showResult(world) {
+					document.querySelectorAll('[data-result]').forEach(function (el) { el.hidden = el.getAttribute('data-result') !== path; });
+					document.querySelectorAll('[data-world-label]').forEach(function (el) { el.textContent = worldLabels[world] || 'everyday life'; });
+				}
+				document.querySelectorAll('[data-path]').forEach(function (b) {
+					b.addEventListener('click', function () {
+						path = b.getAttribute('data-path');
+						set(KEY_P, path);
+						var saved = get(KEY_W);
+						setWorld(defaults[path] || (saved && worldLabels[saved] ? saved : ''));
+						err.hidden = true;
+						show(2, true);
+					});
+				});
+				document.getElementById('back-1').addEventListener('click', function () { show(1, true); });
+				form.addEventListener('submit', function (e) {
+					e.preventDefault();
+					var v = form.elements['world'].value;
+					if (!v) { err.hidden = false; return; }
+					set(KEY_W, v);
+					showResult(v);
+					show(3, true);
+				});
+				document.querySelectorAll('[data-again]').forEach(function (b) {
+					b.addEventListener('click', function () { show(1, true); });
+				});
+				var sp = get(KEY_P), sw = get(KEY_W);
+				if (sp && sw && pathOk(sp) && worldLabels[sw]) {
+					path = sp; setWorld(sw); showResult(sw); show(3, false);
+				}
+			})();
+		</script>
+	</body>
+</html>
