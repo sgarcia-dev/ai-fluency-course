@@ -1,0 +1,72 @@
+---
+// Prompting keeps you in the middle; delegating hands over one card.
+import { samples } from '../../content';
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'stop-prompting-start-delegating')?.diagram.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const rows = [70, 104, 138, 172, 206];
+const card = ['Goal', 'Context', 'Done when'];
+---
+<div class="dg-pair" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 300 280" width="100%" aria-hidden="true">
+		<defs>
+			<filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter>
+			<marker id={`${fid}-a`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ink" /></marker>
+		</defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b" x="10" y="22">Prompting</text>
+			<circle class="acc line" cx="60" cy="138" r="34" />
+			<text class="t b" x="60" y="144" text-anchor="middle">You</text>
+			<rect class="paper line" x="200" y="104" width="80" height="68" />
+			<text class="t b" x="240" y="144" text-anchor="middle">AI</text>
+			{rows.map((y, i) => (
+				<path class="line thin" d={i % 2 ? `M196 ${y + 4} L98 ${y}` : `M98 ${y} L196 ${y + 4}`} marker-end={`url(#${fid}-a)`} />
+			))}
+			<text class="t b bad-t" x="150" y="250" text-anchor="middle">You are the bottleneck</text>
+		</g>
+	</svg>
+	<svg class="dg" viewBox="0 0 300 280" width="100%" aria-hidden="true">
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b" x="10" y="22">Delegating</text>
+			<g transform="rotate(-3 60 100)">
+				<rect class="acc line" x="10" y="40" width="112" height="100" />
+				{card.map((k, i) => <text class="t" x="20" y={68 + i * 28}>{k}</text>)}
+			</g>
+			<path class="line" d="M126 90 L156 90" marker-end={`url(#${fid}-a)`} />
+			<circle class="paper line" cx="220" cy="100" r="58" />
+			<path class="line dash" d="M220 54 A46 46 0 1 1 186 70" marker-end={`url(#${fid}-a)`} />
+			<text class="t b" x="220" y="82" text-anchor="middle">AI</text>
+			<text class="t" x="220" y="104" text-anchor="middle">plan, work,</text>
+			<text class="t" x="220" y="124" text-anchor="middle">check</text>
+			<path class="line" d="M220 160 L220 192" marker-end={`url(#${fid}-a)`} />
+			<rect class="paper line" x="150" y="198" width="140" height="44" />
+			<text class="t b" x="170" y="226">Result</text>
+			<circle class="good line" cx="262" cy="220" r="14" />
+			<path class="tick w" d="M255 220 l5 5 l9 -10" />
+			<text class="t muted" x="10" y="226">You check</text>
+			<text class="t b good-t" x="150" y="270" text-anchor="middle">You manage the result</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-pair { display: flex; gap: 1rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg-pair > svg { flex: 1 1 0; min-width: 0; }
+	@media (max-width: 40rem) { .dg-pair { flex-direction: column; } }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.thin { stroke-width: 2; }
+	.ink { fill: var(--dg-ink, #1f2a37); }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.tick { fill: none; stroke: var(--dg-good, #2e8b57); stroke-width: 2.5; stroke-linecap: round; }
+	.tick.w { stroke: var(--dg-paper, #fff); stroke-width: 3; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 16px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
