@@ -4,91 +4,97 @@ export const lesson: Lesson = {
 	n: 9,
 	slug: 'say-what-done-looks-like',
 	title: 'Say what “done” looks like',
-	idea: 'A vague ask gets confident work on the wrong thing. Say what you want, who it is for, and how you will know it is done.',
+	idea: 'A plain ask gets an okay answer. Spell out who it is for, what goes in, what stays out, the tone and the length, and the answer gets clearly better.',
 	minutes: 8,
 	sections: [
 		{
-			heading: 'It aims at what you said',
+			heading: 'Okay is the trap.',
 			body: [
-				'AI cannot see what is in your head. It only sees what you typed. Ask for something vague and it fills the gaps with a guess. Then it does the guess very well.',
-				'That is the trap. The answer looks polished and sure of itself. It is just not what you wanted, so you read it, spot the problem, and ask again.',
+				'Ask "Write a message to my team about the deadline moving." You will get something you could send. It will also be too long, a bit too sorry, and vague about what happens next.',
+				'Nothing in it is wrong. The AI just had to guess the rest: who reads it, how it should sound, what matters. It guessed the safe, average answer.',
 			],
 		},
 		{
-			heading: 'Three things to say',
+			heading: 'Spell out the guesses',
 			body: [
-				'What you want: the thing itself. A short message, a list, a plan, a fix.',
-				'Who it is for: your doctor, your boss, your grandkids, other engineers. This sets the words, the length and the tone.',
-				'Done when: the finish line. "Under 100 words." "Includes the date." "All the tests pass." If you can check it, the AI can aim for it.',
+				'Before you send an ask, run down a short list. Who is it for? What must it include? What should it leave out? What tone? How long, or in what shape? How will you know it is right?',
+				'You do not need all six every time. Each one you answer is one less guess. Most asks get much better from just two or three of them.',
 			],
 		},
 		{
-			heading: 'The "done when" line',
+			heading: 'Leave-outs are the secret weapon.',
 			body: [
-				'End your ask with "Done when:" and two or three plain checks. It takes ten seconds.',
-				'It helps twice. The AI aims at the right target. And when the answer comes back, you already have a checklist to judge it. No more "hmm, is this good?"',
+				'People rarely say what they do not want. But that is where the average answer goes wrong. It apologizes too much, blames someone, adds a pep talk, or touches files you did not want changed.',
+				'One line like "Do not blame the client" or "Do not change other files" fixes the thing you would otherwise edit by hand.',
 			],
 		},
 		{
-			heading: 'You do not need fancy words',
+			heading: 'End with how you will check it',
 			body: [
-				'There are no magic phrases. Brief the AI the way you would brief a helpful stranger: what you need, who it is for, and what good looks like.',
-				'If the first answer misses, do not just say "try again". Say which check it missed. That is how you get there fast.',
+				'The last item is the finish line: "Under 80 words." "Ends with what I need from them." "All the tests pass." If you can check it, the AI can aim for it.',
+				'It helps twice. The AI aims better, and you get a checklist to judge the reply. If it misses, do not just say "try again". Say which item it missed.',
+			],
+		},
+		{
+			heading: 'When a short ask is fine',
+			body: [
+				'For quick, low-stakes things, like "a word that means happy", a plain ask is fine. If the first answer is good enough, you are done.',
+				'Spell things out when someone else will read it, when tone matters, or when a fix has to be exactly right.',
 			],
 		},
 	],
 	diagram: {
-		caption: 'Same ask, same target. Only the checklist changes where it lands.',
+		caption: 'Same job. The yellow ask says what the plain one left to guesswork.',
 		describe:
-			'Two panels with the same target. Left, "Vague ask": a card says "Write something for the doctor". The arrow flies past and lands well outside the target, marked with a red X and the words "Polished. Wrong thing." Right, "Clear ask": the same card plus a "Done when" checklist, all ticked: under 100 words, mentions the date, asks to call back. The arrow hits the bullseye, labeled "Exactly what you meant".',
+			'Two columns side by side. Left, "Plain ask": a small white card, "Write a message to my team about the deadline moving." An arrow leads to a long reply full of grey lines that starts "So sorry, everyone...", labeled "Okay: long, sorry, vague". Right, "Explicit ask": a larger yellow card listing For: my team; Tone: calm and direct; Include: new date and the reason; Leave out: blaming the client; Length: under 80 words; End: what I need from them. An arrow leads to a short reply with the new date, labeled in green "Clearly better: ready to send".',
 	},
 	figures: [
 		{
-			id: 'three',
+			id: 'checklist',
 			afterSection: 1,
-			caption: 'A good ask has three slots. Fill each one.',
+			caption: 'Six things to spell out. Answer the ones that matter for this job.',
 			describe:
-				'A fill-in card with three slots. What: a note to move my checkup. Who it is for: the front desk. Done when: under 100 words, has the date.',
+				'A yellow card titled "Spell out" with six checkbox rows: Who it is for, What to include, What to leave out, The tone, Length or format, How you will know it is right.',
 		},
 	],
 	examples: {
 		everyday: {
-			before: 'Write a message to my doctor.',
+			before: 'Write a text to my neighbor about the noise last night.',
 			after:
-				'Write a short, polite message to my doctor\'s office asking to move my Tuesday 10am checkup to next week. It is for the front desk. Done when: under 80 words, includes my name and date of birth, asks them to call me back.',
-			why: 'It says what the message is for, who reads it, and what it must include, so you can check it in seconds.',
+				'Write a text to my neighbor Dana about the loud music last night. We get along and I want to keep it that way. Tone: friendly, not passive-aggressive. Include: it went past midnight and I start work at 7. Do not threaten to call anyone. Under 50 words, and end by asking if weekends could finish by 11.',
+			why: 'The plain ask gets a stiff, slightly cold text. Saying the relationship, the tone, the one request and what to leave out gets one you would actually send.',
 		},
 		office: {
-			before: 'Summarize this report.',
+			before: 'Summarize this report for my manager.',
 			after:
-				'Summarize this report for my manager, who has two minutes before a budget meeting. Done when: five bullet points or fewer, the cost numbers are included, and any risk is in the first bullet.',
-			why: 'The reader and the finish line tell the AI what to keep and what to cut.',
+				'Summarize this report for my manager, who has two minutes before a budget meeting. Include the total cost and the one biggest risk, risk first. Leave out the method section and the history. Five bullet points or fewer, plain words, no jargon.',
+			why: 'The plain ask gets a fair summary of everything. Saying what she needs it for, and what to drop, gets the three facts she will use.',
 		},
 		code: {
-			before: 'Fix the login bug.',
+			before: 'Fix the bug where users with capital letters in their email cannot log in.',
 			after:
-				'Users who type their email with capital letters cannot log in. Fix that so email checks ignore upper and lower case. Done when: the existing tests pass, there is a new test for a mixed-case email, and no other files change.',
-			why: 'It names the exact problem and gives checks you can run, so "fixed" means something you can prove.',
+				'Users who type their email with capital letters cannot log in. Make the email check ignore upper and lower case. Change only the login check, not the sign-up code or the database. Add one test for a mixed-case email. Done when all existing tests and the new one pass.',
+			why: 'The plain ask often works, but may also rewrite sign-up or the stored emails. Saying what not to touch and how to check it keeps the fix small and provable.',
 		},
 	},
 	tryThis: {
-		title: 'Add a finish line',
+		title: 'Run the list on one real ask',
 		steps: [
-			'In any free AI chat, type a vague ask: "Plan a day out for my family."',
-			'Now ask again, adding who it is for and a "Done when:" line, for example: "For two grandparents and two kids aged 6 and 9. Done when: costs under $60, no more than 30 minutes of driving, and has a lunch stop."',
-			'Compare the two answers. Which one could you actually use?',
+			'In any free AI chat, ask something you would really send, for example: "Write a message to my friends about moving dinner to Sunday."',
+			'Now ask again, adding three items from the list: who it is for, one thing to leave out, and a length. For example: "They are old friends. Do not over-apologize. Under 40 words."',
+			'Put the two answers side by side. Which one could you send without editing?',
 		],
 	},
 	check: {
-		question: 'Which ask is most likely to get what you want on the first try?',
+		question: 'Which ask is most likely to get a message you can send as is?',
 		options: [
-			'"Make me a shopping list."',
-			'"Make me a great shopping list, please, it is important."',
-			'"Make a shopping list for three dinners for two people. Done when: under $40 and no fish."',
+			'"Write a message to my team about the deadline moving."',
+			'"Write a really good, professional message to my team about the deadline moving. It is important."',
+			'"Write a message to my team: the deadline moved to May 14 because the client changed scope. Calm and direct, do not blame the client, under 80 words."',
 		],
 		answer: 2,
 		explain:
-			'The third one says what, who and when it is done. Saying "great" or "important" feels helpful, but it gives the AI nothing to aim at.',
+			'The third one says what to include, what to leave out, the tone and the length. "Really good" and "important" feel helpful, but they give the AI nothing to aim at.',
 	},
 	next: 'Next: "The right context, not all of it", what to tell the AI and what to leave out.',
 };

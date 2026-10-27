@@ -1,55 +1,59 @@
 ---
-// Same ask, same target. Only the "Done when" checklist differs.
+// One comparison: a plain ask and an explicit (yellow) ask, and the reply each one gets.
 import { samples } from '../../content';
 interface Props { wobble?: boolean }
 const { wobble = false } = Astro.props;
 const label = samples.find((s) => s.slug === 'say-what-done-looks-like')?.diagram.describe ?? '';
 const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
-const arrow = (x1: number, y1: number, x2: number, y2: number) => {
-	const a = Math.atan2(y2 - y1, x2 - x1);
-	const p = (d: number, o: number) => `${x2 - Math.cos(a) * d - Math.sin(a) * o},${y2 - Math.sin(a) * d + Math.cos(a) * o}`;
-	return { shaft: `M${x1},${y1} L${x2},${y2}`, head: `${x2},${y2} ${p(16, 7)} ${p(16, -7)}` };
-};
-const T = { cx: 200, cy: 250, r: 48 };
-const rings = [1, 2 / 3, 1 / 3].map((k) => T.r * k);
-const miss = arrow(30, 215, 282, 168);
-const hit = arrow(30, 215, T.cx, T.cy);
-const ticks = ['Under 100 words', 'Mentions the date', 'Asks to call back'];
+const spec = [
+	['For:', 'my team'],
+	['Tone:', 'calm, direct'],
+	['Include:', 'new date, why'],
+	['Leave out:', 'client blame'],
+	['Length:', 'under 80 words'],
+	['End:', 'what I need'],
+];
+const longBars = [250, 230, 255, 210, 245, 225, 240, 150];
+const R = 248; // y where both replies start
 ---
 <div class="dg-pair" role="img" aria-label={label}>
-	<svg class="dg" viewBox="0 0 300 340" width="100%" aria-hidden="true">
+	<svg class="dg" viewBox="0 0 300 450" width="100%" aria-hidden="true">
 		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
 		<g filter={wobble ? `url(#${fid})` : undefined}>
-			<text class="t b" x="10" y="22">Vague ask</text>
-			<rect class="paper line" x="10" y="34" width="170" height="54" />
-			<text class="t" x="22" y="57">"Write something</text>
-			<text class="t" x="22" y="78">for the doctor"</text>
-			{rings.map((r, i) => <circle class={i % 2 ? 'paper line' : 'tg line'} cx={T.cx} cy={T.cy} r={r} />)}
-			<path class="line" d={miss.shaft} />
-			<polygon class="ink line" points={miss.head} />
-			<path class="xm" d="M274 150 l16 16 M290 150 l-16 16" />
-			<text class="t b bad-t" x="150" y="330" text-anchor="middle">Polished. Wrong thing.</text>
+			<text class="t b" x="10" y="22">Plain ask</text>
+			<rect class="paper line" x="10" y="34" width="280" height="80" />
+			<text class="t" x="24" y="60">"Write a message to my</text>
+			<text class="t" x="24" y="82">team about the deadline</text>
+			<text class="t" x="24" y="104">moving."</text>
+			<path class="line" d="M150 124 L150 236" />
+			<polygon class="ink line" points="150,242 143,230 157,230" />
+			<rect class="paper line" x="10" y={R} width="280" height="160" />
+			<text class="t muted" x="24" y={R + 24}>"So sorry, everyone..."</text>
+			{longBars.map((w, i) => <rect class="soft" x="24" y={R + 36 + i * 14} width={w} height="7" style="rx:3px" />)}
+			<text class="t b" x="150" y="440" text-anchor="middle">Okay: long, sorry, vague</text>
 		</g>
 	</svg>
-	<svg class="dg" viewBox="0 0 300 340" width="100%" aria-hidden="true">
+	<svg class="dg" viewBox="0 0 300 450" width="100%" aria-hidden="true">
 		<g filter={wobble ? `url(#${fid})` : undefined}>
-			<text class="t b" x="10" y="22">Clear ask</text>
-			<rect class="paper line" x="10" y="34" width="170" height="54" />
-			<text class="t" x="22" y="57">"Write something</text>
-			<text class="t" x="22" y="78">for the doctor"</text>
-			{rings.map((r, i) => <circle class={i % 2 ? 'paper line' : 'tg line'} cx={T.cx} cy={T.cy} r={r} />)}
-			<rect class="acc line" x="10" y="96" width="190" height="98" />
-			<text class="t b" x="20" y="118">Done when:</text>
-			{ticks.map((k, i) => (
+			<text class="t b" x="10" y="22">Explicit ask</text>
+			<rect class="acc line" x="10" y="34" width="280" height="190" />
+			<text class="t" x="24" y="58">"Write a message to my team..."</text>
+			{spec.map(([k, v], i) => (
 				<g>
-					<rect class="paper line thin" x="20" y={128 + i * 21} width="14" height="14" />
-					<path class="tick" d={`M22 ${135 + i * 21} l4 4 l7 -9`} />
-					<text class="t" x="42" y={141 + i * 21}>{k}</text>
+					<text class="t b" x="24" y={86 + i * 23}>{k}</text>
+					<text class="t" x="118" y={86 + i * 23}>{v}</text>
 				</g>
 			))}
-			<path class="line" d={hit.shaft} />
-			<polygon class="ink line" points={hit.head} />
-			<text class="t b good-t" x="150" y="330" text-anchor="middle">Exactly what you meant</text>
+			<path class="line" d="M150 226 L150 236" />
+			<polygon class="ink line" points="150,242 143,230 157,230" />
+			<rect class="paper goodline" x="10" y={R} width="280" height="110" />
+			<text class="t" x="24" y={R + 26}>New date: <tspan class="b">May 14</tspan>.</text>
+			<rect class="soft" x="24" y={R + 40} width="200" height="7" style="rx:3px" />
+			<rect class="soft" x="24" y={R + 54} width="160" height="7" style="rx:3px" />
+			<text class="t" x="24" y={R + 92}>Can you each...?</text>
+			<circle class="good" cx="262" cy={R + 84} r="16" />
+			<path class="tickw" d={`M254 ${R + 84} l6 6 l10 -12`} />
+			<text class="t b good-t" x="150" y="440" text-anchor="middle">Clearly better: ready to send</text>
 		</g>
 	</svg>
 </div>
@@ -75,4 +79,7 @@ const ticks = ['Under 100 words', 'Mentions the date', 'Asks to call back'];
 	.good-t { fill: var(--dg-good, #2e8b57); }
 	.bad-t { fill: var(--dg-bad, #c0392b); }
 	rect { rx: var(--dg-radius, 8px); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.35; }
+	.goodline { stroke: var(--dg-good, #2e8b57); stroke-width: 3.5; }
+	.tickw { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 </style>
