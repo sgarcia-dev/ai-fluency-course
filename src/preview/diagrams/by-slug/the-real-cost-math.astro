@@ -1,0 +1,48 @@
+---
+// Growing chat: every message re-sends everything so far. Fresh chat with a summary stays low.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'the-real-cost-math')?.diagram.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const msgs = Array.from({ length: 10 }, (_, i) => i);
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 360" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b" x="20" y="24">One long chat</text>
+			<path class="line" d="M20 180 L320 180" />
+			{msgs.map((i) => <rect class="bad line" x={24 + i * 30} y={180 - (i + 1) * 13} width="22" height={(i + 1) * 13} />)}
+			<text class="t b bad-t" x="274" y="56" text-anchor="end">re-sends it all</text>
+			<text class="t muted" x="35" y="200" text-anchor="middle">msg 1</text>
+			<text class="t muted" x="295" y="200" text-anchor="middle">msg 10</text>
+
+			<text class="t b" x="20" y="244">Fresh chat + summary</text>
+			<path class="line" d="M20 310 L320 310" />
+			{msgs.map((i) => <rect class="good line" x={24 + i * 30} y={310 - (i % 5 + 2) * 6} width="22" height={(i % 5 + 2) * 6} />)}
+			<path class="line dash" d="M168 254 L168 312" />
+			<text class="t b good-t" x="174" y="270">new chat</text>
+			<text class="t b" x="170" y="346" text-anchor="middle">Bar height = cost per message</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>

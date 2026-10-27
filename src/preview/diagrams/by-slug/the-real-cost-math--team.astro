@@ -1,0 +1,49 @@
+---
+// The multiplier: one person one day is small; times people and days is big; smart habits shrink it.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'the-real-cost-math')?.figures?.find((f) => f.id === 'team')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const big = Array.from({ length: 10 }, (_, i) => 242 - i * 18);
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 340" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<path class="line" d="M10 262 L330 262" />
+			<ellipse class="soft" cx="55" cy="250" rx="30" ry="7" />
+			<text class="t b" x="55" y="226" text-anchor="middle">tiny</text>
+			{big.map((y) => <ellipse class="bad line" cx="170" cy={y + 8} rx="40" ry="8" />)}
+			<text class="t b bad-t" x="170" y="66" text-anchor="middle">x 400</text>
+			<ellipse class="good line" cx="285" cy="250" rx="40" ry="8" />
+			<text class="t b good-t" x="285" y="226" text-anchor="middle">a tenth</text>
+			<text class="t b" x="55" y="286" text-anchor="middle">1 person</text>
+			<text class="t b" x="55" y="306" text-anchor="middle">1 day</text>
+			<text class="t b" x="170" y="286" text-anchor="middle">20 people</text>
+			<text class="t b" x="170" y="306" text-anchor="middle">20 days</text>
+			<text class="t b" x="285" y="286" text-anchor="middle">same team,</text>
+			<text class="t b" x="285" y="306" text-anchor="middle">better habits</text>
+			<text class="t muted" x="170" y="334" text-anchor="middle">Same work done in all three</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
