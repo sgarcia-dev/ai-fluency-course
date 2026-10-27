@@ -8,40 +8,78 @@ export const lesson: Lesson = {
 	minutes: 9,
 	sections: [
 		{
-			heading: 'Two ways to do the same job',
+			heading: 'Steps or a goal.',
 			body: [
-				'Say you need a one-page breakdown of three competitors. The micromanager asks for one section, reads it, fixes it, then asks for the next. Two hours later the page is fine, but every step waited on them.',
-				'The manager writes one ask instead: "A one-page breakdown of these three competitors. Cover price, who they sell to, and their top three features. Use these five sources. Flag anything you could not check." Then they walk away, come back to a near-final draft, and check the flagged parts.',
-				'Same person, same tool. One handed over keystrokes. The other handed over a problem.',
+				'There are two ways to hand work to an AI. You can tell it every step, one at a time: do this, now this, now fix that. Or you can tell it the goal and the finish line, and let it work out the steps.',
+				'Engineers call these imperative and declarative. Imperative means "here is how". Declarative means "here is what I want". With the first, you do the thinking and the AI types. With the second, the AI does the thinking and you check.',
+			],
+		},
+		{
+			heading: 'The AI can loop. Let it.',
+			body: [
+				'When you give a goal, a good AI does not just answer once. It makes a plan, does a piece, checks it, and asks itself: "Is this done?" If not, it goes back and plans the next piece. It keeps going round until the answer is yes.',
+				'When you give steps, that loop never starts. You are the loop. Every round trip waits on you to read, think and type the next step.',
 			],
 		},
 		{
 			heading: 'What a good handoff needs',
 			body: [
-				'A clear outcome and the inputs. Say what you want at the end and what it should work from. "A one-page plan, using these notes" beats "help me plan".',
-				'The context it needs. Who it is for, what matters, what to avoid. Give it the few facts a new helper would ask about.',
-				'A check that is not the AI. It will always say it did a great job. So pick a test you can run yourself: a list of must-haves, a number that has to add up, tests that have to pass.',
+				'The goal: what you want at the end. The context: who it is for, what to work from, what to avoid. The finish line: a "done when" list. Add one line for when it should stop and ask you.',
+				'Then ask for its plan before it starts. A five-line plan takes 20 seconds to read. If it is off, you fix it in one sentence, not after an hour of work.',
 			],
 		},
 		{
-			heading: 'Ask for the plan first',
+			heading: 'The check is what makes the loop work.',
 			body: [
-				'Before it does the whole job, ask it to reply with its plan. A short list of steps is quick to read. A finished 20-page report is not.',
-				'If the plan is off, you fix it in one sentence. If it looks good, say "go". You spend a minute steering instead of an hour fixing.',
+				'The loop only stops at the right place if something can decide "done". That something is your "done when" list. If the list is vague, like "make it good", the AI will decide it is done whenever it feels like it.',
+				'Write things anyone could check: a count ("top 3 complaints, each with how many people said it"), a quote ("one real comment per point"), a format ("fits on one page"), a test that passes or fails. The AI saying "looks good" is not a check. It will always say that.',
+				'When the result comes back, go down your list yourself. Look first at anything it flagged as unsure. If one item fails, name that item. "Point 3 has no quote" is far better than "try again".',
 			],
 		},
 		{
-			heading: 'Check the work like a manager',
+			heading: 'When to keep steering',
 			body: [
-				'Do not just skim the result and smile. Hold it up against your "done when" list. Look first at anything it flagged as unsure.',
-				'If it missed, say which check failed. That is clearer than "try again", and it teaches you what to write in the next handoff.',
+				'Delegating is not always right. For a tiny job, like one email reply, just ask. And when you do not know yet what you want, short back-and-forth helps you find out. Once you can write the finish line, hand over the goal.',
 			],
 		},
 	],
 	diagram: {
-		caption: 'Prompting makes you the middle of every step. Delegating hands over the whole job.',
+		caption: 'Prompting: you are in every round trip. Delegating: the AI loops until your "done when" list is met.',
 		describe:
-			'Two panels side by side. Left panel, titled "Prompting": you sit between many small arrows going back and forth with the AI, one step at a time. You are the bottleneck. Right panel, titled "Delegating": you hand the AI one card that reads Goal, Context, Done when. The AI runs its own loop of plan, work, check, and hands back one result that passes a check mark gate.',
+			'Two panels. Left, "Prompting: you give every step": you send step 1 to the AI, it comes back to you, you send step 2, back to you, step 3, and so on. You are in every round trip. Right, "Delegating: you give the goal": a card with Goal, Context and Done when goes in once. The AI loops Plan, Act, Check, then asks "Done?". No goes back to Plan. Yes goes out to the result, which you review.',
+	},
+	compare: {
+		title: 'A real Friday job: 40 customer comments into one page',
+		intro: 'Your boss wants the customer comments summed up for Monday\'s meeting. They sit in a spreadsheet, one per row. Here is the same job done both ways.',
+		afterSection: 1,
+		wrong: {
+			label: 'You give every step',
+			steps: [
+				{ who: 'you', text: 'Here are 40 customer comments. Summarize them.' },
+				{ who: 'ai', text: 'Customers have mixed feelings. Many mention delivery, support and staff...' },
+				{ who: 'you', text: 'Too vague. List the main complaints.' },
+				{ who: 'ai', text: 'Main complaints: delivery, support, invoices, the app, prices, packaging.' },
+				{ who: 'you', text: 'Just the top 3. And how many said each?' },
+				{ who: 'ai', text: 'Delivery (about 12), support (about 8), invoices (about 5).' },
+				{ who: 'note', text: '"About"? You count them yourself. It is 11 and 7. Two rows were "test test".' },
+				{ who: 'you', text: 'Use 11 and 7. Now do the praises the same way. Add a quote for each.' },
+				{ who: 'ai', text: 'Here are the praises with quotes...' },
+				{ who: 'you', text: 'Now put it all on one page for my team.' },
+			],
+			outcome: 'Two hours. You did the thinking.',
+		},
+		right: {
+			label: 'You give the goal',
+			steps: [
+				{ who: 'you', text: 'Goal: a one-page summary of the 40 comments for my team on Monday. Five-minute read.\nDone when: top 3 complaints and top 3 praises, each with how many said it and one real quote. Fits on one page.\nStop and ask if a comment is unclear.\nReply with your plan first.' },
+				{ who: 'ai', text: 'Plan: 1. Tag every comment. 2. Sort by date and count. 3. Pick the top 3 of each. 4. Add counts and quotes. Rows 12 and 31 say "test test". Count them?' },
+				{ who: 'you', text: 'Group by theme, not date. Skip the two tests. Go.' },
+				{ who: 'ai', text: 'Done. Checked against your list: one page, top 3 of each, counts out of 38, a quote per point. Two things I could not verify: comment 22 may be about a different product, and "slow app" and "app crashes" could be one theme or two.' },
+				{ who: 'check', text: 'You go down your list and read the two flagged items. Two minutes.' },
+			],
+			outcome: 'Fifteen minutes of your time. Checked against your list.',
+		},
+		takeaway: 'Same person, same AI. One handed over keystrokes. The other handed over the goal and a finish line it could check.',
 	},
 	examples: {
 		everyday: {
@@ -65,36 +103,6 @@ export const lesson: Lesson = {
 				'Let users add a birthday to their profile. Context: the profile form and its tests are in the profile folder. Done when: the date saves, shows on the profile page, all tests pass, and there is a new test for an empty date. Stop and ask if: you need to change the database. Reply with your plan before writing code.',
 			why: 'It names the result and a check that is not the AI (the tests), and asks for the plan before any code.',
 		},
-	},
-	worked: {
-		title: 'A real Friday job: 40 comments into one page',
-		intro: 'Your boss wants the customer comments summed up for Monday\'s meeting. They sit in a spreadsheet, one per row. Here is the whole handoff, start to finish.',
-		steps: [
-			{
-				label: '1. The brief you paste in',
-				you: 'Goal: a one-page summary of the 40 customer comments in the attached spreadsheet.\nWho it is for: my team at Monday\'s meeting. They have five minutes to read it.\nInputs: the "Comments" column. Ignore the other columns.\nDone when: it fits on one page, it lists the top 3 complaints and top 3 praises, each point shows how many comments said it, and it quotes one real comment per point.\nStop and ask if: a comment is unclear or you are not sure where it fits.\nReply with your plan first. Do not write the summary yet.',
-				note: 'Five parts: goal, reader, inputs, done when, stop if. The "done when" list is what you will check against later.',
-			},
-			{
-				label: '2. The AI replies with a plan',
-				ai: 'Goal: a one-page summary of 40 comments for a five-minute read.\nPlan:\n1. Read every comment and tag it.\n2. Sort them by date, then count.\n3. Pick the top 3 complaints and top 3 praises.\n4. Add counts and one quote each.\nOne question: rows 12 and 31 say "test test". Should I count them?',
-				note: 'A plan takes 20 seconds to read. Here you spot a problem before any work is done.',
-			},
-			{
-				label: '3. Your one-line fix',
-				you: 'Group by theme, not by date, and skip the two test entries. Go.',
-				note: 'One sentence steers the whole job. Fixing a finished page would take much longer.',
-			},
-			{
-				label: '4. A bit of the result',
-				ai: 'Top complaints\n1. Slow delivery (11 of 38). "Took two weeks, no update."\n2. Hard to reach support (7 of 38). "I waited 40 minutes on hold."\n3. Confusing invoices (5 of 38).\n\nTop praises\n1. Friendly staff (9 of 38). "Maria fixed it in one call."',
-			},
-			{
-				label: '5. Your two-minute check',
-				you: 'Point 3 under complaints has no quote. Add one real comment for it.',
-				note: 'You went down the "done when" list: one page, yes. Top 3 each, yes. Counts, yes. A quote per point, no. So you name the failed check in one line, not "try again".',
-			},
-		],
 	},
 	tryThis: {
 		title: 'Get the plan first',

@@ -1,57 +1,78 @@
 ---
-// Prompting keeps you in the middle; delegating hands over one card.
+// Prompting: you in every round trip. Delegating: the AI loops Plan, Act, Check until Done.
 import { samples } from '../../content';
 interface Props { wobble?: boolean }
 const { wobble = false } = Astro.props;
 const label = samples.find((s) => s.slug === 'stop-prompting-start-delegating')?.diagram.describe ?? '';
 const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
-const rows = [70, 104, 138, 172, 206];
+const steps = [1, 2, 3];
 const card = ['Goal', 'Context', 'Done when'];
+const loop = [{ y: 52, t: 'Plan' }, { y: 120, t: 'Act' }, { y: 188, t: 'Check' }];
 ---
 <div class="dg-pair" role="img" aria-label={label}>
-	<svg class="dg" viewBox="0 0 300 280" width="100%" aria-hidden="true">
+	<svg class="dg" viewBox="0 0 300 400" width="100%" aria-hidden="true">
 		<defs>
 			<filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter>
 			<marker id={`${fid}-a`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ink" /></marker>
+			<marker id={`${fid}-r`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="badf" /></marker>
+			<marker id={`${fid}-g`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="good" /></marker>
 		</defs>
 		<g filter={wobble ? `url(#${fid})` : undefined}>
 			<text class="t b" x="10" y="22">Prompting</text>
-			<circle class="acc line" cx="60" cy="138" r="34" />
-			<text class="t b" x="60" y="144" text-anchor="middle">You</text>
-			<rect class="paper line" x="200" y="104" width="80" height="68" />
-			<text class="t b" x="240" y="144" text-anchor="middle">AI</text>
-			{rows.map((y, i) => (
-				<path class="line thin" d={i % 2 ? `M196 ${y + 4} L98 ${y}` : `M98 ${y} L196 ${y + 4}`} marker-end={`url(#${fid}-a)`} />
-			))}
-			<text class="t b bad-t" x="150" y="250" text-anchor="middle">You are the bottleneck</text>
+			<text class="t muted" x="10" y="44">you give every step</text>
+			<circle class="acc line" cx="60" cy="86" r="26" />
+			<text class="t b" x="60" y="92" text-anchor="middle">You</text>
+			<rect class="paper line" x="200" y="62" width="80" height="48" />
+			<text class="t b" x="240" y="92" text-anchor="middle">AI</text>
+			<path class="dash" d="M60 112 L60 340" />
+			<path class="dash" d="M240 110 L240 340" />
+			{steps.map((n, i) => {
+				const y = 140 + i * 66;
+				return (
+					<g>
+						<path class="line" d={`M64 ${y} L234 ${y}`} marker-end={`url(#${fid}-a)`} />
+						<text class="t b" x="150" y={y - 8} text-anchor="middle">step {n}</text>
+						<path class="line bad-s" d={`M236 ${y + 26} L66 ${y + 26}`} marker-end={`url(#${fid}-r)`} />
+					</g>
+				);
+			})}
+			<text class="t b" x="150" y="350" text-anchor="middle">...</text>
+			<text class="t b bad-t" x="150" y="388" text-anchor="middle">You, in every round trip</text>
 		</g>
 	</svg>
-	<svg class="dg" viewBox="0 0 300 280" width="100%" aria-hidden="true">
+	<svg class="dg" viewBox="0 0 300 400" width="100%" aria-hidden="true">
 		<g filter={wobble ? `url(#${fid})` : undefined}>
 			<text class="t b" x="10" y="22">Delegating</text>
-			<g transform="rotate(-3 60 100)">
-				<rect class="acc line" x="10" y="40" width="112" height="100" />
-				{card.map((k, i) => <text class="t" x="20" y={68 + i * 28}>{k}</text>)}
+			<text class="t muted" x="10" y="44">you give the goal, once</text>
+			<g transform="rotate(-3 58 110)">
+				<rect class="acc line" x="6" y="62" width="104" height="96" />
+				{card.map((k, i) => <text class="t" x="16" y={88 + i * 28}>{k}</text>)}
 			</g>
-			<path class="line" d="M126 90 L156 90" marker-end={`url(#${fid}-a)`} />
-			<rect class="paper line" x="162" y="40" width="128" height="100" />
-			<text class="t b" x="226" y="68" text-anchor="middle">AI</text>
-			<text class="t" x="226" y="94" text-anchor="middle">plans, works,</text>
-			<text class="t" x="226" y="116" text-anchor="middle">checks itself</text>
-			<path class="line" d="M226 144 L226 190" marker-end={`url(#${fid}-a)`} />
-			<rect class="paper line" x="150" y="198" width="140" height="44" />
-			<text class="t b" x="166" y="226">Result</text>
-			<circle class="good line" cx="264" cy="220" r="13" />
-			<path class="tick w" d="M257 220 l5 5 l9 -10" />
-			<text class="t muted" x="10" y="226">You check it</text>
-			<path class="line thin" d="M108 221 L144 221" marker-end={`url(#${fid}-a)`} />
-			<text class="t b good-t" x="150" y="270" text-anchor="middle">You manage the result</text>
+			<path class="line" d="M112 88 L150 76" marker-end={`url(#${fid}-a)`} />
+			{loop.map((s, i) => (
+				<g>
+					<rect class="paper line" x="156" y={s.y} width="100" height="44" />
+					<text class="t b" x="206" y={s.y + 28} text-anchor="middle">{s.t}</text>
+					{i < 2 && <path class="line" d={`M206 ${s.y + 46} L206 ${s.y + 64}`} marker-end={`url(#${fid}-a)`} />}
+				</g>
+			))}
+			<path class="line" d="M206 234 L206 250" marker-end={`url(#${fid}-a)`} />
+			<path class="acc line" d="M206 256 L246 286 L206 316 L166 286 Z" />
+			<text class="t b" x="206" y="292" text-anchor="middle">Done?</text>
+			<path class="line bad-s" d="M246 286 L288 286 L288 74 L262 74" marker-end={`url(#${fid}-r)`} />
+			<text class="t b bad-t" x="294" y="182" text-anchor="end" transform="rotate(-90 284 182)">No</text>
+			<path class="line good-s" d="M166 286 L120 286 L120 334" marker-end={`url(#${fid}-g)`} />
+			<text class="t b good-t" x="132" y="278">Yes</text>
+			<rect class="paper line good-s" x="40" y="340" width="120" height="44" />
+			<text class="t b" x="100" y="368" text-anchor="middle">Result</text>
+			<text class="t b good-t" x="172" y="368">you review</text>
 		</g>
 	</svg>
 </div>
 <style>
 	.dg-pair { display: flex; gap: 1rem; font-family: var(--dg-font, system-ui, sans-serif); }
 	.dg-pair > svg { flex: 1 1 0; min-width: 0; }
+	@media (max-width: 40rem) { .dg-pair > svg { max-width: 22rem; margin: 0 auto; } }
 	@media (max-width: 40rem) { .dg-pair { flex-direction: column; } .dg-pair > svg { flex: none; } }
 	.dg { display: block; width: 100%; height: auto; }
 	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
@@ -67,6 +88,9 @@ const card = ['Goal', 'Context', 'Done when'];
 	.b { font-weight: 700; }
 	.muted { fill: var(--dg-muted, #5b6573); }
 	.good-t { fill: var(--dg-good, #2e8b57); }
+	.badf { fill: var(--dg-bad, #c0392b); }
+	.bad-s { stroke: var(--dg-bad, #c0392b); }
+	.good-s { stroke: var(--dg-good, #2e8b57); }
 	.bad-t { fill: var(--dg-bad, #c0392b); }
 	rect { rx: var(--dg-radius, 8px); }
 </style>
