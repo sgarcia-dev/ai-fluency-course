@@ -52,7 +52,7 @@ const card = ['Goal', 'Context', 'Done when'];
 <style>
 	.dg-pair { display: flex; gap: 1rem; font-family: var(--dg-font, system-ui, sans-serif); }
 	.dg-pair > svg { flex: 1 1 0; min-width: 0; }
-	@media (max-width: 40rem) { .dg-pair { flex-direction: column; } }
+	@media (max-width: 40rem) { .dg-pair { flex-direction: column; } .dg-pair > svg { flex: none; } }
 	.dg { display: block; width: 100%; height: auto; }
 	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
 	.thin { stroke-width: 2; }

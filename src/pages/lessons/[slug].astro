@@ -187,12 +187,13 @@ const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l
 	.diagram{margin:1.5rem 0;padding:1rem;border:3px solid #0A0A0A}
 	.worked{margin:2.5rem 0}
 	.wsteps{list-style:none;padding:0;margin:1rem 0 0;display:grid;gap:1.25rem}
+	.wsteps > li{min-width:0}
 	.bubble{border:3px solid #0A0A0A;padding:.75rem 1rem;margin:.5rem 0}
 	.bubble.you{background:#FFFBE0}
 	.bubble.ai{background:#fff;margin-left:1.5rem}
 	.bubble .who{margin:0 0 .25rem;font-size:.75rem}
 	.pre{white-space:pre-wrap;margin:0}
-	.worked pre{background:#0A0A0A;color:#F2F0EA;padding:1rem;overflow-x:auto;font:400 .9rem/1.5 'JetBrains Mono',monospace;margin:.5rem 0}
+	.worked pre{max-width:100%;background:#0A0A0A;color:#F2F0EA;padding:1rem;overflow-x:auto;font:400 .9rem/1.5 'JetBrains Mono',monospace;margin:.5rem 0}
 	.note{font-size:.95rem;color:#3F3F3F;margin:.4rem 0 0}
 
 	.diagram :global(svg){width:100%;height:auto;display:block}
