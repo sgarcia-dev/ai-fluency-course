@@ -1,9 +1,9 @@
 ---
 // Renders the drawn diagram for a lesson slug, or nothing if none exists.
-// Each diagram lives in ./by-slug/<lesson slug>.astro and takes an optional `wobble` prop.
-interface Props { slug: string; wobble?: boolean }
-const { slug, wobble = false } = Astro.props;
+// Each diagram lives in ./by-slug/<lesson slug>.astro (extra ones: <slug>--<id>.astro) and takes an optional `wobble` prop.
+interface Props { slug: string; id?: string; wobble?: boolean }
+const { slug, id, wobble = false } = Astro.props;
 const diagrams = import.meta.glob<{ default: any }>('./by-slug/*.astro', { eager: true });
-const Drawn = diagrams[`./by-slug/${slug}.astro`]?.default;
+const Drawn = diagrams[`./by-slug/${id ? `${slug}--${id}` : slug}.astro`]?.default;
 ---
 {Drawn && <Drawn wobble={wobble} />}

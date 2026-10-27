@@ -11,11 +11,11 @@ const lineInfo = Object.fromEntries(paths.map((p) => [p.id, { name: p.name, colo
 const data = { lessons, lines: lineInfo };
 const sampleCards = samples.map((s) => ({ ...stop(s.n), ids: paths.filter((p) => p.lessons.includes(s.n)).map((p) => p.id) }));
 const most = [
-	'Most AI courses: one long course for everyone.',
-	'Most AI courses: built around one app that changes every few months.',
-	'Most AI courses: hours of video before you try anything.',
-	'Most AI courses: always reach for the biggest, priciest model.',
-	'Most AI courses: a paywall or an upsell at the end.',
+	'One long course for everyone, whatever you already know.',
+	'Built around one app, so it goes stale in a few months.',
+	'Hours of video before you try anything yourself.',
+	'Reaching for the biggest, priciest model by default.',
+	'A paywall or an upsell waiting at the end.',
 ];
 const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 ---
@@ -104,11 +104,11 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 	</section>
 	<section class="wrap" aria-labelledby="diff-h">
 		<h2 id="diff-h">How it is different</h2>
-		<p class="lede">Tap a card to compare.</p>
+		<p class="lede">Here are a few mistakes I see AI courses and trainings make, and what this one does instead. Tap a card to flip it.</p>
 		<ul class="diff">{site.different.map((d, i) => (
 			<li><button type="button" class="flip lift" aria-pressed="false">
-				<span class="face a"><span class="mono">Most AI courses</span><span class="ft">{most[i] ?? ''}</span></span>
-				<span class="face b"><span class="mono">This one</span><span class="ft display">{d.title}</span><span>{d.body}</span></span>
+				<span class="face a"><span class="mono">The mistake</span><span class="ft">{most[i] ?? ''}</span></span>
+				<span class="face b"><span class="mono">What this one does</span><span class="ft display">{d.title}</span><span>{d.body}</span></span>
 			</button></li>
 		))}</ul>
 	</section>

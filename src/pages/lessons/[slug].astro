@@ -30,6 +30,12 @@ const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l
 					<figcaption>{lesson.diagram.caption}</figcaption>
 				</figure>
 			)}
+			{(lesson.figures ?? []).filter((f) => f.afterSection === i).map((f) => (
+				<figure class="diagram" style="--dg-ink:#0A0A0A;--dg-paper:#FFFFFF;--dg-accent:#FFD400;--dg-good:#1A34B0;--dg-bad:#D9411C;--dg-muted:#4a4a4a;--dg-pair:#FF6A44;--dg-stroke:3;--dg-radius:0px;--dg-font:'Space Grotesk',sans-serif">
+					<Diagram slug={lesson.slug} id={f.id} />
+					<figcaption>{f.caption}</figcaption>
+				</figure>
+			))}
 		</section>
 	))}
 
@@ -51,6 +57,23 @@ const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l
 					</div>
 				);
 			})}
+		</section>
+	)}
+
+	{lesson.worked && (
+		<section class="worked">
+			<p class="mono">Worked example</p>
+			<h2>{lesson.worked.title}</h2>
+			<p>{lesson.worked.intro}</p>
+			<ol class="wsteps">{lesson.worked.steps.map((st) => (
+				<li>
+					<p class="mono lbl">{st.label}</p>
+					{st.you && <div class="bubble you"><p class="mono who">You</p><p class="pre">{st.you}</p></div>}
+					{st.ai && <div class="bubble ai"><p class="mono who">AI</p><p class="pre">{st.ai}</p></div>}
+					{st.code && <pre><code>{st.code}</code></pre>}
+					{st.note && <p class="note">{st.note}</p>}
+				</li>
+			))}</ol>
 		</section>
 	)}
 
@@ -162,6 +185,16 @@ const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l
 	.idea{border:3px solid #0A0A0A;background:#FFD400;padding:.8rem 1rem}
 	.idea p{margin:0}.idea p+p{font-size:1.2rem;font-weight:500;margin-top:.3rem}
 	.diagram{margin:1.5rem 0;padding:1rem;border:3px solid #0A0A0A}
+	.worked{margin:2.5rem 0}
+	.wsteps{list-style:none;padding:0;margin:1rem 0 0;display:grid;gap:1.25rem}
+	.bubble{border:3px solid #0A0A0A;padding:.75rem 1rem;margin:.5rem 0}
+	.bubble.you{background:#FFFBE0}
+	.bubble.ai{background:#fff;margin-left:1.5rem}
+	.bubble .who{margin:0 0 .25rem;font-size:.75rem}
+	.pre{white-space:pre-wrap;margin:0}
+	.worked pre{background:#0A0A0A;color:#F2F0EA;padding:1rem;overflow-x:auto;font:400 .9rem/1.5 'JetBrains Mono',monospace;margin:.5rem 0}
+	.note{font-size:.95rem;color:#3F3F3F;margin:.4rem 0 0}
+
 	.diagram :global(svg){width:100%;height:auto;display:block}
 	figcaption{font-weight:700;margin-top:.6rem}
 	.wline{margin:0 0 .6rem}
