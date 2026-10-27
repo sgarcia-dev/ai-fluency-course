@@ -19,8 +19,8 @@ export const worlds = [
 ] as const;
 
 export const site = {
-	name: 'AI, Plainly',
-	nameNote: 'Working name. The old course was called AI Fluency.',
+	name: 'Your AI Path',
+	nameNote: 'Working title.',
 	tagline: 'Start where you are.',
 	pitch:
 		'Short lessons on using AI well, in any tool. Tell it where you are starting, and it shows you only what you need.',
