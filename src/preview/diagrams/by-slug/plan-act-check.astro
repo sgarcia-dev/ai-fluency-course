@@ -1,83 +1,67 @@
 ---
-// Plan, act, check: the agent loop, with the two places you step in.
+// Plan, act, check: the loop with its real exit test, and the two places you step in.
 import { samples } from '../../content';
 interface Props { wobble?: boolean }
 const { wobble = false } = Astro.props;
 const label = samples.find((s) => s.slug === 'plan-act-check')?.diagram.describe ?? '';
 const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
-// Loop center and radius
-const cx = 150, cy = 170, r = 70;
-const pt = (deg: number, rr = r) => {
-	const a = (deg * Math.PI) / 180;
-	return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr];
-};
-const arc = (a1: number, a2: number) => {
-	const [x1, y1] = pt(a1);
-	const [x2, y2] = pt(a2);
-	return `M${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2}`;
-};
-const head = (deg: number) => {
-	const [x, y] = pt(deg);
-	const a = ((deg + 90) * Math.PI) / 180;
-	const p = (d: number, o: number) => `${x - Math.cos(a) * d - Math.sin(a) * o},${y - Math.sin(a) * d + Math.cos(a) * o}`;
-	return `${x},${y} ${p(14, 7)} ${p(14, -7)}`;
-};
-// Plan top (270), Act right-bottom (30), Check left-bottom (150)
-const segs = [[285, 15], [45, 135], [165, 255]];
-const spiral = Array.from({ length: 60 }, (_, i) => {
-	const t = i / 59 * Math.PI * 5;
-	const rr = 3 + i * 0.35;
-	return `${i ? 'L' : 'M'}${318 + Math.cos(t) * rr},${262 + Math.sin(t) * rr}`;
-}).join(' ');
+const x = 220; // center column
+const steps = [{ t: 'Plan', y: 20 }, { t: 'Act', y: 100 }, { t: 'Check', y: 180 }];
 ---
-<div class="dg-pair" role="img" aria-label={label}>
-	<svg class="dg" viewBox="0 0 380 340" width="100%" aria-hidden="true">
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 470 430" width="100%" aria-hidden="true">
 		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
 		<g filter={wobble ? `url(#${fid})` : undefined}>
-			{segs.map(([a, b]) => <path class="line" d={arc(a, b)} />)}
-			{segs.map(([, b]) => <polygon class="acc line" points={head(b)} />)}
-			<rect class="paper line" x={cx - 26} y={cy - 18} width="52" height="36" />
-			<text class="t b" x={cx} y={cy + 6} text-anchor="middle">AI</text>
-			<text class="t b" x={cx} y={cy - r - 12} text-anchor="middle">Plan</text>
-			<text class="t b" x={cx + 72} y={cy + 72}>Act</text>
-			<text class="t b" x={cx - 104} y={cy + 72}>Check</text>
-			<!-- You flag at Plan -->
-			<path class="line thin" d="M186 82 L186 40" />
-			<rect class="acc line thin" x="186" y="16" width="150" height="44" />
-			<text class="t b" x="194" y="34">You:</text>
-			<text class="t" x="194" y="53">approve the plan</text>
-			<!-- You flag at Check -->
-			<path class="line thin" d="M60 214 L28 214 L28 120" />
-			<rect class="acc line thin" x="4" y="76" width="112" height="44" />
-			<text class="t b" x="12" y="94">You:</text>
-			<text class="t" x="12" y="113">define done</text>
-			<!-- Exit through Check -->
-			<path class="line" d="M70 250 L70 290" />
-			<polygon class="good line" points="70,302 63,288 77,288" />
-			<rect class="good line" x="34" y="304" width="74" height="30" />
-			<text class="t b on-good" x="71" y="325" text-anchor="middle">Done</text>
-			<!-- Off track spiral from Act -->
-			<path class="line dash" d="M222 208 L290 250" />
-			<path class="bad-line" d={spiral} />
-			<text class="t b bad-t" x="250" y="310">Off track:</text>
-			<text class="t bad-t" x="230" y="330">stop, narrow it</text>
+			{steps.map((s) => (<g><rect class="paper line" x={x - 70} y={s.y} width="140" height="46" /><text class="t b" x={x} y={s.y + 30} text-anchor="middle">{s.t}</text></g>))}
+			<path class="line" d={`M${x} 66 L${x} 90`} /><polygon class="ink" points={`${x},98 ${x - 7},86 ${x + 7},86`} />
+			<path class="line" d={`M${x} 146 L${x} 170`} /><polygon class="ink" points={`${x},178 ${x - 7},166 ${x + 7},166`} />
+			<path class="line" d={`M${x} 226 L${x} 244`} /><polygon class="ink" points={`${x},252 ${x - 7},240 ${x + 7},240`} />
+			<!-- decision -->
+			<polygon class="acc line" points={`${x},252 ${x + 80},295 ${x},338 ${x - 80},295`} />
+			<text class="t b" x={x} y="301" text-anchor="middle">Passes?</text>
+			<!-- yes -->
+			<path class="good-l" d={`M${x} 338 L${x} 370`} /><polygon class="good" points={`${x},380 ${x - 8},366 ${x + 8},366`} />
+			<text class="t b good-t" x={x + 10} y="362">Yes</text>
+			<rect class="good line" x={x - 70} y="380" width="140" height="44" />
+			<text class="t b w" x={x} y="409" text-anchor="middle">Done</text>
+			<!-- no: back to plan with the error -->
+			<path class="bad-l" d={`M${x - 80} 295 L50 295 L50 43 L${x - 82} 43`} />
+			<polygon class="bad" points={`${x - 72},43 ${x - 86},36 ${x - 86},50`} />
+			<text class="t b bad-t" x="62" y="285">No</text>
+			<text class="t bad-t" transform="translate(40 250) rotate(-90)">error feeds next plan</text>
+			<!-- you flags -->
+			<path class="line thin" d={`M${x + 70} 43 L320 43`} />
+			<rect class="you line thin" x="320" y="14" width="146" height="58" />
+			<text class="t b" x="330" y="38">You:</text><text class="t" x="330" y="60">approve plan</text>
+			<path class="line thin" d={`M${x + 70} 203 L320 203`} />
+			<rect class="you line thin" x="320" y="174" width="146" height="58" />
+			<text class="t b" x="330" y="198">You:</text><text class="t" x="330" y="220">write the check</text>
+			<!-- off track -->
+			<path class="bad-l dash" d={`M${x + 80} 295 L330 295`} />
+			<text class="t b bad-t" x="336" y="280">Same error</text>
+			<text class="t b bad-t" x="336" y="300">twice? Stop,</text>
+			<text class="t b bad-t" x="336" y="320">narrow it.</text>
 		</g>
 	</svg>
 </div>
 <style>
-	.dg-pair { display: flex; gap: 1rem; font-family: var(--dg-font, system-ui, sans-serif); }
-	.dg-pair > svg { flex: 1 1 0; min-width: 0; }
+	.dg-wrap { max-width: 36rem; font-family: var(--dg-font, system-ui, sans-serif); }
 	.dg { display: block; width: 100%; height: auto; }
 	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
 	.thin { stroke-width: 1.5; }
-	.dash { stroke-dasharray: 5 6; stroke: var(--dg-bad, #c0392b); }
-	.bad-line { stroke: var(--dg-bad, #c0392b); stroke-width: var(--dg-stroke, 2.5); fill: none; stroke-linecap: round; }
+	.good-l { stroke: var(--dg-good, #2e8b57); stroke-width: 3.5; fill: none; }
+	.bad-l { stroke: var(--dg-bad, #c0392b); stroke-width: 3.5; fill: none; stroke-linejoin: round; }
+	.dash { stroke-dasharray: 6 6; }
 	.paper { fill: var(--dg-paper, #fff); }
-	.acc { fill: var(--dg-accent, #f2c14e); }
+	.acc { fill: var(--dg-paper, #fff); }
+	.you { fill: var(--dg-accent, #f2c14e); }
+	.ink { fill: var(--dg-ink, #1f2a37); }
 	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
 	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
 	.b { font-weight: 700; }
-	.on-good { fill: var(--dg-paper, #fff); }
+	.w { fill: var(--dg-paper, #fff); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
 	.bad-t { fill: var(--dg-bad, #c0392b); }
 	rect { rx: var(--dg-radius, 8px); }
 </style>

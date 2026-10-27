@@ -4,44 +4,66 @@ export const lesson: Lesson = {
 	n: 30,
 	slug: 'plan-act-check',
 	title: 'Plan, act, check',
-	idea: 'Every coding agent runs the same loop. You get the most control for the least effort at two spots: the plan, and the check that decides "done".',
-	minutes: 9,
+	idea: 'A coding agent loops plan, act, check until the check passes. Approve the plan and write the check yourself, because a check that can fail is what makes the loop safe.',
+	minutes: 10,
 	sections: [
 		{
 			heading: 'The loop under the hood',
 			body: [
-				'A coding agent is an AI that can read files, edit them and run commands on its own. Strip away the interface and it does one thing over and over: read the code, make a plan, edit files, run something, read the result, and go again.',
-				'That loop is why an agent can do an hour of work in five minutes, or an hour of damage. It cannot tell which. It only knows what you told it and what the last command printed.',
+				'A coding agent is an AI that can read files, edit them and run commands on its own. You already know how to hand it a job. This lesson is about what it does next: plan, edit files, run something, read the result, and decide whether to go again.',
+				'That last decision is the whole game. The agent stops when it believes it is done. If "done" means "I feel good about it", you get an hour of work in five minutes, or an hour of damage, and it cannot tell which.',
 			],
 		},
 		{
-			heading: 'Two cheap places to step in',
+			heading: 'Step in twice, not fifty times',
 			body: [
-				'You could watch every edit. You will not. Instead, step in at the two spots where a minute of your time saves the most.',
-				'First, the plan. Ask the agent to say what it will change, and in which files, before it touches anything. Reading five lines of plan is much cheaper than reading five hundred lines of diff (the list of changed lines). A wrong plan caught here costs nothing.',
-				'Second, the check. You decide what "done" means, ideally as tests or a command that passes or fails. "Done when: the test suite passes and the new test for empty input passes." Now the agent has a finish line it cannot argue with, and so do you.',
+				'You will not watch every edit. Instead, step in at two spots. First, the plan: ask what it will change, and in which files, before it touches anything. Five lines of plan are much cheaper to read than five hundred lines of diff (the list of changed lines).',
+				'Second, the check: you decide what "done" means, as a command that passes or fails. Now the loop has a real exit. Each failed run prints an error, and that error is what the next plan works from.',
 			],
 		},
 		{
-			heading: 'Signs the loop is off track',
+			heading: 'The check is what makes the loop safe.',
 			body: [
-				'It keeps "fixing" the same error, each time with total confidence. It edits the tests so they pass, instead of fixing the code. It wanders into files that have nothing to do with the task. The plan keeps growing: one small fix has become a refactor (a rewrite of how the code is organized) of half the project.',
-				'None of these fix themselves. More loops usually means more mess, just faster.',
+				'A good check for code is a command with a yes or no answer: the tests, the type check, the build, or a small script that reproduces the bug. "npm test -- date-filter" is a check. "Make sure it works" is not.',
+				'The agent saying "I verified it" is not a check either. It may have run nothing, run the wrong thing, or read a failure as a pass. Ask for the command and its output, every loop, not only at the end. A fix for one thing often breaks another, and the next run is where you find out.',
 			],
 		},
 		{
-			heading: 'How to pull it back',
+			heading: 'Make it fail first.',
 			body: [
-				'Stop it. Then narrow the task to the smallest piece that is still useful. Restate the done-when check in plain words, including what must not change, like "do not edit the tests".',
-				'If the session is long and tangled, start a fresh one. Give it a short summary: the goal, what you tried, what failed, and the check. A clean start with a good summary beats a long chat full of wrong turns.',
+				'A test that passed before the fix proves nothing. Have the agent write the test first and show it failing for the reason you expect. Then you know the check can say no, and a later yes means something.',
+				'The same goes for the rules around the check. The agent must not edit, skip or loosen a test to get to green. If it wants to, that is a sign it is stuck, not a shortcut.',
+			],
+		},
+		{
+			heading: 'What a check cannot catch',
+			body: [
+				'Tests only check what someone thought to test. They will not tell you the fix is slow, copies code that already exists, logs a password, or quietly changes a file outside the task. So you still read the diff. The check means you read it once, at the end, knowing it works, instead of guessing.',
+				'And some jobs have no clean command, like "make this page look nicer". There the check is you, looking at it. Say so in the task, so the agent stops and shows you instead of declaring victory.',
+			],
+		},
+		{
+			heading: 'When the loop goes off track',
+			body: [
+				'Watch for these: the same error twice, each "fix" made with total confidence. A wish to change the test. Edits in files unrelated to the task. A plan that keeps growing. More loops will not fix any of these. They only make the mess faster.',
+				'Stop it. Narrow the task to the smallest useful piece and restate the check, including what must not change. If the session is long and tangled, start fresh with a short summary: goal, what failed, and the check.',
 			],
 		},
 	],
 	diagram: {
-		caption: 'The agent loops. You approve the plan and you define done.',
+		caption: 'The loop exits only when the check passes. You approve the plan and write the check.',
 		describe:
-			'A loop of three arrows around a box labeled "AI": Plan, then Act, then Check, then back to Plan. A small flag labeled "You: approve the plan" sits at Plan. Another flag labeled "You: define done" sits at Check. The only exit arrow leaves from Check and leads to a box labeled "Done". From Act, a red spiral branches off labeled "Off track", with a note "stop and narrow it".',
+			'A flowchart going down: Plan, Act, Check, then a diamond "Passes?". Yes leads down to a green "Done" box. No goes in red back up to Plan, labeled "error feeds next plan". Yellow notes beside Plan and Check say "You: approve plan" and "You: write the check". A dashed red line from the diamond says "Same error twice? Stop, narrow it."',
 	},
+	figures: [
+		{
+			id: 'proof',
+			afterSection: 2,
+			caption: 'If it cannot fail, it is not a check.',
+			describe:
+				'Two panels. Left, in red, "Not a check": the AI says "Fixed! I verified it works." Can it fail? No, it only says yes. Right, in green, "A check": a terminal running npm test, showing FAIL before the fix and PASS after. Can it fail? Yes, you saw it fail.',
+		},
+	],
 	examples: {
 		everyday: {
 			before: 'Sort out my photos folder.',
@@ -62,63 +84,49 @@ export const lesson: Lesson = {
 			why: '"Make sure it works" lets the agent decide when to stop. A plan you approve and a command that passes or fails put you in charge of both ends of the loop.',
 		},
 	},
+	compare: {
+		title: 'One bug, two ways',
+		intro: 'Bug: the date filter drops items from the last day of the month. Same agent, same codebase.',
+		afterSection: 3,
+		wrong: {
+			label: 'trust the agent',
+			steps: [
+				{ who: 'you', text: 'Fix the date filter bug.' },
+				{ who: 'ai', text: 'Edits three files, including the shared date utils. "Fixed! I tested it and it works now."' },
+				{ who: 'note', text: 'No plan to read. No command you can rerun. You skim, it looks fine, you ship.' },
+			],
+			outcome: 'A week later the end-of-month report breaks. The utils change shifted time zones.',
+		},
+		right: {
+			label: 'own the plan and the check',
+			steps: [
+				{ who: 'you', text: 'Plan first. Done when `npm test -- date-filter` passes. Write the failing test first.' },
+				{ who: 'ai', text: 'Plan: one file, dateFilter.ts, plus a test for Jan 31. Also tidy the date utils?' },
+				{ who: 'you', text: 'Skip the utils. Go.' },
+				{ who: 'check', text: 'FAIL: expected 1 item, got 0. Then, after the fix: PASS (6 tests).' },
+				{ who: 'ai', text: 'One old test fails on a time zone case. I could loosen it.' },
+				{ who: 'you', text: 'No. Do not change tests. Find the real cause.' },
+				{ who: 'check', text: 'PASS (7 tests). One file changed.' },
+			],
+			outcome: 'You read a small diff, once. The time zone bug was found before it shipped.',
+		},
+		takeaway: 'The hard way took less of your time today. The better way took about two minutes more, and the check did the watching.',
+	},
 	worked: {
-		title: 'One bug, start to finish',
-		intro: 'A real-sized task in a web app. Watch where you spend your minutes: the request, the plan, one stop. The agent does the rest.',
+		title: 'Save the rules once',
+		intro: 'You will fix many bugs. Put the plan and check rules in a skill file, so every bug fix starts the right way without you typing them.',
 		steps: [
 			{
-				label: '1. Ask, with a finish line',
-				you: 'Bug: the date filter drops items from the last day of the month. Before you edit anything, show me your plan. Done when: `npm test -- date-filter` passes, a new test covers this bug, and you touch no unrelated files.',
-			},
-			{
-				label: '2. The agent plans',
-				ai: 'Plan: 1) Read src/filters/dateFilter.ts and its test file. 2) Add a test for an item dated Jan 31. 3) Fix the end-of-range check. 4) Also tidy up the date utils while I am there.',
-			},
-			{
-				label: '3. You fix the plan in one line',
-				you: 'Skip step 4. Write the test first and show me it failing.',
-				note: 'Ten seconds of reading just saved you a surprise refactor.',
-			},
-			{
-				label: '4. Failing test, then passing',
-				code: `it('keeps items from the last day of the month', () => {
-  const items = [{ id: 1, date: '2026-01-31T18:00:00' }];
-  const result = filterByMonth(items, 2026, 1);
-  expect(result).toHaveLength(1);
-});
-
-$ npm test -- date-filter
-  FAIL  date-filter.test.ts
-  x keeps items from the last day of the month
-    Expected length: 1, Received length: 0
-
-# after the fix (range now ends at the end of Jan 31, not its start)
-$ npm test -- date-filter
-  PASS  date-filter.test.ts (6 tests)`,
-				note: 'The red run proves the test catches the bug. The green run proves the fix.',
-			},
-			{
-				label: '5. The off-track moment',
-				ai: 'One older test still fails on a time zone edge case. I can relax that assertion to compare dates only, and then everything passes.',
-			},
-			{
-				label: '6. Your stop line',
-				you: 'No. Do not change existing tests. Tell me why it fails and what you think the real fix is.',
-				note: 'Green tests only count if they are the tests you trust.',
-			},
-			{
-				label: '7. Save it as a skill',
-				code: `fix-a-bug.md
-
-When I ask you to fix a bug:
+				label: 'fix-a-bug.md',
+				code: `When I ask you to fix a bug:
 1. Reproduce it with a failing test first. Show me the failure.
 2. Give me a short plan (files, change, test) before any edits.
 3. Change only what the plan names.
-4. Run the check command I gave you and show the output.
+4. Run the check command after every change and show the output.
 5. Never weaken, skip or delete an existing test.
-6. If two attempts fail, stop and ask. Do not try a third.
+6. If the same error comes back twice, stop and ask.
 7. When done, list the files you changed.`,
-				note: 'Put a file like this in your tool\'s instructions or skills folder. Next bug, you say "fix this bug" and the rules come along.',
+				note: 'Put it in your tool\'s instructions or skills folder. Next time, "fix this bug" brings the rules along.',
 			},
 		],
 	},

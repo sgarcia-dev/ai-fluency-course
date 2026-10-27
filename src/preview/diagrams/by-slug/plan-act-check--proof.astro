@@ -1,0 +1,43 @@
+---
+// What counts as a check: the agent's word versus a command that can fail.
+import { samples } from '../../content';
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'plan-act-check')?.figures?.find((f) => f.id === 'proof')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 480 250" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b bad-t" x="115" y="26" text-anchor="middle">Not a check</text>
+			<rect class="paper line" x="10" y="44" width="210" height="80" />
+			<text class="t" x="24" y="76">AI: "Fixed! I</text>
+			<text class="t" x="24" y="100">verified it works."</text>
+			<text class="t bad-t b" x="115" y="166" text-anchor="middle">Can it fail?</text>
+			<text class="t bad-t" x="115" y="190" text-anchor="middle">No. It only says yes.</text>
+			<text class="t b good-t" x="365" y="26" text-anchor="middle">A check</text>
+			<rect class="term line" x="250" y="44" width="220" height="80" />
+			<text class="m" x="264" y="74">$ npm test</text>
+			<text class="m bad-t b" x="264" y="96">FAIL (before fix)</text>
+			<text class="m good-t b" x="264" y="116">PASS (after fix)</text>
+			<text class="t good-t b" x="360" y="166" text-anchor="middle">Can it fail?</text>
+			<text class="t good-t" x="360" y="190" text-anchor="middle">Yes. You saw it fail.</text>
+			<path class="line thin" d="M235 20 L235 230" />
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 36rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.thin { stroke-width: 1.5; stroke-dasharray: 5 6; }
+	.paper { fill: var(--dg-paper, #fff); }
+	.term { fill: var(--dg-paper, #fff); }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.m { fill: var(--dg-ink, #1f2a37); font-size: 16px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+	.b { font-weight: 700; }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
