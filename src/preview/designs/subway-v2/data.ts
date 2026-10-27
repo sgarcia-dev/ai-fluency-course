@@ -48,3 +48,21 @@ export const lines = paths.map((p) => ({
 	stops: p.lessons.map(stop), minutes: lineMinutes(p.lessons),
 	first: p.lessons.map(stop).find((s) => s.href)?.href ?? '',
 }));
+
+// v3 network map layout, computed from the data. Lessons left to right, one lane per line.
+export function network() {
+	const cw = 34, left = 24, top = 30, lane = 46, labelH = 190;
+	const order = allLessons.map((l) => l.n);
+	const x = (n: number) => left + order.indexOf(n) * cw + cw / 2;
+	const laneY = (i: number) => top + i * lane;
+	const width = left * 2 + order.length * cw;
+	const baseY = top + (paths.length - 1) * lane + 26;
+	const height = baseY + labelH;
+	const tracks = paths.map((p, i) => ({ id: p.id, name: p.name, color: colorFor(p.id), y: laneY(i), pts: p.lessons.map(x) }));
+	const stations = allLessons.map((l) => {
+		const on = paths.map((p, i) => (p.lessons.includes(l.n) ? i : -1)).filter((i) => i >= 0);
+		const ys = on.length ? on.map(laneY) : [laneY(0)];
+		return { n: l.n, title: l.title, x: x(l.n), y0: Math.min(...ys), y1: Math.max(...ys), lanes: on, ids: on.map((i) => paths[i].id) };
+	});
+	return { width, height, baseY, lane, tracks, stations, laneOf: Object.fromEntries(paths.map((p, i) => [p.id, laneY(i)])) };
+}

@@ -2,20 +2,21 @@
 import Diagram from '../../preview/diagrams/Diagram.astro';
 import Base from '../../preview/designs/subway-v2/Base.astro';
 import { site, samples, worlds } from '../../preview/content';
-import { lines, base } from '../../preview/designs/subway-v2/data';
+import { base, stop, colorFor } from '../../preview/designs/subway-v2/data';
+import { allLessons, paths } from '../../preview/content';
 export function getStaticPaths() {
 	return samples.map((s) => ({ params: { slug: s.slug }, props: { lesson: s } }));
 }
 const { lesson } = Astro.props;
-const strip = { current: lesson.n, lines: lines.map((l) => ({ id: l.id, name: l.name, color: l.color, stops: l.stops.map((s) => ({ n: s.n, title: s.title, href: s.href })) })) };
+const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l) => { const s = stop(l.n); return [l.n, { title: s.title, href: s.href }]; })), lines: Object.fromEntries(paths.map((p) => [p.id, { name: p.name, color: colorFor(p.id) }])) };
 ---
 <Base title={`${lesson.title} | ${site.name}`}>
-<nav class="strip" id="strip" data-strip={JSON.stringify(strip)} aria-label="Your line">
+<nav class="strip" id="strip" data-strip={JSON.stringify(strip)} aria-label="Your route">
 	<a href={`${base}#map`} class="mono">Map</a>
 	<ol class="sline"></ol>
 </nav>
 <main class="read">
-	<p class="mono">Stop {lesson.n} · {lesson.minutes} min read</p>
+	<p class="mono">{lesson.minutes} min read</p>
 	<h1>{lesson.title}</h1>
 	<aside class="idea"><p class="mono">The one idea</p><p>{lesson.idea}</p></aside>
 
@@ -69,7 +70,7 @@ const strip = { current: lesson.n, lines: lines.map((l) => ({ id: l.id, name: l.
 		<p class="explain" hidden>{lesson.check.explain}</p>
 	</section>
 
-	<p class="next"><span class="mono">Next stop</span> {lesson.next}</p>
+	<p class="next" id="next"><span class="mono">Next stop</span> <span id="nexttxt">{lesson.next}</span></p>
 	<p><a href={`${base}#map`}>Back to the map</a> · <a href={site.feedbackUrl}>Send feedback on this lesson</a></p>
 </main>
 
@@ -77,26 +78,39 @@ const strip = { current: lesson.n, lines: lines.map((l) => ({ id: l.id, name: l.
 	const nav = document.getElementById('strip')!;
 	const data = JSON.parse(nav.dataset.strip!);
 	const ol = nav.querySelector('ol')!;
-	let id = '';
-	try { id = localStorage.getItem('aip-path') || ''; } catch {}
-	const p = data.lines.find((x: any) => x.id === id && x.stops.some((s: any) => s.n === data.current));
-	if (p) {
-		nav.style.setProperty('--c', p.color);
-		const h = document.createElement('li'); h.className = 'lname mono'; h.textContent = p.name; ol.append(h);
-		for (const s of p.stops) {
-			const li = document.createElement('li');
-			const cur = s.n === data.current;
+	let segs: { line: string; lessons: number[] }[] = [];
+	try { segs = JSON.parse(localStorage.getItem('aip-route') || '[]'); } catch {}
+	const flat = Array.isArray(segs) ? segs.flatMap((g, si) => (g.lessons || []).map((n) => ({ n, si, line: g.line }))) : [];
+	const at = flat.findIndex((x) => x.n === data.current);
+	if (flat.length) {
+		const h = document.createElement('li'); h.className = 'lname mono';
+		h.textContent = at >= 0 ? `Stop ${at + 1} of ${flat.length}` : 'Not on your route'; ol.append(h);
+		flat.forEach((x, i) => {
+			const s = data.lessons[x.n]; if (!s) return;
+			const L = data.lines[x.line] || { color: '#0A0A0A' };
+			const li = document.createElement('li'); li.style.setProperty('--c', L.color);
+			if (i > 0 && flat[i - 1].si !== x.si) li.className = 'xfer';
+			const cur = i === at;
 			const el = document.createElement(s.href && !cur ? 'a' : 'span');
 			if (el instanceof HTMLAnchorElement) el.href = s.href;
-			el.className = 'sdot' + (cur ? ' cur' : '') + (s.href ? ' ready' : '');
-			el.title = `${s.n}. ${s.title}`;
-			el.setAttribute('aria-label', `Stop ${s.n}: ${s.title}${cur ? ', you are here' : ''}`);
+			el.className = 'sdot' + (cur ? ' cur' : '');
+			el.style.background = cur ? L.color : '#fff';
+			el.title = s.title;
+			el.setAttribute('aria-label', `${s.title}${cur ? ', you are here' : ''}`);
 			if (cur) el.setAttribute('aria-current', 'step');
 			li.append(el); ol.append(li);
-		}
+		});
+		const nx = at >= 0 ? flat[at + 1] : undefined;
+		const t = document.getElementById('nexttxt')!;
+		if (nx && data.lessons[nx.n]) {
+			const s = data.lessons[nx.n];
+			t.textContent = '';
+			if (s.href) { const a = document.createElement('a'); a.href = s.href; a.textContent = s.title; t.append(a); }
+			else t.textContent = `${s.title} (coming soon)`;
+		} else if (at === flat.length - 1) t.textContent = 'This is the last stop on your route. Well done.';
 	} else {
 		const li = document.createElement('li');
-		li.innerHTML = 'No line yet. <a href="/#pick">Find your line on the map</a>.';
+		li.innerHTML = 'No route yet. <a href="/#plan">Plan your route</a>';
 		ol.append(li);
 	}
 	// World switch
@@ -135,6 +149,7 @@ const strip = { current: lesson.n, lines: lines.map((l) => ({ id: l.id, name: l.
 	.sline li{display:flex;align-items:center}
 	.sline .lname{margin-right:.6rem}
 	.sline li+li:not(:nth-child(2))::before{content:"";width:.7rem;height:6px;background:var(--c);outline:1px solid #0A0A0A}
+	.sline li.xfer::before{width:1rem;background:#fff;border-left:3px solid #0A0A0A;border-right:3px solid #0A0A0A;outline:none}
 	.sdot{display:block;width:1rem;height:1rem;border-radius:50%;border:3px solid #0A0A0A;background:#fff}
 	a.sdot:hover{background:#FFD400}
 	.sdot.cur{width:1.6rem;height:1.6rem;background:var(--c);border-width:4px}

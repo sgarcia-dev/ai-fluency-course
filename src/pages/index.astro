@@ -1,9 +1,12 @@
 ---
 import Base from '../preview/designs/subway-v2/Base.astro';
-import Station from '../preview/designs/subway-v2/Station.astro';
-import { site } from '../preview/content';
-import { lines, goals } from '../preview/designs/subway-v2/data';
-const data = { lines: lines.map((l) => ({ id: l.id, name: l.name, color: l.color, ink: l.ink, count: l.stops.length, minutes: l.minutes, first: l.first, ns: l.stops.map((s) => s.n) })), goals };
+import { site, paths } from '../preview/content';
+import { goals } from '../preview/route';
+import { stop, colorFor, inkOn, network } from '../preview/designs/subway-v2/data';
+const N = network();
+const lessons = Object.fromEntries(N.stations.map((s) => [s.n, { ...stop(s.n), ids: s.ids }]));
+const lineInfo = Object.fromEntries(paths.map((p) => [p.id, { name: p.name, color: colorFor(p.id), ink: inkOn(p.id) }]));
+const data = { lessons, lines: lineInfo, laneOf: N.laneOf, xs: Object.fromEntries(N.stations.map((s) => [s.n, s.x])) };
 ---
 <Base title={`${site.name}: the map`}>
 <header class="hero wrap">
@@ -12,58 +15,71 @@ const data = { lines: lines.map((l) => ({ id: l.id, name: l.name, color: l.color
 	<p class="tag display">{site.tagline}</p>
 	<p class="pitch">{site.pitch}</p>
 	<p class="status"><span class="mono">Status</span> {site.status}</p>
-	<p><a class="btn ink" href="#pick">Find your line</a></p>
+	<p><a class="btn ink" href="#plan">Plan your route</a></p>
 </header>
 
-<main id="main" data-v2={JSON.stringify(data)}>
-	<section id="pick" class="wrap pick" aria-live="polite">
+<main id="main" data-v3={JSON.stringify(data)}>
+	<section id="plan" class="wrap pick" aria-live="polite">
 		<div class="step" id="step1">
 			<p class="mono">Step 1 of 2</p>
-			<h2>What do you want AI to help you with?</h2>
+			<h2>Where do you want to get to?</h2>
+			<p>Pick one to three.</p>
 			<ul class="goals">
-				{goals.map((g) => <li><button type="button" class="goal" data-goal={g.id}>{g.label}</button></li>)}
+				{goals.map((g) => <li><button type="button" class="goal" data-goal={g.id} aria-pressed="false">{g.label}</button></li>)}
 			</ul>
+			<p class="tk-act"><button type="button" class="btn ink" id="next1" disabled>Next</button> <span class="mono" id="count">0 of 3 picked</span></p>
 		</div>
 		<div class="step" id="step2" hidden>
 			<p class="mono">Step 2 of 2</p>
-			<h2>Which sounds most like you today?</h2>
-			<ul class="stories">
-				{lines.map((l) => (
-					<li><button type="button" class="story" data-path={l.id} style={`--c:${l.color}`}><span class="sw" aria-hidden="true"></span><q>{l.story}</q></button></li>
-				))}
-			</ul>
+			<h2>Where are you today?</h2>
+			<ul class="stories" id="stories"></ul>
 			<button type="button" class="linkbtn" id="back1">Back to step 1</button>
 		</div>
 		<div class="ticket" id="ticket" hidden>
-			<div class="tk-band" id="tk-band"><span class="mono">Your line</span><span class="tk-name display" id="tk-name"></span></div>
+			<div class="tk-band"><span class="mono">Your route</span><span class="tk-name display" id="tk-name" tabindex="-1">Ready to go</span></div>
 			<div class="tk-body">
+				<p id="tk-skip" class="mono" hidden></p>
+				<p><span class="mono">From</span><br /><span id="tk-from"></span></p>
+				<p><span class="mono">To</span><br /><span id="tk-to"></span></p>
 				<p class="mono" id="tk-meta"></p>
-				<p id="tk-goal"></p>
-				<p class="tk-act"><a class="btn ink" id="tk-start" href="#line">Start at stop 1</a> <button type="button" class="linkbtn" id="tk-change">Change</button></p>
+				<p id="tk-reason"></p>
+				<p class="tk-act"><a class="btn ink" id="tk-start" href="#stops">Start your route</a> <button type="button" class="linkbtn" id="tk-change">Change</button></p>
 			</div>
 		</div>
 	</section>
 
 	<section id="map" class="wrap map" aria-labelledby="map-h">
 		<h2 id="map-h">The map</h2>
-		<p class="lede">Four lines. Each is a path through the course. A lesson that fits more than one path is a stop on each line. Hover, focus or tap any stop to preview it.</p>
-		<div class="overview">
-			{lines.map((l) => (
-				<div class="row" data-line={l.id} style={`--c:${l.color}`}>
-					<p class="rname"><span class="mono">{l.stops.length} stops</span> {l.name}</p>
-					<ol class="track">{l.stops.map((s) => <Station s={s} line={`o-${l.id}`} />)}</ol>
-				</div>
-			))}
-		</div>
+		<p class="lede" id="legend">Each line is a path through the course. Where lines meet, they share a lesson. Hover, focus or tap any stop to preview it.</p>
+		<ul class="keys">{paths.map((p) => <li><span class="bar" style={`--c:${colorFor(p.id)}`} aria-hidden="true"></span>{p.name}</li>)}</ul>
+		<figure class="net" id="net">
+			<svg viewBox={`0 0 ${N.width} ${N.height}`} role="group" aria-label="Network map of all lessons">
+				<g class="tracks">
+					{N.tracks.map((t) => (
+						<polyline class="trk" data-line={t.id} points={`${Math.min(...t.pts)},${t.y} ${Math.max(...t.pts)},${t.y}`} stroke={t.color} stroke-width="10" fill="none" />
+					))}
+					{N.tracks.filter((t) => t.id === 'new').map((t) => (
+						<polyline class="trk edge" points={`${Math.min(...t.pts)},${t.y} ${Math.max(...t.pts)},${t.y}`} stroke="#0A0A0A" stroke-width="12" fill="none" />
+					))}
+				</g>
+				<g id="routeg"></g>
+				{N.stations.map((s) => (
+					<g class="st" tabindex="0" role="button" data-n={s.n} aria-label={`${s.title}. Preview`}>
+						{s.lanes.length > 1 ? (
+							<rect x={s.x - 10} y={s.y0 - 10} width="20" height={s.y1 - s.y0 + 20} fill="#fff" stroke="#0A0A0A" stroke-width="4" />
+						) : (
+							<circle cx={s.x} cy={s.y0} r="8" fill="#fff" stroke="#0A0A0A" stroke-width="4" />
+						)}
+						<text class="lbl" transform={`translate(${s.x + 4},${N.baseY}) rotate(60)`}>{s.title.length > 30 ? s.title.slice(0, 29) + '...' : s.title}</text>
+					</g>
+				))}
+			</svg>
+			<div class="card" id="card" role="tooltip" hidden></div>
+		</figure>
 
-		<div id="line" class="chosen">
-			<p class="empty" id="empty">Pick your line above, and it shows here, stop by stop.</p>
-			{lines.map((l) => (
-				<div class="route" data-line={l.id} style={`--c:${l.color};--k:${l.ink}`} hidden>
-					<h3><span class="bar" aria-hidden="true"></span>{l.name} line</h3>
-					<ol class="vline">{l.stops.map((s) => <Station s={s} line={`v-${l.id}`} big />)}</ol>
-				</div>
-			))}
+		<div id="stops" class="chosen" hidden>
+			<h3>Your stops</h3>
+			<ol class="vline" id="vlist"></ol>
 		</div>
 	</section>
 
@@ -88,70 +104,154 @@ const data = { lines: lines.map((l) => ({ id: l.id, name: l.name, color: l.color
 </main>
 
 <script>
+	import { goals, startsFor, planRoute } from '../preview/route';
 	const main = document.getElementById('main')!;
-	const D = JSON.parse(main.dataset.v2!);
+	const D = JSON.parse(main.dataset.v3!);
 	const $ = (id: string) => document.getElementById(id)!;
 	const get = (k: string) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } };
 	const set = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} };
-	let goal = get('aip-goal');
+	const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+	const NS = 'http://www.w3.org/2000/svg';
+	let picked: string[] = [];
+	try { picked = JSON.parse(get('aip-goals') || '[]').filter((g: string) => goals.some((x) => x.id === g)); } catch {}
 
 	function show(step: 'step1' | 'step2' | 'ticket') {
 		for (const s of ['step1', 'step2', 'ticket']) $(s).hidden = s !== step;
 	}
-	function render(pathId: string, scroll = false) {
-		const L = D.lines.find((l: any) => l.id === pathId);
-		if (!L) { show('step1'); return; }
-		const g = D.goals.find((x: any) => x.id === goal);
-		const hl: number[] = g ? g.tied.filter((n: number) => L.ns.includes(n)).slice(0, 3) : [];
-		$('tk-band').style.cssText = `background:${L.color};color:${L.ink}`;
-		$('tk-name').textContent = L.name;
-		$('tk-meta').textContent = `${L.count} stops · about ${Math.round(L.minutes / 5) * 5} minutes in all`;
-		$('tk-goal').textContent = g ? `You want to ${g.want}. ${hl.length ? 'The stops marked on your line help most with that.' : 'This line builds the skills for that.'}` : 'This line fits where you are today.';
-		const a = $('tk-start') as HTMLAnchorElement;
-		a.href = L.first || '#line';
-		show('ticket');
-		document.querySelectorAll<HTMLElement>('.route').forEach((r) => (r.hidden = r.dataset.line !== pathId));
-		document.querySelectorAll<HTMLElement>('.row').forEach((r) => r.classList.toggle('on', r.dataset.line === pathId));
-		document.querySelectorAll<HTMLElement>('.route .st').forEach((s) => s.classList.toggle('hl', hl.includes(Number(s.dataset.n))));
-		main.classList.add('picked');
-		$('empty').hidden = true;
-		if (scroll) $('ticket').scrollIntoView({ block: 'start' });
+	function syncGoals() {
+		document.querySelectorAll<HTMLButtonElement>('.goal').forEach((b) => {
+			const on = picked.includes(b.dataset.goal!);
+			b.setAttribute('aria-pressed', String(on));
+			b.disabled = !on && picked.length >= 3;
+		});
+		($('next1') as HTMLButtonElement).disabled = !picked.length;
+		$('count').textContent = `${picked.length} of 3 picked`;
 	}
 	document.querySelectorAll<HTMLButtonElement>('.goal').forEach((b) => b.addEventListener('click', () => {
-		goal = b.dataset.goal!;
-		set('aip-goal', goal);
-		const g = D.goals.find((x: any) => x.id === goal);
-		if (g) set('aip-world', g.world);
+		const g = b.dataset.goal!;
+		picked = picked.includes(g) ? picked.filter((x) => x !== g) : [...picked, g].slice(0, 3);
+		syncGoals();
+	}));
+	$('next1').addEventListener('click', () => {
+		const ss = startsFor(picked);
+		if (ss.length === 1) { plan(ss[0].id, true, true); return; }
+		const ul = $('stories'); ul.innerHTML = '';
+		for (const s of ss) {
+			const li = document.createElement('li');
+			const b = document.createElement('button'); b.type = 'button'; b.className = 'story';
+			b.innerHTML = `<q>${esc(s.story)}</q>`;
+			b.addEventListener('click', () => plan(s.id, true));
+			li.append(b); ul.append(li);
+		}
 		show('step2');
-		($('step2').querySelector('h2') as HTMLElement).setAttribute('tabindex', '-1');
-		($('step2').querySelector('h2') as HTMLElement).focus();
-	}));
-	document.querySelectorAll<HTMLButtonElement>('.story').forEach((b) => b.addEventListener('click', () => {
-		set('aip-path', b.dataset.path!);
-		render(b.dataset.path!, true);
-		$('tk-name').setAttribute('tabindex', '-1'); $('tk-name').focus();
-	}));
+		const h = $('step2').querySelector('h2') as HTMLElement; h.tabIndex = -1; h.focus();
+	});
 	$('back1').addEventListener('click', () => show('step1'));
-	$('tk-change').addEventListener('click', () => { show('step1'); (document.querySelector('.goal') as HTMLElement).focus(); });
-	render(get('aip-path'));
+	$('tk-change').addEventListener('click', () => { syncGoals(); show('step1'); (document.querySelector('.goal') as HTMLElement).focus(); });
 
-	// Preview cards: hover and focus are CSS. Tap toggles; Escape closes.
-	document.querySelectorAll<HTMLElement>('.st').forEach((st) => {
-		const b = st.querySelector('button')!;
-		b.addEventListener('click', () => {
-			const open = !st.classList.contains('open');
-			document.querySelectorAll('.st.open').forEach((x) => { x.classList.remove('open'); x.querySelector('button')!.setAttribute('aria-expanded', 'false'); });
-			st.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
+	function plan(startId: string, fresh: boolean, skipped = false) {
+		let r;
+		try { r = planRoute(picked, startId); } catch { show('step1'); return; }
+		if (fresh) {
+			set('aip-goals', JSON.stringify(picked)); set('aip-start', startId);
+			set('aip-route', JSON.stringify(r.segments)); set('aip-world', r.world);
+		}
+		const start = startsFor(picked).concat([]).find((s) => s.id === startId);
+		$('tk-skip').hidden = !skipped;
+		$('tk-skip').textContent = 'Your goal starts from the basics, so we start there too.';
+		$('tk-from').textContent = start ? start.story : '';
+		$('tk-to').textContent = picked.map((g) => goals.find((x) => x.id === g)!.label).join('; ');
+		$('tk-meta').textContent = `${r.lessons.length} stops · about ${r.minutes} minutes in all`;
+		$('tk-reason').textContent = r.reason;
+		const first = r.lessons.map((n) => D.lessons[n]).find((l: any) => l.href);
+		($('tk-start') as HTMLAnchorElement).href = first ? first.href : '#stops';
+		// List of stops by segment
+		const ol = $('vlist'); ol.innerHTML = '';
+		r.segments.forEach((seg, i) => {
+			const L = D.lines[seg.line];
+			if (i > 0) {
+				const li = document.createElement('li'); li.className = 'chg';
+				li.innerHTML = `<span class="mono">Change to the ${esc(L.name)} line</span>`;
+				li.style.setProperty('--c', L.color); ol.append(li);
+			}
+			for (const n of seg.lessons) {
+				const l = D.lessons[n];
+				const li = document.createElement('li'); li.className = 'vs'; li.style.setProperty('--c', L.color);
+				li.innerHTML = `<span class="vdot" aria-hidden="true"></span><span class="txt"><span class="t">${l.href ? `<a href="${l.href}">${esc(l.title)}</a>` : esc(l.title)}</span><span class="i">${esc(l.idea)}</span><span class="mono">${l.minutes || 10} min${l.href ? '' : ' · Coming soon'}</span></span>`;
+				ol.append(li);
+			}
 		});
-		st.addEventListener('keydown', (e) => { if (e.key === 'Escape') { st.classList.add('shut'); b.focus(); } });
-		st.addEventListener('focusout', () => st.classList.remove('shut'));
-		st.addEventListener('mouseleave', () => st.classList.remove('shut'));
-	});
-	document.addEventListener('click', (e) => {
-		if (!(e.target as HTMLElement).closest('.st')) document.querySelectorAll('.st.open').forEach((x) => x.classList.remove('open'));
-	});
-</script>
+		$('stops').hidden = false;
+		drawRoute(r.segments);
+		show('ticket');
+		if (fresh) { $('plan').scrollIntoView({ block: 'start' }); $('tk-name').focus({ preventScroll: true }); }
+	}
 
+	function drawRoute(segs: { line: string; lessons: number[] }[]) {
+		const g = $('routeg'); g.innerHTML = '';
+		main.classList.add('routed');
+		$('legend').textContent = 'Your route is the thick line. Everything else is faded. Hover, focus or tap any stop to preview it.';
+		const on = new Set<number>();
+		let prev: [number, number] | null = null;
+		segs.forEach((seg, i) => {
+			const L = D.lines[seg.line];
+			const y = D.laneOf[seg.line];
+			const pts: [number, number][] = seg.lessons.map((n) => [D.xs[n], y]);
+			if (prev) pts.unshift(prev);
+			const pl = document.createElementNS(NS, 'polyline');
+			pl.setAttribute('points', pts.map((p) => p.join(',')).join(' '));
+			pl.setAttribute('stroke', L.color); pl.setAttribute('stroke-width', '16'); pl.setAttribute('fill', 'none');
+			pl.setAttribute('stroke-linejoin', 'round');
+			if (seg.line === 'new') { const o = pl.cloneNode() as SVGElement; o.setAttribute('stroke', '#0A0A0A'); o.setAttribute('stroke-width', '20'); g.append(o); }
+			g.append(pl);
+			if (i > 0) {
+				const [x0, y0] = pts[1];
+				const t = document.createElementNS(NS, 'text');
+				t.setAttribute('x', String(x0 + 12)); t.setAttribute('y', String(y0 - 14)); t.setAttribute('class', 'chgl');
+				t.textContent = 'change'; g.append(t);
+			}
+			seg.lessons.forEach((n) => on.add(n));
+			prev = pts[pts.length - 1];
+		});
+		document.querySelectorAll<SVGGElement>('.st').forEach((s) => s.classList.toggle('in', on.has(Number(s.dataset.n))));
+	}
+
+	// Preview card, shared by all stations. Hover, focus or tap opens it. Escape closes.
+	const card = $('card'); const net = $('net');
+	let pinned: SVGGElement | null = null;
+	function open(st: SVGGElement) {
+		const l = D.lessons[st.dataset.n!];
+		const names = l.ids.map((id: string) => D.lines[id].name);
+		const where = names.length > 1 ? `On the ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]} lines` : names.length ? `On the ${names[0]} line` : '';
+		card.innerHTML = `<p class="mono">${esc(where)} · ${l.minutes || 10} min</p><p class="ct">${esc(l.title)}</p><p>${esc(l.idea)}</p>${l.covers.length ? `<ul>${l.covers.map((c: string) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}${l.href ? `<a class="btn" href="${l.href}">Read sample</a>` : '<p class="mono soon">Coming soon</p>'}`;
+		card.hidden = false;
+		const nb = net.getBoundingClientRect(), sb = st.getBoundingClientRect();
+		const w = card.offsetWidth, vw = document.documentElement.clientWidth;
+		let left = sb.left + sb.width / 2 - w / 2;
+		left = Math.max(8, Math.min(left, vw - w - 8));
+		card.style.left = `${left - nb.left}px`;
+		card.style.top = `${sb.bottom - nb.top + 6}px`;
+	}
+	const close = () => { card.hidden = true; pinned = null; };
+	document.querySelectorAll<SVGGElement>('.st').forEach((st) => {
+		st.addEventListener('mouseenter', () => { if (!pinned) open(st); });
+		st.addEventListener('mouseleave', () => { if (!pinned && !card.matches(':hover')) setTimeout(() => { if (!pinned && !card.matches(':hover')) card.hidden = true; }, 150); });
+		st.addEventListener('focus', () => open(st));
+		st.addEventListener('click', (e) => { e.stopPropagation(); if (pinned === st) close(); else { pinned = st; open(st); } });
+		st.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pinned = st; open(st); const a = card.querySelector('a'); if (a) a.focus(); }
+			if (e.key === 'Escape') close();
+		});
+	});
+	card.addEventListener('mouseleave', () => { if (!pinned) card.hidden = true; });
+	card.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const s = pinned; close(); s?.focus(); } });
+	document.addEventListener('click', (e) => { if (!card.contains(e.target as Node)) close(); });
+
+	// Return visit: show the saved route directly.
+	syncGoals();
+	const savedStart = get('aip-start');
+	if (picked.length && savedStart && get('aip-route')) plan(savedStart, false, startsFor(picked).length === 1);
+</script>
 <style is:global>
 	.wrap{max-width:68rem;margin:0 auto;padding:3.5rem 1.25rem}
 	.hero{padding-top:4rem}
@@ -179,52 +279,44 @@ const data = { lines: lines.map((l) => ({ id: l.id, name: l.name, color: l.color
 	.tk-act{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}
 	.map{border-top:3px solid #0A0A0A}
 	.lede{max-width:40rem}
-	.overview{display:grid;gap:1.4rem;margin:2rem 0 3rem}
-	.row{opacity:.55}
-	.picked .row.on,.row:hover,.row:focus-within,main:not(.picked) .row{opacity:1}
-	.rname{margin:0 0 .3rem;font-weight:700}
-	.rname .mono{margin-right:.5rem}
-	.track{list-style:none;margin:0;padding:0;display:flex;justify-content:space-between;position:relative}
-	.track::before{content:"";position:absolute;left:10px;right:10px;top:13px;height:8px;background:var(--c);outline:1px solid #0A0A0A}
-	.st{position:relative}
-	.stb{position:relative;display:flex;flex-direction:column;align-items:center;gap:.2rem;background:none;border:0;padding:3px;cursor:pointer;color:#0A0A0A;font:inherit;text-align:left}
-	.dot{width:28px;height:28px;border-radius:50%;background:#fff;border:5px solid #0A0A0A}
-	.stb:hover .dot,.st.open .dot{background:#FFD400}
-	.num{font-size:.75rem}
-	.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-	.card{display:none;position:absolute;z-index:5;top:100%;left:50%;transform:translateX(-50%);width:18rem;max-width:80vw;background:#fff;border:3px solid #0A0A0A;box-shadow:4px 4px 0 #0A0A0A;padding:.8rem 1rem;font-size:.95rem}
-	.track .st:first-child .card,.track .st:nth-child(2) .card{left:0;transform:none}
-	.track .st:last-child .card,.track .st:nth-last-child(2) .card{left:auto;right:0;transform:none}
-	.st:hover .card,.st:focus-within .card,.st.open .card{display:block}
-	.st.shut .card{display:none}
+	.goal[aria-pressed=true]{background:#FFD400}
+	.goal:disabled{opacity:.45;cursor:not-allowed}
+	.btn:disabled{opacity:.45;cursor:not-allowed}
+	.tk-body p{margin:.6rem 0}
+	.keys{list-style:none;padding:0;margin:0 0 1rem;display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;font-weight:700}
+	.keys li{display:flex;align-items:center;gap:.5rem}
+	.bar{display:inline-block;width:2.5rem;height:12px;background:var(--c);outline:1px solid #0A0A0A}
+	.net{position:relative;margin:0 0 2.5rem}
+	.net svg{display:block;width:100%;height:auto}
+	.lbl{font:500 11px 'Space Grotesk',sans-serif;fill:#0A0A0A}
+	.chgl{font:700 12px 'JetBrains Mono',monospace;fill:#0A0A0A;paint-order:stroke;stroke:#fff;stroke-width:4px}
+	.st{cursor:pointer;outline:none}
+	.st:hover rect,.st:hover circle,.st:focus rect,.st:focus circle{fill:#FFD400}
+	.st:focus-visible rect,.st:focus-visible circle{stroke:#1A34B0}
+	.routed .tracks{opacity:.18}
+	.routed .st:not(.in){opacity:.3}
+	.routed .st.in .lbl{font-weight:700}
+	.card{position:absolute;z-index:5;width:18rem;max-width:calc(100vw - 16px);background:#fff;border:3px solid #0A0A0A;box-shadow:4px 4px 0 #0A0A0A;padding:.8rem 1rem;font-size:.95rem}
 	.card p{margin:0 0 .4rem}.ct{font-weight:700;font-size:1.05rem}
 	.card ul{margin:.2rem 0 .7rem;padding-left:1.1rem}
 	.soon{color:#3a3a3a}
-	.chosen h3{font-size:clamp(1.8rem,5vw,2.6rem);display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem}
-	.bar{width:2.5rem;height:14px;background:var(--c);outline:1px solid #0A0A0A}
-	.vline{list-style:none;margin:0;padding:0;position:relative}
-	.vline::before{content:"";position:absolute;left:21px;top:20px;bottom:20px;width:14px;background:var(--c);outline:1px solid #0A0A0A}
-	.vline .st{padding:.5rem 0}
-	.vline .stb{flex-direction:row;align-items:flex-start;gap:1rem;width:100%;max-width:44rem}
-	.vline .dot{flex:none;width:42px;height:42px;border-width:6px;margin-left:7px}
-	.vline .num{position:absolute;left:3px;top:52px;width:56px;text-align:center}
-	.txt{display:flex;flex-direction:column;padding-top:.3rem}
-	.txt .t{font:900 1.3rem/1.2 'Fraunces',serif;letter-spacing:-.01em}
+	.chosen h3{font-size:clamp(1.8rem,5vw,2.6rem);margin-bottom:1.2rem}
+	.vline{list-style:none;margin:0;padding:0;max-width:44rem}
+	.vs{display:flex;gap:1rem;padding:.5rem 0 .5rem 1rem;border-left:14px solid var(--c);outline-offset:0;position:relative}
+	.vdot{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;border:5px solid #0A0A0A;margin-left:-34px;margin-top:.2rem}
+	.chg{border-left:14px dashed var(--c);padding:.6rem 0 .6rem 1rem}
+	.chg .mono{background:var(--c);color:#fff;padding:.15rem .5rem;border:2px solid #0A0A0A;color:#0A0A0A;background:#fff}
+	.txt{display:flex;flex-direction:column}
+	.txt .t{font:900 1.25rem/1.2 'Fraunces',serif;letter-spacing:-.01em}
 	.txt .i{color:#333}
-	.goalmark{display:none;align-self:flex-start;margin-top:.3rem;background:#FFD400;border:2px solid #0A0A0A;padding:.1rem .4rem;font-size:.7rem}
-	.st.hl .goalmark{display:inline-block}
-	.st.hl .dot{background:#FFD400}
-	.vline .card{left:4.5rem;transform:none;top:calc(100% - .4rem)}
 	.diff{list-style:none;padding:0;margin:0;display:grid;gap:1.2rem;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr))}
 	.diff li{border:3px solid #0A0A0A;padding:1rem}
 	.diff h3{font-size:1.4rem;margin-bottom:.4rem}
 	.prose p{max-width:40rem;font-size:1.1rem}
-	@media (max-width:40rem){
-		.picked .overview{display:none}
-		.overview .row{overflow:hidden}
-		.overview .card{display:none!important}
-		.track .dot{width:20px;height:20px;border-width:4px}.track::before{top:9px;height:6px}.track .stb{padding:1px}
-		.vline .card{left:0;width:auto;right:0;max-width:none}
+	@media (max-width:48rem){
+		.map{display:flex;flex-direction:column}
+		#stops{order:-1;margin-bottom:2rem}
+		.lbl{font-size:13px}
 	}
 </style>
 </Base>
