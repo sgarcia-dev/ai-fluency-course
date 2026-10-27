@@ -14,7 +14,8 @@
       "Why it guesses instead of looking things up",
       "Why it is not a person, even when it sounds like one"
      ],
-     "minutes": 6
+     "minutes": 6,
+     "needs": []
     },
     {
      "n": 2,
@@ -26,7 +27,10 @@
       "How to ask follow-up questions to get it right",
       "What a good back-and-forth feels like"
      ],
-     "minutes": 6
+     "minutes": 6,
+     "needs": [
+      1
+     ]
     },
     {
      "n": 3,
@@ -38,7 +42,10 @@
       "Which kinds of details to keep to yourself",
       "A few simple rules to stay safe"
      ],
-     "minutes": 7
+     "minutes": 7,
+     "needs": [
+      2
+     ]
     },
     {
      "n": 4,
@@ -50,7 +57,10 @@
       "Why its tone tells you nothing about the truth",
       "How to check an answer with proof from outside it"
      ],
-     "minutes": 7
+     "minutes": 7,
+     "needs": [
+      1
+     ]
     },
     {
      "n": 5,
@@ -62,7 +72,10 @@
       "Warning signs like sudden pressure to act now",
       "Simple checks before you trust or pay"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      4
+     ]
     },
     {
      "n": 6,
@@ -74,7 +87,10 @@
       "How to ask for a rewrite, summary or plan",
       "Where each job tends to go wrong"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      2
+     ]
     },
     {
      "n": 7,
@@ -86,7 +102,10 @@
       "How to talk through a problem out loud",
       "When typing is still the better choice"
      ],
-     "minutes": 5
+     "minutes": 5,
+     "needs": [
+      2
+     ]
     },
     {
      "n": 8,
@@ -98,7 +117,10 @@
       "What really differs between the apps",
       "Why your skills carry over to any of them"
      ],
-     "minutes": 6
+     "minutes": 6,
+     "needs": [
+      6
+     ]
     }
    ],
    "for": "People new to AI"
@@ -117,7 +139,10 @@
       "Three things to say: what you want, who it is for, when it is done",
       "How to add a \"Done when\" line to any request"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      6
+     ]
     },
     {
      "n": 10,
@@ -129,7 +154,10 @@
       "Why too much buries what matters",
       "How to pick the few facts it really needs"
      ],
-     "minutes": 7
+     "minutes": 7,
+     "needs": [
+      9
+     ]
     },
     {
      "n": 11,
@@ -141,7 +169,10 @@
       "How to pick a good example to share",
       "How to ask it to match your style"
      ],
-     "minutes": 6
+     "minutes": 6,
+     "needs": [
+      9
+     ]
     },
     {
      "n": 12,
@@ -153,7 +184,10 @@
       "How to check with a source, a test or a calculator",
       "Which answers need checking most"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      4
+     ]
     },
     {
      "n": 13,
@@ -165,7 +199,10 @@
       "How to fix a plan in one sentence",
       "When to skip the plan and just ask"
      ],
-     "minutes": 6
+     "minutes": 6,
+     "needs": [
+      9
+     ]
     },
     {
      "n": 14,
@@ -177,7 +214,10 @@
       "How to tell when it is time to start over",
       "How to carry a short summary into a new chat"
      ],
-     "minutes": 6
+     "minutes": 6,
+     "needs": [
+      10
+     ]
     },
     {
      "n": 15,
@@ -189,7 +229,10 @@
       "Why it predicts words instead of looking them up",
       "How this explains its strengths and mistakes"
      ],
-     "minutes": 10
+     "minutes": 10,
+     "needs": [
+      1
+     ]
     },
     {
      "n": 16,
@@ -201,7 +244,10 @@
       "How to match a model to the job",
       "When stepping up is worth it"
      ],
-     "minutes": 7
+     "minutes": 7,
+     "needs": [
+      15
+     ]
     },
     {
      "n": 17,
@@ -213,7 +259,10 @@
       "How claims about new models get inflated",
       "How to test a model on your own tasks"
      ],
-     "minutes": 7
+     "minutes": 7,
+     "needs": [
+      16
+     ]
     },
     {
      "n": 18,
@@ -225,7 +274,10 @@
       "Where to keep your saved requests",
       "How to reuse them in one line next time"
      ],
-     "minutes": 6
+     "minutes": 6,
+     "needs": [
+      11
+     ]
     },
     {
      "n": 19,
@@ -237,7 +289,10 @@
       "What to tell your team and your manager",
       "How to use it at work without losing trust"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      12
+     ]
     }
    ],
    "for": "Everyone"
@@ -256,7 +311,10 @@
       "How to describe the finish line clearly",
       "How to check the work it hands back"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      13
+     ]
     },
     {
      "n": 21,
@@ -268,7 +326,10 @@
       "What to put in them and what to leave out",
       "How they shape every new chat"
      ],
-     "minutes": 7
+     "minutes": 7,
+     "needs": [
+      10
+     ]
     },
     {
      "n": 22,
@@ -280,7 +341,11 @@
       "How to turn it into a written recipe",
       "How to get it to follow the recipe each time"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      18,
+      20
+     ]
     },
     {
      "n": 23,
@@ -292,7 +357,11 @@
       "What it can see and do once connected",
       "The risks, and how to limit them"
      ],
-     "minutes": 9
+     "minutes": 9,
+     "needs": [
+      3,
+      20
+     ]
     },
     {
      "n": 24,
@@ -304,7 +373,10 @@
       "Which pieces can run at the same time",
       "How to bring the results back together"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      20
+     ]
     },
     {
      "n": 25,
@@ -316,7 +388,10 @@
       "Which actions need your OK first",
       "When and how to tell it to stop"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      23
+     ]
     },
     {
      "n": 26,
@@ -328,7 +403,10 @@
       "Why longer chats and bigger models cost more",
       "How to get the same result for less"
      ],
-     "minutes": 9
+     "minutes": 9,
+     "needs": [
+      16
+     ]
     },
     {
      "n": 27,
@@ -340,7 +418,10 @@
       "How to move your instructions to a new tool",
       "What to test after you switch"
      ],
-     "minutes": 6
+     "minutes": 6,
+     "needs": [
+      21
+     ]
     }
    ],
    "for": "People who use AI daily"
@@ -359,7 +440,10 @@
       "Why the same model acts differently in different tools",
       "What to look for when picking one"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      20
+     ]
     },
     {
      "n": 29,
@@ -371,7 +455,11 @@
       "How it makes every session start with context",
       "How to keep the file short and current"
      ],
-     "minutes": 8
+     "minutes": 8,
+     "needs": [
+      21,
+      28
+     ]
     },
     {
      "n": 30,
@@ -383,7 +471,11 @@
       "Where you should step in and review",
       "How to stop the loop going off track"
      ],
-     "minutes": 9
+     "minutes": 9,
+     "needs": [
+      28,
+      13
+     ]
     },
     {
      "n": 31,
@@ -395,7 +487,11 @@
       "How to make the agent run tests every time",
       "How to keep it from weakening the tests"
      ],
-     "minutes": 10
+     "minutes": 10,
+     "needs": [
+      12,
+      30
+     ]
     },
     {
      "n": 32,
@@ -407,7 +503,11 @@
       "How to turn your habits into reusable skills",
       "How to review what it wrote"
      ],
-     "minutes": 9
+     "minutes": 9,
+     "needs": [
+      29,
+      22
+     ]
     },
     {
      "n": 33,
@@ -419,7 +519,11 @@
       "How to split work so helpers do not collide",
       "How to check what the team produced"
      ],
-     "minutes": 11
+     "minutes": 11,
+     "needs": [
+      24,
+      30
+     ]
     },
     {
      "n": 34,
@@ -431,7 +535,11 @@
       "How to compare models fairly on it",
       "Why your results beat any public ranking"
      ],
-     "minutes": 10
+     "minutes": 10,
+     "needs": [
+      17,
+      31
+     ]
     }
    ],
    "for": "Engineers"
