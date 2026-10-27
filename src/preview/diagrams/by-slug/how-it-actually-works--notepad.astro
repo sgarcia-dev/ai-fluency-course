@@ -1,0 +1,52 @@
+---
+// The notepad: what it sees in this chat vs everything it cannot see.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'how-it-actually-works')?.figures?.find((f) => f.id === 'notepad')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const lines = [0.12, 0.25, 0.45, 1, 1, 1, 1];
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 300" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b" x="80" y="24" text-anchor="middle">This chat</text>
+			<rect class="paper line" x="10" y="36" width="140" height="250" />
+			{lines.map((o, i) => (
+				<rect class={o < 1 ? 'soft' : 'good'} style={`opacity:${o}`} x={i % 2 ? 50 : 22} y={52 + i * 32} width="88" height="18" />
+			))}
+						<path class="line" d="M156 70 l14 0" />
+			<text class="t muted" x="174" y="76" font-size="15">fading out</text>
+			<path class="line" d="M156 254 l14 0" />
+			<text class="t b good-t" x="174" y="260">it sees this</text>
+
+			<ellipse class="soft" cx="262" cy="160" rx="74" ry="55" />
+			<text class="t" x="262" y="142" text-anchor="middle">internet</text>
+			<text class="t" x="262" y="166" text-anchor="middle">your email</text>
+			<text class="t" x="262" y="190" text-anchor="middle">past chats</text>
+			<path class="line bad-s" d="M214 116 L310 204 M310 116 L214 204" />
+			<text class="t b bad-t" x="262" y="236" text-anchor="middle">cannot see</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
+<style>.bad-s { stroke: var(--dg-bad, #c0392b); stroke-width: 5; opacity: 0.55; }</style>

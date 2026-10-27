@@ -1,0 +1,62 @@
+---
+// Word-by-word chain: each step picks a likely next piece from a few candidates.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'how-it-actually-works')?.diagram.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const steps = [
+	{ sofar: 'The meeting is on', opts: [['Tuesday', 0.7], ['Monday', 0.45], ['Friday', 0.25]] },
+	{ sofar: '... on Tuesday', opts: [['at', 0.75], ['in', 0.3], ['the', 0.2]] },
+	{ sofar: '... Tuesday at', opts: [['10', 0.6], ['3', 0.4], ['noon', 0.3]] },
+] as const;
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 470" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			{steps.map((s, i) => {
+				const y = 10 + i * 128;
+				return (
+					<g>
+						<text class="t b" x="10" y={y + 18}>{s.sofar}</text>
+						<text class="t muted" x="330" y={y + 18} text-anchor="end">next piece?</text>
+						{s.opts.map((o, j) => {
+							const yy = y + 32 + j * 30;
+							return (
+								<g>
+									<text class={j === 0 ? 't b' : 't muted'} x="96" y={yy + 18} text-anchor="end">{o[0]}</text>
+									<rect class={j === 0 ? 'acc line' : 'soft'} x="106" y={yy + 2} width={o[1] * 200} height="22" />
+									{j === 0 && <text class="t b" x={112 + o[1] * 200} y={yy + 19}>picked</text>}
+								</g>
+							);
+						})}
+						{i < 2 && <path class="line" d={`M30 ${y + 124} l0 -10 m-6 4 l6 6 l6 -6`} />}
+					</g>
+				);
+			})}
+			<rect class="paper line" x="10" y="400" width="320" height="56" />
+			<text class="t b" x="170" y="434" text-anchor="middle">The meeting is on <tspan class="hl">Tuesday at 10</tspan></text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
+<style>.hl { fill: var(--dg-good, #2e8b57); }</style>
