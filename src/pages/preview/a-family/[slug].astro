@@ -1,0 +1,98 @@
+---
+import Shell from '../../../preview/designs/a-family/Shell.astro';
+import Diagram from '../../../preview/designs/a-family/Diagram.astro';
+import { site, samples, paths, worlds, lessonByNumber, type Lesson } from '../../../preview/content';
+export function getStaticPaths() {
+	return samples.map((lesson) => ({ params: { slug: lesson.slug }, props: { lesson } }));
+}
+const { lesson } = Astro.props as { lesson: Lesson };
+const base = '/preview/a-family/';
+const pathData = paths.map((p) => ({ id: p.id, name: p.name, titles: p.lessons.map((n) => ({ n, title: lessonByNumber(n).title })) }));
+---
+<Shell title={`${lesson.title} | ${site.name}`} calm>
+<header class="slim">
+	<a class="home" href={base}>{site.name}</a>
+	<a class="label" href={`${base}#map`} id="maplink">See the full map</a>
+	<nav class="progress" id="progress" hidden aria-label="Your path"></nav>
+</header>
+<main class="read">
+	<p class="label">Lesson {lesson.n}. {lesson.minutes} minutes</p>
+	<h1>{lesson.title}</h1>
+	<p class="idea"><span class="label" style="display:block;color:var(--c)">The one idea</span>{lesson.idea}</p>
+
+	{lesson.sections.map((s, i) => (
+		<>
+			<h2>{s.heading}</h2>
+			{s.body.map((p) => <p>{p}</p>)}
+			{i === 0 && <Diagram describe={lesson.diagram.describe} caption={lesson.diagram.caption} />}
+		</>
+	))}
+
+	{lesson.examples && (
+		<section class="box">
+			<h2 style="margin-top:0">See it in your world</h2>
+			<div class="tabs" role="tablist" aria-label="Example world">
+				{worlds.map((w, i) => <button role="tab" id={`tab-${w.id}`} aria-controls={`pane-${w.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-world={w.id}>{w.label}</button>)}
+			</div>
+			{worlds.map((w, i) => {
+				const ex = lesson.examples![w.id];
+				return (
+					<dl class="ex" role="tabpanel" id={`pane-${w.id}`} aria-labelledby={`tab-${w.id}`} hidden={i !== 0}>
+						<dt>Before</dt><dd>{ex.before}</dd>
+						<dt>After</dt><dd>{ex.after}</dd>
+						<dt>Why it works</dt><dd>{ex.why}</dd>
+					</dl>
+				);
+			})}
+		</section>
+	)}
+
+	<section class="box" style="border-color:var(--c);border-width:3px">
+		<p class="label" style="color:var(--c);margin:0">Try this now</p>
+		<h2 style="margin-top:4px">{lesson.tryThis.title}</h2>
+		<ol>{lesson.tryThis.steps.map((s) => <li>{s}</li>)}</ol>
+	</section>
+
+	<section class="box" id="check" data-answer={lesson.check.answer}>
+		<p class="label" style="margin:0">Check yourself</p>
+		<h2 style="margin-top:4px">{lesson.check.question}</h2>
+		<div class="opts">{lesson.check.options.map((o, i) => <button type="button" data-i={i}>{o}</button>)}</div>
+		<p class="fb" id="fb" aria-live="polite"></p>
+		<p id="explain" hidden>{lesson.check.explain}</p>
+	</section>
+
+	<p><strong>Next:</strong> {lesson.next}</p>
+	<p><a href={base}>Back to the start</a></p>
+</main>
+<script type="application/json" id="aip-paths" set:html={JSON.stringify({ paths: pathData, n: lesson.n })} />
+<script>
+	const { paths, n } = JSON.parse(document.getElementById('aip-paths')!.textContent || '{}');
+	const get = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
+	const set = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} };
+	const p = paths.find((x: any) => x.id === get('aip-path'));
+	if (p) {
+		const nav = document.getElementById('progress')!;
+		const head = document.createElement('span'); head.className = 'label'; head.textContent = `Your path: ${p.name}`;
+		const ol = document.createElement('ol');
+		p.titles.forEach((t: any) => { const li = document.createElement('li'); li.textContent = t.title; if (t.n === n) { li.className = 'now'; li.setAttribute('aria-current', 'step'); } ol.append(li); });
+		nav.append(head, ol); nav.hidden = false;
+	}
+	const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role=tab]')];
+	function pick(id: string, focus = false) {
+		tabs.forEach((t) => { const on = t.dataset.world === id; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; document.getElementById(`pane-${t.dataset.world}`)!.hidden = !on; if (on && focus) t.focus(); });
+	}
+	tabs.forEach((t, i) => {
+		t.addEventListener('click', () => { pick(t.dataset.world!); set('aip-world', t.dataset.world!); });
+		t.addEventListener('keydown', (e) => { const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (d) pick(tabs[(i + d + tabs.length) % tabs.length].dataset.world!, true); });
+	});
+	const w = get('aip-world'); if (w && tabs.some((t) => t.dataset.world === w)) pick(w);
+	const check = document.getElementById('check')!; const ans = Number(check.dataset.answer);
+	check.querySelectorAll<HTMLButtonElement>('[data-i]').forEach((b) => b.addEventListener('click', () => {
+		check.querySelectorAll('[data-i]').forEach((x) => x.classList.remove('right', 'wrong'));
+		const ok = Number(b.dataset.i) === ans;
+		b.classList.add(ok ? 'right' : 'wrong');
+		document.getElementById('fb')!.textContent = ok ? 'Right.' : 'Not quite. Try another, or read why below.';
+		document.getElementById('explain')!.hidden = false;
+	}));
+</script>
+</Shell>

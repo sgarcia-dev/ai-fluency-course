@@ -1,0 +1,132 @@
+---
+import Shell from '../../../preview/designs/a-family/Shell.astro';
+import { site, parts, paths, worlds, samples, lessonByNumber } from '../../../preview/content';
+const base = '/preview/a-family/';
+const sampleSlugs = new Set(samples.map((s) => s.slug));
+const pathData = paths.map((p) => ({ ...p, titles: p.lessons.map((n) => `${n}. ${lessonByNumber(n).title}`) }));
+---
+<Shell title={`${site.name}: ${site.tagline}`}>
+<header class="band b-y hero">
+	<div class="shell">
+		<p class="label">A free course by {site.author.name}</p>
+		<h1>{site.name}</h1>
+		<p class="tag">{site.tagline}</p>
+		<p class="pitch">{site.pitch}</p>
+		<p class="note label">{site.status}</p>
+		<div><a class="hit hit-primary hit-big" href="#path">Find your path</a></div>
+	</div>
+</header>
+
+<section id="path" class="band b-c">
+	<div class="shell">
+		<h2 style="font-size:clamp(2.2rem,6vw,4.5rem)">Where are you starting?</h2>
+		<div class="cards" role="group" aria-label="Pick the line that sounds like you">
+			{paths.map((p) => (
+				<button class="card" type="button" aria-pressed="false" data-path={p.id}>
+					<span class="label">{p.name}</span>
+					<span class="says">"{p.says}"</span>
+				</button>
+			))}
+		</div>
+		<div class="picked" id="picked" hidden aria-live="polite">
+			<h3 id="picked-name"></h3>
+			<p>These are your lessons, in order:</p>
+			<ol id="picked-list"></ol>
+			<p class="label">Where do you want your examples from?</p>
+			<div class="worlds" role="group" aria-label="Examples from">
+				{worlds.map((w) => <button class="hit" type="button" aria-pressed="false" data-world={w.id}>{w.label}</button>)}
+			</div>
+			<p style="margin-top:20px"><a href="#map">See your lessons on the full map</a></p>
+		</div>
+	</div>
+</section>
+
+<section class="band">
+	<div class="shell sec">
+		<h2>Why this exists</h2>
+		<div>{site.why.map((p) => <p style="font-size:20px">{p}</p>)}</div>
+	</div>
+</section>
+
+<section class="band b-t">
+	<div class="shell sec">
+		<h2>How it is different</h2>
+		<ul class="diff">
+			{site.different.map((d) => <li><h3>{d.title}</h3><p style="margin:0">{d.body}</p></li>)}
+		</ul>
+	</div>
+</section>
+
+<section id="map" class="band">
+	<div class="shell">
+		<h2 style="font-size:clamp(2.2rem,6vw,4.5rem)">The full map</h2>
+		<p id="map-note" class="label">All {parts.reduce((a, p) => a + p.lessons.length, 0)} lessons. Pick a path above to highlight yours.</p>
+		{parts.map((part) => (
+			<div class="part">
+				<p class="label">Part {part.n}. For: {part.for}</p>
+				<h3 style="font-size:1.8rem">{part.title}</h3>
+				<ol>
+					{part.lessons.map((l) => (
+						<li data-n={l.n}>
+							<span class="label">{String(l.n).padStart(2, '0')}</span>
+							<div>
+								<span class="t">{l.title}</span>
+								{sampleSlugs.has(l.slug) && <a class="sample" href={`${base}${l.slug}/`}>Read a sample</a>}
+								<div>{l.idea}</div>
+							</div>
+						</li>
+					))}
+				</ol>
+			</div>
+		))}
+	</div>
+</section>
+
+<section class="band b-c">
+	<div class="shell sec">
+		<h2>Who made this</h2>
+		<div>
+			<p style="font-size:20px">{site.author.story}</p>
+			<p><a class="hit" href={site.author.url}>More about {site.author.name}</a></p>
+		</div>
+	</div>
+</section>
+
+<section class="band b-y">
+	<div class="shell sec">
+		<h2>Tell me what you think</h2>
+		<div>
+			<p style="font-size:20px">Seeing this at a meetup? Come say hi, or send a note later. What confused you, what you would skip, what is missing.</p>
+			<p><a class="hit hit-big" href={site.feedbackUrl}>Send feedback</a></p>
+			<p class="label">{site.nameNote}</p>
+		</div>
+	</div>
+</section>
+<footer class="band b-k foot label">{site.name}. Free, always.</footer>
+
+<script type="application/json" id="aip-paths" set:html={JSON.stringify(pathData)} />
+<script>
+	const data = JSON.parse(document.getElementById('aip-paths')!.textContent || '[]');
+	const get = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
+	const set = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} };
+	const picked = document.getElementById('picked')!;
+	function showPath(id: string | null) {
+		const p = data.find((x: any) => x.id === id);
+		document.querySelectorAll<HTMLButtonElement>('[data-path]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.path === id)));
+		document.querySelectorAll<HTMLElement>('.part li').forEach((li) => li.classList.toggle('off', !!p && !p.lessons.includes(Number(li.dataset.n))));
+		if (!p) return;
+		picked.hidden = false;
+		document.getElementById('picked-name')!.textContent = p.name;
+		const ol = document.getElementById('picked-list')!;
+		ol.replaceChildren(...p.titles.map((t: string) => { const li = document.createElement('li'); li.textContent = t.replace(/^\d+\. /, ''); return li; }));
+		document.getElementById('map-note')!.textContent = `Your path, ${p.name}, has ${p.lessons.length} lessons. The rest are dimmed.`;
+	}
+	function showWorld(w: string | null) {
+		document.querySelectorAll<HTMLButtonElement>('[data-world]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.world === w)));
+	}
+	document.querySelectorAll<HTMLButtonElement>('[data-path]').forEach((b) => b.addEventListener('click', () => { set('aip-path', b.dataset.path!); showPath(b.dataset.path!); }));
+	document.querySelectorAll<HTMLButtonElement>('[data-world]').forEach((b) => b.addEventListener('click', () => { set('aip-world', b.dataset.world!); showWorld(b.dataset.world!); }));
+	showPath(get('aip-path'));
+	showWorld(get('aip-world'));
+</script>
+</Shell>

@@ -1,0 +1,44 @@
+---
+// Draws a simple left-to-right flow of boxes from a plain-text description.
+// Steps are split on arrows, then on sentences. Reusable: Box and Arrow are drawn here.
+interface Props { describe: string; caption: string }
+const { describe, caption } = Astro.props;
+let steps = describe.split(/\s*(?:->|→|=>)\s*/).filter(Boolean);
+if (steps.length < 2) steps = describe.split(/(?<=[.;])\s+/).filter(Boolean);
+steps = steps.slice(0, 4);
+const wrap = (s: string, n = 18) => {
+	const out: string[] = []; let line = '';
+	for (const w of s.replace(/[.;]$/, '').split(/\s+/)) {
+		if ((line + ' ' + w).trim().length > n) { if (line) out.push(line); line = w; } else line = (line + ' ' + w).trim();
+	}
+	if (line) out.push(line);
+	return out.slice(0, 6);
+};
+const bw = 170, gap = 50, bh = 130;
+const W = steps.length * bw + (steps.length - 1) * gap + 8;
+const fills = ['#FFD400', '#FFFFFF', '#FFFFFF', '#FFD400'];
+---
+<figure class="diagram">
+	<svg viewBox={`0 0 ${W} ${bh + 12}`} role="img" aria-label={describe} preserveAspectRatio="xMidYMid meet">
+		{steps.map((s, i) => {
+			const x = 2 + i * (bw + gap);
+			const lines = wrap(s);
+			return (
+				<g>
+					<rect x={x + 5} y={7} width={bw} height={bh} fill="#0A0A0A" />
+					<rect x={x} y={2} width={bw} height={bh} fill={fills[i % 4]} stroke="#0A0A0A" stroke-width="3" />
+					<text x={x + bw / 2} y={2 + bh / 2 - (lines.length - 1) * 9} text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="14" fill="#0A0A0A">
+						{lines.map((l, j) => <tspan x={x + bw / 2} dy={j ? 18 : 0}>{l}</tspan>)}
+					</text>
+					{i < steps.length - 1 && (
+						<g stroke="#0A0A0A" stroke-width="3" fill="none">
+							<line x1={x + bw + 8} y1={2 + bh / 2} x2={x + bw + gap - 10} y2={2 + bh / 2} />
+							<polyline points={`${x + bw + gap - 18},${bh / 2 - 6} ${x + bw + gap - 10},${2 + bh / 2} ${x + bw + gap - 18},${bh / 2 + 10}`} />
+						</g>
+					)}
+				</g>
+			);
+		})}
+	</svg>
+	<figcaption class="label">{caption}</figcaption>
+</figure>
