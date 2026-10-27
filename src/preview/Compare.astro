@@ -1,0 +1,49 @@
+---
+// Two ways to do the same job, side by side; stacked on narrow screens.
+import type { Lesson } from './lessons';
+interface Props { c: NonNullable<Lesson['compare']> }
+const { c } = Astro.props;
+const sides = [
+	{ key: 'wrong', head: 'The hard way', side: c.wrong },
+	{ key: 'right', head: 'The better way', side: c.right },
+];
+const who = { you: 'You', ai: 'AI', check: 'Check', note: 'Note' } as const;
+---
+<section class="compare">
+	<p class="mono">Two ways</p>
+	<h2>{c.title}</h2>
+	{c.intro && <p>{c.intro}</p>}
+	<div class="cmp">
+		{sides.map(({ key, head, side }) => (
+			<div class={`side ${key}`}>
+				<p class="mono side-h">{head}: {side.label}</p>
+				<ol class="cmp-steps">{side.steps.map((st) => (
+					<li class={`cs ${st.who}`}><span class="mono who">{who[st.who]}</span><span class="txt">{st.text}</span></li>
+				))}</ol>
+				<p class="outcome">{side.outcome}</p>
+			</div>
+		))}
+	</div>
+	<p class="takeaway"><strong>{c.takeaway}</strong></p>
+</section>
+<style>
+	.compare{margin:2.5rem 0}
+	.mono{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.04em;font-size:.8rem}
+	.cmp{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+	@media (max-width:44rem){.cmp{grid-template-columns:1fr}}
+	.side{min-width:0;border:3px solid #0A0A0A;padding:.75rem}
+	.side.wrong{background:#FFF1EC}
+	.side.right{background:#FFFBE0}
+	.side-h{margin:0 0 .5rem}
+	.side.wrong .side-h{color:#A3301A}
+	.side.right .side-h{color:#1A34B0}
+	.cmp-steps{list-style:none;padding:0;margin:0;display:grid;gap:.4rem}
+	.cs{display:grid;grid-template-columns:3.4rem 1fr;gap:.4rem;align-items:start;font-size:.95rem;border-top:1px dashed rgba(10,10,10,.25);padding-top:.35rem}
+	.cs:first-child{border-top:0;padding-top:0}
+	.cs .who{font-size:.68rem;padding-top:.2rem}
+	.cs.check .who{color:#1A34B0}
+	.cs.note .txt{color:#3F3F3F;font-style:italic}
+	.txt{white-space:pre-wrap;min-width:0;overflow-wrap:anywhere}
+	.outcome{margin:.75rem 0 0;padding-top:.5rem;border-top:3px solid #0A0A0A;font-weight:600}
+	.takeaway{margin-top:1rem}
+</style>

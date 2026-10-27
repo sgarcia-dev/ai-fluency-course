@@ -1,5 +1,6 @@
 ---
 import Diagram from '../../preview/diagrams/Diagram.astro';
+import Compare from '../../preview/Compare.astro';
 import Base from '../../preview/designs/subway-v2/Base.astro';
 import { site, samples, worlds } from '../../preview/content';
 import { base, stop, colorFor } from '../../preview/designs/subway-v2/data';
@@ -36,6 +37,7 @@ const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l
 					<figcaption>{f.caption}</figcaption>
 				</figure>
 			))}
+			{lesson.compare && lesson.compare.afterSection === i && <Compare c={lesson.compare} />}
 		</section>
 	))}
 
@@ -59,6 +61,8 @@ const strip = { current: lesson.n, lessons: Object.fromEntries(allLessons.map((l
 			})}
 		</section>
 	)}
+
+	{lesson.compare && lesson.compare.afterSection === undefined && <Compare c={lesson.compare} />}
 
 	{lesson.worked && (
 		<section class="worked">

@@ -1,5 +1,8 @@
 // Sample lessons. Each lives in its own file in ./lessons/, so writers never edit the same file.
 export type World = 'everyday' | 'office' | 'code';
+// One column of a comparison: a label, the exchange in order, and how it ended.
+export type CompareSide = { label: string; steps: { who: 'you' | 'ai' | 'check' | 'note'; text: string }[]; outcome: string };
+
 export type Lesson = {
 	n: number; // matches curriculum.json
 	slug: string;
@@ -12,6 +15,16 @@ export type Lesson = {
 	figures?: { id: string; afterSection: number; caption: string; describe: string }[];
 	// A worked, day-to-day example with real prompts, replies or code, shown before "Try this now".
 	worked?: { title: string; intro: string; steps: { label: string; you?: string; ai?: string; code?: string; note?: string }[] };
+	// Two ways to do the same job, side by side (stacked on phones): the hard way and the better way.
+	// Shown after section `afterSection` (0-based), or before "Try this now" when unset.
+	compare?: {
+		title: string;
+		intro?: string;
+		afterSection?: number;
+		wrong: CompareSide;
+		right: CompareSide;
+		takeaway: string;
+	};
 	examples?: Record<World, { before: string; after: string; why: string }>; // world-switched example
 	tryThis: { title: string; steps: string[] };
 	check: { question: string; options: string[]; answer: number; explain: string };
