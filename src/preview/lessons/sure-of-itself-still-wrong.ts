@@ -18,7 +18,7 @@ export const lesson: Lesson = {
 		{
 			heading: 'Why it happens',
 			body: [
-				'An AI chat works by guessing the next words that would most likely come next, over and over, until it has an answer. It is very good at this. But "likely to sound right" is not the same as "true".',
+				'An AI chat works by guessing the word most likely to come next, over and over, until it has an answer. It is very good at this. But "likely to sound right" is not the same as "true".',
 				'Answers from memory are the riskiest. A date, a quote, a dose, a phone number, the name of a book: the AI fills the gap with something that fits the pattern. Often it is correct. Sometimes it is made up, and it reads exactly the same.',
 				'It is not lying. It has no idea it is wrong. That is why asking it to be honest does not fix it.',
 			],
@@ -40,10 +40,19 @@ export const lesson: Lesson = {
 		},
 	],
 	diagram: {
-		caption: 'Same confident face. Only an outside check shows which answer is right.',
+		caption: 'Both answers sound fully sure. Only an outside check shows which one is right.',
 		describe:
-			'Two speech bubbles side by side, both coming from the same small AI character with the same calm, confident smile. Left bubble says "The meeting is on March 3." Right bubble says "The meeting is on March 5." The bubbles look identical in style and color, so tone gives no clue. Below them, a magnifying glass held over a printed calendar (the source), and next to it a simple calculator. A green check mark appears only on the bubble that matches the calendar, and a red cross on the other. The check marks come from the magnifier, not from the AI.',
+			'Two answer cards from an AI that look the same. One says "Canberra is the capital of Australia." The other says "Sydney is the capital of Australia." Under each, a "How sure it sounds" meter is full on both. Below, a row labeled "Checked against an atlas": Canberra gets a big green check marked Right, Sydney gets a big red cross marked Wrong. The meter is the same, the truth is not.',
 	},
+	figures: [
+		{
+			id: 'why',
+			afterSection: 1,
+			caption: 'It picks the word that sounds most likely, not the one it checked.',
+			describe:
+				'The start of a sentence: "The capital of Australia is..." Below it, three bars show how likely each next word sounds. Sydney is the tallest bar, in red, marked Picked. Canberra, the true answer, is shorter and green. Melbourne is small and gray. A note says: sounds likely, but not true.',
+		},
+	],
 	tryThis: {
 		title: 'Catch a confident guess',
 		steps: [
