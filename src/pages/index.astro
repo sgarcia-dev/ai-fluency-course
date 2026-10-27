@@ -3,9 +3,10 @@ import Base from '../preview/designs/subway-v2/Base.astro';
 import { site, paths, samples } from '../preview/content';
 import { starts } from '../preview/route';
 import { pickGoals } from '../preview/picker';
-import { stop, colorFor, inkOn, network } from '../preview/designs/subway-v2/data';
+import { stop, colorFor, inkOn, network, mobileNetwork } from '../preview/designs/subway-v2/data';
 const N = network();
-const colorWord: Record<string, string> = { new: 'Yellow', 'hit-or-miss': 'Tomato', daily: 'Blue', builder: 'Purple' };
+const M = mobileNetwork();
+const colorWord: Record<string, string> = { new: 'Yellow', 'hit-or-miss': 'Orange', daily: 'Blue', builder: 'Purple' };
 const lessons = Object.fromEntries(N.stations.map((s) => { const { n, ...rest } = stop(s.n); return [n, rest]; }));
 const lineInfo = Object.fromEntries(paths.map((p) => [p.id, { name: p.name, color: colorFor(p.id), ink: inkOn(p.id), word: colorWord[p.id], lessons: p.lessons, story: starts.find((s) => s.id === p.id)?.story ?? p.says }]));
 const data = { lessons, lines: lineInfo };
@@ -74,6 +75,17 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 						{t.id === 'new' && <polyline class="edge" points={`${Math.min(...t.pts)},${t.y} ${xEnd(t)},${t.y}`} />}
 						<polyline class="trk" pathLength="1" points={`${Math.min(...t.pts)},${t.y} ${xEnd(t)},${t.y}`} />
 						{t.pts.map((x, i) => <circle class="dot" cx={x} cy={t.y} r="8" style={`--i:${i}`} />)}
+					</g>
+				))}
+			</svg>
+		</figure>
+		<figure class="mnet" aria-hidden="true">
+			<ul class="mhead">{paths.map((p) => <li class="mh" data-line={p.id} style={`--c:${colorFor(p.id)}`}><span class="mono">{colorWord[p.id]}</span>{p.name}</li>)}</ul>
+			<svg viewBox={`0 0 ${M.width} ${M.height}`} preserveAspectRatio="xMidYMin meet">
+				{M.cols.map((c) => (
+					<g class="ln mln" data-line={c.id} style={`--c:${c.color}`}>
+						<line class="trk" pathLength="1" x1={c.x} y1={c.y0} x2={c.x} y2={c.y1} />
+						{c.ys.map((y, i) => <circle class="dot" cx={c.x} cy={y} r="6" style={`--i:${i}`} />)}
 					</g>
 				))}
 			</svg>
@@ -156,7 +168,7 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 		$('teaser').hidden = on;
 		if (!on) {
 			main.classList.remove('chosen-line');
-			document.querySelectorAll<SVGGElement>('.ln').forEach((g) => g.classList.remove('on', 'draw'));
+			document.querySelectorAll<Element>('.ln, .mh').forEach((g) => g.classList.remove('on', 'draw'));
 			document.querySelectorAll<HTMLElement>('.keys li').forEach((k) => k.classList.remove('off'));
 		}
 	}
@@ -227,7 +239,10 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 		document.querySelectorAll<SVGGElement>('.ln').forEach((g) => {
 			const on = g.dataset.line === lineId;
 			g.classList.toggle('on', on);
-			if (on) { g.parentNode!.append(g); g.classList.remove('draw'); void (g as any).getBBox(); g.classList.add('draw'); }
+			if (on) { g.parentNode!.append(g); g.classList.remove('draw'); try { void (g as any).getBBox(); } catch {} void (g as any).getBoundingClientRect(); g.classList.add('draw'); }
+		});
+		document.querySelectorAll<HTMLElement>('.mh').forEach((h) => {
+			h.classList.toggle('on', h.dataset.line === lineId);
 		});
 		document.querySelectorAll<HTMLElement>('.keys li').forEach((k) => k.classList.toggle('off', k.dataset.line !== lineId));
 		$('legend').textContent = `Your line is in color. The other lines are grey.`;
@@ -351,7 +366,18 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 	.sdots{display:flex;gap:.35rem}
 	.sdot{width:16px;height:16px;border-radius:50%;background:var(--c);border:2px solid #0A0A0A}
 	.prose p{max-width:40rem;font-size:1.1rem}
-	@media (max-width:48rem){.map{display:flex;flex-direction:column}#stops{order:-1;margin-bottom:2rem}}
-	@media (prefers-reduced-motion: reduce){.lift:hover:not(:disabled),.chip:hover{transform:none}.ln.draw .trk,.ln.draw .edge{stroke-dasharray:none}}
+	.mnet{display:none;margin:0 0 2.5rem}
+	.mhead{list-style:none;margin:0 0 .6rem;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem;border-bottom:3px solid #0A0A0A;padding-bottom:.5rem}
+	.mh{font:700 .72rem/1.2 'Space Grotesk',sans-serif;text-align:center;border-top:8px solid var(--c);padding-top:.35rem;overflow-wrap:anywhere;transition:opacity .3s,border-color .3s}
+	.mh .mono{display:block;font-size:.68rem;margin-bottom:.15rem}
+	.chosen-line .mh:not(.on){opacity:.45;border-top-color:#D6D6D6}
+	.mnet svg{display:block;width:100%;height:auto}
+	.mln .trk{stroke-width:6;stroke-linecap:square}
+	.mln .dot{stroke-width:3}
+	.chosen-line .mln.on .trk{stroke-width:12}
+	.chosen-line .mln.on .dot{r:8px;stroke-width:4}
+	.mln.draw .trk{animation-duration:1.4s}
+	@media (max-width:48rem){.map{display:flex;flex-direction:column}#stops{order:-1;margin-bottom:2rem}.net{display:none}.mnet{display:block}}
+	@media (prefers-reduced-motion: reduce){.lift:hover:not(:disabled),.chip:hover{transform:none}.ln.draw .trk,.ln.draw .edge{stroke-dasharray:none;animation:none}.ln.draw .dot{animation:none}}
 </style>
 </Base>

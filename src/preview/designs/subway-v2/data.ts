@@ -4,7 +4,7 @@ import { paths, allLessons, samples } from '../../content';
 export const base = '/';
 export const lineColors: Record<string, string> = {
 	new: '#FFD400',
-	'hit-or-miss': '#FF6A44',
+	'hit-or-miss': '#FF7A2F', // orange line (was tomato #FF6A44, read too red next to yellow)
 	daily: '#1A34B0',
 	builder: '#7B2FBE',
 };
@@ -65,4 +65,19 @@ export function network() {
 		return { n: l.n, title: l.title, x: x(l.n), y0: Math.min(...ys), y1: Math.max(...ys), lanes: on, ids: on.map((i) => paths[i].id) };
 	});
 	return { width, height, baseY, lane, tracks, stations, laneOf: Object.fromEntries(paths.map((p, i) => [p.id, laneY(i)])) };
+}
+
+// Mobile map: lanes as vertical columns, one row per lesson in course order.
+// Lessons used by several lanes share a row, so shared stops line up across columns.
+export function mobileNetwork() {
+	const colW = 80, top = 14, row = 26;
+	const used = allLessons.map((l) => l.n).filter((n) => paths.some((p) => p.lessons.includes(n)));
+	const y = (n: number) => top + used.indexOf(n) * row;
+	const width = colW * paths.length;
+	const height = top * 2 + (used.length - 1) * row;
+	const cols = paths.map((p, i) => {
+		const ys = p.lessons.filter((n) => used.includes(n)).map(y);
+		return { id: p.id, color: colorFor(p.id), x: colW * i + colW / 2, ys, y0: Math.min(...ys), y1: Math.max(...ys) };
+	});
+	return { width, height, cols };
 }
