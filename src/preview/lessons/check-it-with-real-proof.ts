@@ -4,43 +4,52 @@ export const lesson: Lesson = {
 	n: 12,
 	slug: 'check-it-with-real-proof',
 	title: 'Check it with real proof',
-	idea: 'Trust a source, a test or a calculator, not its tone. Pick a check that fits how much it costs to be wrong.',
+	idea: 'A real check gives the same answer every time and does not care what the AI said. Match it to how much it costs to be wrong.',
 	minutes: 8,
 	sections: [
 		{
-			heading: 'Asking again is not a check',
+			heading: 'A real check gives the same answer every time',
 			body: [
-				'When an answer looks off, it is tempting to type "Are you sure?" But the AI often just says yes. Or it flips to a new answer to please you. Neither tells you which one is true.',
-				'Asking the same AI the same question again has the same problem. You get a second guess from the same guesser. A real check comes from outside the chat: something that does not care what the AI said.',
+				'Type 17 x 23 into a calculator. You get 391. Do it again tomorrow. You get 391. It does not matter who asks or how they ask. Same question in, same answer out, every time.',
+				'The AI is different. It is a guesser. Ask it the same thing three times and you can get three answers. Most are right, but some are not, and it sounds just as sure either way.',
+				'So a real check has two parts. It gives the same answer every time. And it does not care what the AI said.',
 			],
 		},
 		{
-			heading: 'Your small toolkit',
+			heading: 'Why "Are you sure?" is not a check',
 			body: [
-				'Open the source. If it names a website, a book or a rule, go look. Does the page exist? Does it really say that? Made-up links and quotes fall apart in one click.',
-				'Redo the math. Put the numbers into a calculator yourself. Run the code or test the steps, and see if they really work. Compare with something you already trust, like your bill, your calendar, or last year\'s report.',
+				'When an answer looks off, it is tempting to type "Are you sure?" But the AI often just says yes. Or it flips to a new answer to please you. Asking again in a new chat has the same problem. You get one more guess from the same guesser.',
+				'Real checks live outside the chat. A calculator. A source you open and read. A test that passes or fails. A rule you can tick off, like "under 200 words" or "has the date in it".',
+			],
+		},
+		{
+			heading: 'Pick your check',
+			body: [
+				'Numbers? Put them in a calculator yourself. A fact or a quote? Open the source it named. Does the page exist, and does it really say that? Code or steps? Run them and see if they work.',
 				'And when it really matters, ask a person who knows: a pharmacist, an accountant, a coworker who owns that system.',
 			],
 		},
 		{
-			heading: 'When to check: the cost of being wrong',
+			heading: 'How much to check',
 			body: [
-				'You do not need to check everything. Ask one question: "What happens if this is wrong?"',
-				'A movie suggestion or a birthday poem? Just glance at it. A recipe swap, a date, a fact you will repeat to others? Do one quick check. Money, health, the law, or code other people use? Check twice, and ask a person.',
-			],
-		},
-		{
-			heading: 'Make checking easy',
-			body: [
-				'You can help yourself before the answer even arrives. Ask the AI to show its sources, list its numbers, or tell you how you could test it. That gives you something to check, fast.',
-				'Just remember: the AI listing sources is not the check. Opening them is.',
+				'You do not need to check everything. Ask one question: "What happens if this is wrong?" The worse the answer, the stronger your check.',
+				'Tip: ask the AI to list its sources and numbers. That gives you something fast to check. But the list is not the check. Opening it is.',
 			],
 		},
 	],
+	figures: [
+		{
+			id: 'stakes',
+			afterSection: 3,
+			caption: 'The more it costs to be wrong, the stronger your check.',
+			describe:
+				'A three-step ladder. Low stakes, like a recipe tweak: glance at it. Medium stakes, like an email to your boss or a number in a report: check the key fact or redo the math. High stakes, like health, money, legal or code that ships: check with a source or a test, or ask a person. The color gets stronger as the stakes go up.',
+		},
+	],
 	diagram: {
-		caption: 'Proof comes from outside the chat. The higher the stakes, the more you check.',
+		caption: 'A real check gives the same answer every time.',
 		describe:
-			'An AI answer card sits in the middle, with a question mark on it. Around it are three check tools, each with an arrow pointing at the card: an open book labeled "Source", a calculator labeled "Math", and a box with a check mark labeled "Test". Below is a stakes dial. The low end is labeled "Low: glance" and the high end is labeled "High: check twice, ask a person". The needle sits near the high end.',
+			'Two columns side by side. Left, "Ask the AI again", with a dice icon: three tries of "What is 17 x 23?" give 381, 391 and 393. Two are marked wrong in red. Right, "Ask a calculator": three tries give 391, 391 and 391, all marked right in green.',
 	},
 	examples: {
 		everyday: {
@@ -80,7 +89,7 @@ export const lesson: Lesson = {
 		],
 		answer: 2,
 		explain:
-			'Both of the first two ask the same guesser again. It can agree with itself and still be wrong. For health, the stakes are high, so check the label and ask a person who knows.',
+			'Both of the first two ask the same guesser again, and a guesser can change its answer. It can agree with itself and still be wrong. For health, the stakes are high, so check the label and ask a person who knows.',
 	},
 	next: 'Next stop: "Ask for the plan first", see the steps before the AI does the work.',
 };

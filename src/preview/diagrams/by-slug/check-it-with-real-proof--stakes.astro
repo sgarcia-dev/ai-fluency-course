@@ -1,0 +1,43 @@
+---
+// Stakes ladder: the higher the cost of being wrong, the stronger the check.
+import { samples } from '../../content';
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'check-it-with-real-proof')?.figures?.find((f) => f.id === 'stakes')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const rows = [
+	{ k: 'High', ex: 'Health, money, legal, code', a: 'Source, test, or a person', o: 1 },
+	{ k: 'Medium', ex: 'An email to your boss', a: 'Check the key fact or math', o: 0.55 },
+	{ k: 'Low', ex: 'A recipe tweak', a: 'Glance at it', o: 0.2 },
+];
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 320 312" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="9" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			{rows.map((r, i) => {
+				const y = 8 + i * 102;
+				return (
+					<g>
+						<rect class="fillbad" x="4" y={y} width="312" height="94" style={`fill-opacity:${r.o}`} />
+						<rect class="line" x="4" y={y} width="312" height="94" />
+						<text class={`t b big ${i === 0 ? 'w' : ''}`} x="16" y={y + 30}>{r.k}</text>
+						<text class={`t ${i === 0 ? 'w' : ''}`} x="16" y={y + 52}>{r.ex}</text>
+						<text class={`t b ${i === 0 ? 'w' : ''}`} x="16" y={y + 80}>{'→'} {r.a}</text>
+					</g>
+				);
+			})}
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 28rem; margin: 0 auto; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); fill: none; }
+	.fillbad { fill: var(--dg-bad, #c0392b); }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 16px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.big { font-size: 22px; }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
