@@ -1,4 +1,5 @@
 ---
+import Diagram from '../../../preview/diagrams/Diagram.astro';
 import Base from '../../../preview/designs/c-subway/Base.astro';
 import { site, samples, paths, worlds, allLessons } from '../../../preview/content';
 import { colorFor, sampleSlugs } from '../../../preview/designs/c-subway/lines';
@@ -7,9 +8,6 @@ export function getStaticPaths() {
 }
 const { lesson } = Astro.props;
 const base = '/preview/c-subway/';
-// Diagram: split the description into stops along a line.
-const steps = lesson.diagram.describe.split(/(?<=[.!?])\s+(?=[A-Z])/).filter(Boolean);
-const rowH = 62;
 const strip = {
 	paths: paths.map((p) => ({ id: p.id, name: p.name, color: colorFor(p.id), stops: p.lessons.map((n) => {
 		const l = allLessons.find((x) => x.n === n)!;
@@ -33,18 +31,8 @@ const strip = {
 			<h2>{s.heading}</h2>
 			{s.body.map((p) => <p>{p}</p>)}
 			{i === 0 && (
-				<figure class="diagram">
-					<svg viewBox={`0 0 600 ${steps.length * rowH + 20}`} role="img" aria-label={lesson.diagram.caption}>
-						<line x1="30" x2="30" y1="30" y2={(steps.length - 1) * rowH + 30} stroke="#1D4ED8" stroke-width="10" stroke-linecap="round" />
-						{steps.map((t, j) => (
-							<g>
-								<circle cx="30" cy={j * rowH + 30} r="11" fill="#fff" stroke="#16181d" stroke-width="5" />
-								<foreignObject x="56" y={j * rowH + 6} width="540" height={rowH - 6}>
-									<p class="dstep">{t}</p>
-								</foreignObject>
-							</g>
-						))}
-					</svg>
+				<figure class="diagram" style="--dg-ink:#16181d;--dg-paper:#FFFFFF;--dg-accent:#F5B800;--dg-good:#0B6E4F;--dg-bad:#B93A0A;--dg-muted:#4b5563;--dg-stroke:4;--dg-radius:6px;--dg-font:inherit">
+					<Diagram slug={lesson.slug} />
 					<figcaption>{lesson.diagram.caption}</figcaption>
 				</figure>
 			)}
@@ -156,7 +144,6 @@ const strip = {
 	.sdot{display:block;width:1rem;height:1rem;border-radius:50%;border:3px solid var(--c);background:#fff}
 	a.sdot{background:#fde68a}
 	.sdot.cur{width:1.5rem;height:1.5rem;background:var(--c);box-shadow:0 0 0 3px #fff,0 0 0 5px #16181d}
-	.dstep{margin:0;font:1rem/1.35 'Atkinson Hyperlegible',sans-serif;color:#16181d}
 </style>
 <style>
 	.read{max-width:40rem;margin:0 auto;padding:2rem 1.25rem 4rem}

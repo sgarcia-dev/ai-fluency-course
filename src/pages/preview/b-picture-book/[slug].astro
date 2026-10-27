@@ -1,6 +1,6 @@
 ---
 import Layout from '../../../preview/designs/b-picture-book/Layout.astro';
-import Diagram from '../../../preview/designs/b-picture-book/Diagram.astro';
+import Diagram from '../../../preview/diagrams/Diagram.astro';
 import { site, samples, paths, worlds, type Lesson } from '../../../preview/content';
 export function getStaticPaths() {
 	return samples.map((lesson) => ({ params: { slug: lesson.slug }, props: { lesson } }));
@@ -25,7 +25,12 @@ const pathData = JSON.stringify(paths.map((p) => ({ id: p.id, name: p.name, less
 			<>
 				<h2>{s.heading}</h2>
 				{s.body.map((p) => <p>{p}</p>)}
-				{i === 0 && <Diagram caption={lesson.diagram.caption} describe={lesson.diagram.describe} />}
+				{i === 0 && (
+					<figure class="pb-diagram" style="--dg-ink:#1f2a37;--dg-paper:#fdf7ec;--dg-accent:#5fb3a8;--dg-good:#4f9d69;--dg-bad:#e9785f;--dg-muted:#6b7280;--dg-stroke:3;--dg-radius:14px;--dg-font:inherit">
+						<Diagram slug={lesson.slug} wobble />
+						<figcaption>{lesson.diagram.caption}</figcaption>
+					</figure>
+				)}
 			</>
 		))}
 

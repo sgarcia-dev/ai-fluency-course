@@ -1,0 +1,9 @@
+---
+// Renders the drawn diagram for a lesson slug, or nothing if none exists.
+import ConfidentWrong from './ConfidentWrong.astro';
+import DoneTarget from './DoneTarget.astro';
+interface Props { slug: string; wobble?: boolean }
+const { slug, wobble = false } = Astro.props;
+---
+{slug === 'sure-of-itself-still-wrong' && <ConfidentWrong wobble={wobble} />}
+{slug === 'say-what-done-looks-like' && <DoneTarget wobble={wobble} />}

@@ -1,0 +1,71 @@
+---
+// Lesson 4: same confident AI, two answers, only the source decides.
+import { samples } from '../content';
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'sure-of-itself-still-wrong')?.diagram.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const bubbles = [
+	{ x: 8, day: '3', ok: true },
+	{ x: 192, day: '5', ok: false },
+];
+const days = [1, 2, 3, 4, 5, 6, 7];
+---
+<svg class="dg" viewBox="0 0 360 340" width="100%" role="img" aria-label={label}>
+	<defs>
+		<filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter>
+	</defs>
+	<g filter={wobble ? `url(#${fid})` : undefined}>
+		<!-- AI character -->
+		<line class="line" x1="180" y1="6" x2="180" y2="16" />
+		<circle class="acc line" cx="180" cy="6" r="4" />
+		<circle class="acc line" cx="180" cy="40" r="24" />
+		<circle class="ink-fill" cx="172" cy="37" r="3" />
+		<circle class="ink-fill" cx="188" cy="37" r="3" />
+		<path class="line" d="M171 48 Q180 55 189 48" fill="none" />
+		{bubbles.map((b) => (
+			<g>
+				<path class="line" d={b.ok ? 'M140 82 L162 52' : 'M220 82 L198 52'} />
+				<rect class="paper line" x={b.x} y="82" width="160" height="62" />
+				<text class="t" x={b.x + 80} y="108" text-anchor="middle">The meeting is</text>
+				<text class="t" x={b.x + 80} y="130" text-anchor="middle">on March {b.day}.</text>
+				<circle class={b.ok ? 'good line' : 'bad line'} cx={b.x + 152} cy="84" r="14" />
+				<path class="mark" d={b.ok ? `M${b.x + 145} 84 l5 6 l9 -11` : `M${b.x + 146} 78 l12 12 M${b.x + 158} 78 l-12 12`} />
+			</g>
+		))}
+		<text class="t muted" x="180" y="172" text-anchor="middle">Same confident tone</text>
+		<!-- Calendar, the source -->
+		<rect class="paper line" x="20" y="196" width="196" height="100" />
+		<rect class="acc line" x="20" y="196" width="196" height="30" />
+		<text class="t b" x="118" y="217" text-anchor="middle">MARCH</text>
+		{days.map((d, i) => (
+			<text class={d === 3 ? 't b' : 't muted'} x={36 + i * 27} y="262" text-anchor="middle">{d}</text>
+		))}
+		<!-- Magnifier over March 3 -->
+		<circle class="glass line" cx="90" cy="256" r="20" />
+		<line class="line thick" x1="104" y1="270" x2="124" y2="290" />
+		<path class="line dash" d="M90 236 Q100 170 160 98" fill="none" />
+		<!-- Calculator -->
+		<rect class="paper line" x="250" y="210" width="70" height="86" />
+		<rect class="acc line" x="260" y="220" width="50" height="18" />
+		{[0, 1, 2].map((r) => [0, 1, 2].map((c) => <rect class="ink-fill" x={262 + c * 17} y={248 + r * 15} width="10" height="8" />))}
+		<text class="t muted" x="180" y="330" text-anchor="middle">Checked against the source</text>
+	</g>
+</svg>
+<style>
+	.dg { display: block; width: 100%; height: auto; font-family: var(--dg-font, system-ui, sans-serif); }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; }
+	.thick { stroke-width: calc(var(--dg-stroke, 2.5) * 2); }
+	.dash { stroke-dasharray: 4 6; stroke: var(--dg-good, #2e8b57); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.glass { fill: var(--dg-paper, #fff); fill-opacity: 0.25; }
+	.ink-fill { fill: var(--dg-ink, #1f2a37); }
+	.mark { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 16px; }
+	.b { font-weight: 700; }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
