@@ -45,6 +45,9 @@ The original course (Starlight docs) is kept at `/legacy/`.
 
 ## Writing rules
 
+The full lesson standard, including what makes a diagram work, is in
+[LESSON-GUIDE.md](./LESSON-GUIDE.md).
+
 - Plain English at about a grade 7 level, short sentences, second person, warm. No em dashes.
 - No tool, vendor or model names in lessons. Teach the method, not the buttons.
 - No lesson numbers anywhere a reader sees them.
