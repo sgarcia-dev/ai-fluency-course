@@ -1,0 +1,60 @@
+---
+// Tangled pieces clash in one shared doc; clean pieces each get their own output.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'helpers-working-in-parallel')?.figures?.find((f) => f.id === 'tangled')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const xs = [20, 125, 230];
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 380" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b bad-t" x="20" y="24">Tangled: one shared doc</text>
+			{xs.map((x) => (
+				<g>
+					<rect class="bad line" x={x} y="38" width="90" height="34" />
+					<text class="t b w" x={x + 45} y="61" text-anchor="middle">Helper</text>
+					<path class="line" d={`M${x + 45} 72 L170 112`} />
+				</g>
+			))}
+			<rect class="paper line" x="110" y="112" width="120" height="44" />
+			<text class="t b bad-t" x="170" y="140" text-anchor="middle">clash!</text>
+			<path class="line" stroke="var(--dg-bad, #c0392b)" d="M240 120 l16 16 M256 120 l-16 16" style="stroke: var(--dg-bad, #c0392b)" />
+
+			<path class="line dash" d="M10 186 L330 186" />
+			<text class="t b good-t" x="20" y="218">Clean: own piece, own output</text>
+			{xs.map((x, i) => (
+				<g>
+					<rect class="good line" x={x} y="232" width="90" height="34" />
+					<text class="t b w" x={x + 45} y="255" text-anchor="middle">Helper {i + 1}</text>
+					<path class="line" d={`M${x + 45} 266 L${x + 45} 292`} />
+					<rect class="paper line" x={x + 10} y="292" width="70" height="44" />
+					<circle class="good line" cx={x + 45} cy="314" r="11" />
+					<path class="tick" d={`M${x + 39} 314 l4 4 l8 -9`} />
+				</g>
+			))}
+			<text class="t muted" x="170" y="368" text-anchor="middle">each one checked on its own</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
