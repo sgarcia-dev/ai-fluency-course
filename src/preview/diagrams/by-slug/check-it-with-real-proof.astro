@@ -1,43 +1,52 @@
 ---
-// Ask the AI again (answers change) vs ask a calculator (same answer every time).
+// Eight tries: the AI is right 7 times and wrong once. A calculator is right all 8 times.
 import { samples } from '../../content';
 interface Props { wobble?: boolean }
 const { wobble = false } = Astro.props;
 const label = samples.find((s) => s.slug === 'check-it-with-real-proof')?.diagram.describe ?? '';
 const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
-const ys = [112, 164, 216];
-const ai = [{ v: '381', ok: false }, { v: '391', ok: true }, { v: '393', ok: false }];
-const L = 62, R = 206, W = 128;
+const W = 76, H = 62, G = 8, X0 = 6;
+const tries = Array.from({ length: 8 }, (_, i) => i);
+const pos = (i: number, top: number) => ({ x: X0 + (i % 4) * (W + G), y: top + Math.floor(i / 4) * (H + G) });
+const AI_TOP = 72, CALC_TOP = 336;
 ---
 <div class="dg-wrap" role="img" aria-label={label}>
-	<svg class="dg" viewBox="0 0 340 300" width="100%" aria-hidden="true">
+	<svg class="dg" viewBox="0 0 340 500" width="100%" aria-hidden="true">
 		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="7" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
 		<g filter={wobble ? `url(#${fid})` : undefined}>
 			<text class="t b q" x="170" y="24" text-anchor="middle">What is 17 x 23?</text>
-			<!-- Dice icon + header -->
-			<rect class="paper line" x={L + W / 2 - 15} y="38" width="30" height="30" />
-			<circle class="ink" cx={L + W / 2 - 7} cy="46" r="3" /><circle class="ink" cx={L + W / 2} cy="53" r="3" /><circle class="ink" cx={L + W / 2 + 7} cy="60" r="3" />
-			<text class="t b" x={L + W / 2} y="92" text-anchor="middle">Ask the AI again</text>
-			<!-- Calculator icon + header -->
-			<rect class="acc line" x={R + W / 2 - 13} y="36" width="26" height="34" />
-			<rect class="paper line thin" x={R + W / 2 - 8} y="41" width="16" height="8" />
-			{[0, 1].map((r) => [0, 1, 2].map((c) => <circle class="ink" cx={R + W / 2 - 7 + c * 7} cy={56 + r * 8} r="2" />))}
-			<text class="t b" x={R + W / 2} y="92" text-anchor="middle">Ask a calculator</text>
-			{ys.map((y, i) => (
-				<g>
-					<text class="t muted" x="4" y={y + 26}>Try {i + 1}</text>
-					<rect class={`line ${ai[i].ok ? 'good-f' : 'bad-f'}`} x={L} y={y} width={W} height="40" />
-					<text class="t b num" x={L + 48} y={y + 28} text-anchor="middle">{ai[i].v}</text>
-					{ai[i].ok
-						? <path class="mark good-m" d={`M${L + 92} ${y + 20} l7 8 l13 -15`} />
-						: <path class="mark bad-m" d={`M${L + 92} ${y + 10} l18 20 M${L + 110} ${y + 10} l-18 20`} />}
-					<rect class="line good-f" x={R} y={y} width={W} height="40" />
-					<text class="t b num" x={R + 48} y={y + 28} text-anchor="middle">391</text>
-					<path class="mark good-m" d={`M${R + 92} ${y + 20} l7 8 l13 -15`} />
-				</g>
-			))}
-			<text class="t b bad-t" x={L + W / 2} y="286" text-anchor="middle">Changes each time</text>
-			<text class="t b good-t" x={R + W / 2} y="286" text-anchor="middle">Same every time</text>
+			<text class="t b" x="6" y="60">Ask the AI</text>
+			{tries.map((i) => {
+				const { x, y } = pos(i, AI_TOP);
+				const ok = i < 7;
+				return (
+					<g>
+						{!ok && <rect class="acc" x={x - 5} y={y - 5} width={W + 10} height={H + 10} />}
+						<rect class={`line ${ok ? 'good-f' : 'bad-f'}`} x={x} y={y} width={W} height={H} />
+						<text class="t muted" x={x + 8} y={y + 21}>Try {i + 1}</text>
+						{ok
+							? <path class="mark good-m" d={`M${x + 56} ${y + 13} l4 5 l8 -9`} />
+							: <path class="mark bad-m" d={`M${x + 57} ${y + 9} l10 11 M${x + 67} ${y + 9} l-10 11`} />}
+						<text class={`t b num ${ok ? '' : 'bad-t'}`} x={x + W / 2} y={y + 51} text-anchor="middle">{ok ? '391' : '381'}</text>
+					</g>
+				);
+			})}
+			<text class="t b bad-t" x="170" y="242" text-anchor="middle">Right 7 times. Wrong on try 8.</text>
+			<rect class="acc" x="70" y="256" width="200" height="34" />
+			<text class="t b big" x="170" y="280" text-anchor="middle">Which try is today?</text>
+			<text class="t b" x="6" y="324">Ask a calculator</text>
+			{tries.map((i) => {
+				const { x, y } = pos(i, CALC_TOP);
+				return (
+					<g>
+						<rect class="line good-f" x={x} y={y} width={W} height={H} />
+						<text class="t muted" x={x + 8} y={y + 21}>Try {i + 1}</text>
+						<path class="mark good-m" d={`M${x + 56} ${y + 13} l4 5 l8 -9`} />
+						<text class="t b num" x={x + W / 2} y={y + 51} text-anchor="middle">391</text>
+					</g>
+				);
+			})}
+			<text class="t b good-t" x="170" y="492" text-anchor="middle">391 every time</text>
 		</g>
 	</svg>
 </div>
@@ -45,20 +54,18 @@ const L = 62, R = 206, W = 128;
 	.dg-wrap { max-width: 30rem; margin: 0 auto; font-family: var(--dg-font, system-ui, sans-serif); }
 	.dg { display: block; width: 100%; height: auto; }
 	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
-	.thin { stroke-width: 1.5; }
-	.paper { fill: var(--dg-paper, #fff); }
 	.acc { fill: var(--dg-accent, #f2c14e); }
-	.ink { fill: var(--dg-ink, #1f2a37); }
 	.good-f { fill: var(--dg-paper, #fff); stroke: var(--dg-good, #2e8b57); }
-	.bad-f { fill: var(--dg-paper, #fff); stroke: var(--dg-bad, #c0392b); stroke-dasharray: 6 4; }
-	.mark { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+	.bad-f { fill: var(--dg-paper, #fff); stroke: var(--dg-bad, #c0392b); stroke-width: 4; }
+	.mark { fill: none; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
 	.good-m { stroke: var(--dg-good, #2e8b57); }
 	.bad-m { stroke: var(--dg-bad, #c0392b); }
 	.t { fill: var(--dg-ink, #1f2a37); font-size: 16px; font-family: var(--dg-font, system-ui, sans-serif); }
-	.q { font-size: 19px; }
+	.q { font-size: 20px; }
+	.big { font-size: 19px; }
 	.num { font-size: 24px; }
 	.b { font-weight: 700; }
-	.muted { fill: var(--dg-muted, #5b6573); }
+	.muted { fill: var(--dg-muted, #5b6573); font-size: 15px; }
 	.good-t { fill: var(--dg-good, #2e8b57); }
 	.bad-t { fill: var(--dg-bad, #c0392b); }
 	rect { rx: var(--dg-radius, 8px); }

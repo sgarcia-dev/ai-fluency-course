@@ -4,15 +4,15 @@ export const lesson: Lesson = {
 	n: 12,
 	slug: 'check-it-with-real-proof',
 	title: 'Check it with real proof',
-	idea: 'A real check gives the same answer every time and does not care what the AI said. Match it to how much it costs to be wrong.',
+	idea: 'The AI is usually right, but you cannot tell which time it is wrong. A real check gives the same answer every time and does not care what the AI said. Match it to how much it costs to be wrong.',
 	minutes: 8,
 	sections: [
 		{
-			heading: 'A real check gives the same answer every time',
+			heading: 'Usually right is not always right',
 			body: [
-				'Type 17 x 23 into a calculator. You get 391. Do it again tomorrow. You get 391. It does not matter who asks or how they ask. Same question in, same answer out, every time.',
-				'The AI is different. It is a guesser. Ask it the same thing three times and you can get three answers. Most are right, but some are not, and it sounds just as sure either way.',
-				'So a real check has two parts. It gives the same answer every time. And it does not care what the AI said.',
+				'Ask the AI "What is 17 x 23?" and it will most likely say 391. That is right. Ask again and again, and it is right again and again. Then one day it says 381, just as calm and sure as before.',
+				'That is the trap. The AI is right most of the time, so you stop checking. But the rare miss is the one that hurts, and nothing in the reply tells you which time it is. A check is what catches that one miss.',
+				'A calculator says 391 every time, no matter who asks or how. That is what a real check looks like. It gives the same answer every time, and it does not care what the AI said.',
 			],
 		},
 		{
@@ -47,9 +47,9 @@ export const lesson: Lesson = {
 		},
 	],
 	diagram: {
-		caption: 'A real check gives the same answer every time.',
+		caption: 'The AI is usually right. A check catches the one time it is not.',
 		describe:
-			'Two columns side by side. Left, "Ask the AI again", with a dice icon: three tries of "What is 17 x 23?" give 381, 391 and 393. Two are marked wrong in red. Right, "Ask a calculator": three tries give 391, 391 and 391, all marked right in green.',
+			'The question "What is 17 x 23?" asked eight times. Top, "Ask the AI": tries 1 to 7 say 391 with green ticks, and try 8 says 381 with a red cross, highlighted in yellow. Under it: "Right 7 times. Wrong on try 8. Which try is today?" Bottom, "Ask a calculator": all eight tries say 391 with green ticks, "391 every time".',
 	},
 	examples: {
 		everyday: {
