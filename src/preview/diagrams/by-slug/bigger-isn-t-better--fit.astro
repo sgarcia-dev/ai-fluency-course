@@ -1,0 +1,60 @@
+---
+// Fit table: which model suits which job.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'bigger-isn-t-better')?.figures?.find((f) => f.id === 'fit')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const rows = [
+	{ job: 'Rewrite an email', quick: true },
+	{ job: 'Summarize a page', quick: true },
+	{ job: 'Plan a tricky project', quick: false },
+	{ job: 'Find a bug in big code', quick: false },
+];
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 330" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b" x="232" y="30" text-anchor="middle">Quick</text>
+			<text class="t b" x="306" y="22" text-anchor="middle">Big</text>
+			<text class="t b" x="306" y="40" text-anchor="middle">thinking</text>
+			{rows.map((r, i) => {
+				const y = 82 + i * 54;
+				const cells = [{ x: 232, best: r.quick }, { x: 306, best: !r.quick }];
+				return (
+					<g>
+						<path class="line dash" d={`M10 ${y + 27} L330 ${y + 27}`} />
+						<text class="t" x="10" y={y + 6}>{r.job}</text>
+						{cells.map((c) => c.best ? (
+							<g><circle class="good line" cx={c.x} cy={y} r="15" /><path class="tick" d={`M${c.x - 7} ${y} l5 5 l9 -10`} /></g>
+						) : <circle class="soft" cx={c.x} cy={y} r="7" />)}
+					</g>
+				);
+			})}
+			<circle class="good line" cx="24" cy="306" r="9" />
+			<text class="t" x="40" y="312">best fit</text>
+			<circle class="soft" cx="140" cy="306" r="7" />
+			<text class="t" x="154" y="312">overkill or struggles</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>

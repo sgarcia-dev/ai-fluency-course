@@ -1,0 +1,44 @@
+---
+// 100 everyday requests: quick is one small stack, big is about 10x.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'bigger-isn-t-better')?.figures?.find((f) => f.id === 'cost')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const big = Array.from({ length: 10 }, (_, i) => 222 - i * 18);
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 320" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b" x="170" y="24" text-anchor="middle">100 everyday requests</text>
+			<path class="line" d="M20 240 L320 240" />
+			<ellipse class="good line" cx="90" cy="230" rx="40" ry="8" />
+			<text class="t b good-t" x="90" y="206" text-anchor="middle">1x</text>
+			{big.map((y) => <ellipse class="bad line" cx="250" cy={y + 8} rx="40" ry="8" />)}
+			<text class="t b bad-t" x="250" y="48" text-anchor="middle">about 10x</text>
+			<text class="t b" x="90" y="264" text-anchor="middle">Quick</text>
+			<text class="t b" x="250" y="264" text-anchor="middle">Big</text>
+			<text class="t muted" x="170" y="304" text-anchor="middle">and your usage limit runs out sooner</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
