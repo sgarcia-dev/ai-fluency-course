@@ -1,0 +1,106 @@
+---
+import Layout from '../../../preview/designs/b-picture-book/Layout.astro';
+import Diagram from '../../../preview/designs/b-picture-book/Diagram.astro';
+import { site, samples, paths, worlds, type Lesson } from '../../../preview/content';
+export function getStaticPaths() {
+	return samples.map((lesson) => ({ params: { slug: lesson.slug }, props: { lesson } }));
+}
+const { lesson } = Astro.props as { lesson: Lesson };
+const base = '/preview/b-picture-book/';
+const pathData = JSON.stringify(paths.map((p) => ({ id: p.id, name: p.name, lessons: p.lessons })));
+---
+<Layout title={`${lesson.title} · ${site.name}`}>
+	<div class="pb-top">
+		<div class="pb-wrap">
+			<a href={base}>← {site.name}</a>
+			<span id="pb-progress"><a href={base + '#map'}>See the full map</a></span>
+		</div>
+	</div>
+	<main class="pb-lesson">
+		<p class="pb-eyebrow">Lesson {lesson.n} · {lesson.minutes} minutes</p>
+		<h1>{lesson.title}</h1>
+		<p class="pb-idea"><strong>The one idea:</strong> {lesson.idea}</p>
+
+		{lesson.sections.map((s, i) => (
+			<>
+				<h2>{s.heading}</h2>
+				{s.body.map((p) => <p>{p}</p>)}
+				{i === 0 && <Diagram caption={lesson.diagram.caption} describe={lesson.diagram.describe} />}
+			</>
+		))}
+
+		{lesson.examples && (
+			<section class="pb-ex" aria-labelledby="ex-h">
+				<h2 id="ex-h">See it in your world</h2>
+				<div class="pb-tabs" role="tablist">
+					{worlds.map((w) => <button class="pb-chip" role="tab" type="button" id={'tab-' + w.id} data-world={w.id} aria-controls={'panel-' + w.id} aria-selected="false">{w.label}</button>)}
+				</div>
+				{worlds.map((w) => {
+					const e = lesson.examples![w.id];
+					return (
+						<div class="pb-ba" role="tabpanel" id={'panel-' + w.id} aria-labelledby={'tab-' + w.id} data-panel={w.id} hidden={w.id !== 'everyday'}>
+							<div class="b"><strong>Before</strong>{e.before}</div>
+							<div class="a"><strong>After</strong>{e.after}</div>
+							<div><strong>Why it works</strong>{e.why}</div>
+						</div>
+					);
+				})}
+			</section>
+		)}
+
+		<section class="pb-try">
+			<h2 style="margin-top:0">Try this now: {lesson.tryThis.title}</h2>
+			<ol>{lesson.tryThis.steps.map((s) => <li>{s}</li>)}</ol>
+		</section>
+
+		<section class="pb-check" data-answer={lesson.check.answer}>
+			<h2 style="margin-top:0">Quick check</h2>
+			<p>{lesson.check.question}</p>
+			{lesson.check.options.map((o, i) => <button class="pb-opt" type="button" data-i={i}>{o}</button>)}
+			<p class="pb-result" aria-live="polite"></p>
+			<p class="pb-explain" hidden>{lesson.check.explain}</p>
+		</section>
+
+		<p class="pb-next">Next: {lesson.next}</p>
+		<p><a href={base + '#map'}>Back to the map</a></p>
+	</main>
+
+	<script define:vars={{ pathData, n: lesson.n, base }}>
+		const get = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+		const set = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+		const p = JSON.parse(pathData).find((x) => x.id === get('aip-path'));
+		if (p) {
+			const i = p.lessons.indexOf(n);
+			const el = document.getElementById('pb-progress');
+			const pct = i >= 0 ? Math.round(((i + 1) / p.lessons.length) * 100) : 0;
+			el.className = 'pb-prog';
+			el.innerHTML = '';
+			const label = document.createElement('a');
+			label.href = base + '#paths';
+			label.textContent = i >= 0 ? `Your path: ${p.name}, ${i + 1} of ${p.lessons.length}` : `Your path: ${p.name} (this one is extra)`;
+			const bar = document.createElement('span');
+			bar.className = 'pb-bar'; bar.setAttribute('aria-hidden', 'true');
+			bar.innerHTML = `<i style="width:${pct}%"></i>`;
+			el.append(label, bar);
+		}
+		const tabs = document.querySelectorAll('.pb-tabs .pb-chip');
+		function showWorld(id) {
+			tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.world === id)));
+			document.querySelectorAll('[data-panel]').forEach((d) => (d.hidden = d.dataset.panel !== id));
+		}
+		if (tabs.length) {
+			tabs.forEach((t) => t.addEventListener('click', () => { set('aip-world', t.dataset.world); showWorld(t.dataset.world); }));
+			showWorld(get('aip-world') || 'everyday');
+		}
+		const box = document.querySelector('.pb-check');
+		const ans = Number(box.dataset.answer);
+		box.querySelectorAll('.pb-opt').forEach((b) => b.addEventListener('click', () => {
+			const i = Number(b.dataset.i);
+			box.querySelectorAll('.pb-opt').forEach((o) => o.classList.remove('right', 'wrong'));
+			b.classList.add(i === ans ? 'right' : 'wrong');
+			if (i !== ans) box.querySelector(`[data-i="${ans}"]`).classList.add('right');
+			box.querySelector('.pb-result').textContent = i === ans ? 'Yes, that is right.' : 'Not quite. The green one is right.';
+			box.querySelector('.pb-explain').hidden = false;
+		}));
+	</script>
+</Layout>

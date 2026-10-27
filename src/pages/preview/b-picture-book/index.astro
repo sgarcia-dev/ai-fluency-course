@@ -1,0 +1,141 @@
+---
+import Layout from '../../../preview/designs/b-picture-book/Layout.astro';
+import Character from '../../../preview/designs/b-picture-book/Character.astro';
+import { site, parts, paths, worlds, samples, lessonByNumber } from '../../../preview/content';
+const base = '/preview/b-picture-book/';
+const sampleNums = new Set(samples.map((s) => s.n));
+const sampleSlug = (n: number) => samples.find((s) => s.n === n)?.slug;
+const pathIcons = ['you', 'notepad', 'ai', 'checker'] as const;
+const pathData = JSON.stringify(paths.map((p) => ({ id: p.id, lessons: p.lessons })));
+---
+<Layout title={`${site.name}: ${site.tagline}`}>
+	<header class="pb-hero">
+		<div class="pb-wrap">
+			<p class="pb-eyebrow">A free course</p>
+			<h1>{site.name}</h1>
+			<p class="tag">{site.tagline}</p>
+			<p class="pitch">{site.pitch}</p>
+			<a class="pb-btn" href="#paths">Find your path</a>
+			<div class="pb-cast" aria-label="The cast you will meet in every lesson">
+				<div><Character who="you" /><b>You</b><small>The one asking.</small></div>
+				<div><Character who="ai" /><b>The AI</b><small>A fast, well-read helper.</small></div>
+				<div><Character who="notepad" /><b>Its Notepad</b><small>All it can see right now.</small></div>
+				<div><Character who="checker" /><b>The Checker</b><small>How you know it is right.</small></div>
+			</div>
+			<p class="pb-note"><strong>Note:</strong> {site.status} <em>{site.nameNote}</em></p>
+		</div>
+	</header>
+
+	<main>
+		<section id="paths" class="pb-section">
+			<div class="pb-wrap">
+				<p class="pb-eyebrow">Find your path</p>
+				<h2>Which one sounds like you?</h2>
+				<div class="pb-paths">
+					{paths.map((p, i) => (
+						<button class="pb-path" type="button" data-path={p.id} aria-pressed="false">
+							<Character who={pathIcons[i % 4]} size={64} label="" />
+							<span class="says">"{p.says}"</span>
+							<span class="nm">{p.name} · {p.lessons.length} lessons</span>
+						</button>
+					))}
+				</div>
+				{paths.map((p) => (
+					<div class="pb-chosen" data-for={p.id} hidden>
+						<h3>Your path: {p.name}</h3>
+						<ol>
+							{p.lessons.map((n) => {
+								const l = lessonByNumber(n);
+								const s = sampleSlug(n);
+								return <li>{s ? <a href={base + s + '/'}>{l.title}</a> : l.title}</li>;
+							})}
+						</ol>
+					</div>
+				))}
+				<fieldset class="pb-worlds">
+					<legend>Where will you use it most? Examples will match.</legend>
+					{worlds.map((w) => <button class="pb-chip" type="button" data-world={w.id} aria-pressed="false">{w.label}</button>)}
+				</fieldset>
+			</div>
+		</section>
+
+		<section class="pb-section pb-band">
+			<div class="pb-wrap pb-read">
+				<p class="pb-eyebrow">Why this exists</p>
+				<h2>Time, not talent</h2>
+				{site.why.map((p) => <p>{p}</p>)}
+			</div>
+		</section>
+
+		<section class="pb-section">
+			<div class="pb-wrap">
+				<p class="pb-eyebrow">How it is different</p>
+				<h2>Made to be finished</h2>
+				<div class="pb-diff">
+					{site.different.map((d) => <div><h3>{d.title}</h3><p>{d.body}</p></div>)}
+				</div>
+			</div>
+		</section>
+
+		<section id="map" class="pb-section pb-band">
+			<div class="pb-wrap">
+				<p class="pb-eyebrow">The map</p>
+				<h2>All {parts.reduce((a, p) => a + p.lessons.length, 0)} lessons</h2>
+				<p id="pb-map-note">Pick a path above and the lessons that are not on it will fade back.</p>
+				{parts.map((part) => (
+					<div class="pb-part">
+						<h3>Part {part.n}: {part.title}<small>For {part.for.charAt(0).toLowerCase() + part.for.slice(1)}</small></h3>
+						<ul class="pb-lessons">
+							{part.lessons.map((l) => (
+								<li data-n={l.n} class={sampleNums.has(l.n) ? 'sample' : ''}>
+									<span class="n">{l.n}</span><span class="t">{l.title}</span>
+									<p>{l.idea}</p>
+									{sampleNums.has(l.n) && <a class="pb-sample" href={base + l.slug + '/'}>Read a sample →</a>}
+								</li>
+							))}
+						</ul>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class="pb-section">
+			<div class="pb-wrap pb-read">
+				<p class="pb-eyebrow">About the author</p>
+				<h2>Hi, I am {site.author.name}</h2>
+				<p>{site.author.story}</p>
+				<p><a href={site.author.url}>More about me</a></p>
+			</div>
+		</section>
+
+		<section class="pb-section">
+			<div class="pb-wrap">
+				<div class="pb-cta">
+					<h2>Tell me what you think</h2>
+					<p>Met me at a meetup? I would love to hear what confused you, what you liked, and what is missing.</p>
+					<a class="pb-btn" href={site.feedbackUrl}>Send feedback</a>
+				</div>
+			</div>
+		</section>
+	</main>
+	<footer class="pb-foot"><div class="pb-wrap">{site.name}. Free, always.</div></footer>
+
+	<script define:vars={{ pathData }}>
+		const all = JSON.parse(pathData);
+		const get = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+		const set = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+		function showPath(id) {
+			document.querySelectorAll('.pb-path').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.path === id)));
+			document.querySelectorAll('.pb-chosen').forEach((d) => (d.hidden = d.dataset.for !== id));
+			const p = all.find((x) => x.id === id);
+			document.querySelectorAll('.pb-lessons li').forEach((li) => li.classList.toggle('dim', !!p && !p.lessons.includes(Number(li.dataset.n))));
+		}
+		function showWorld(id) {
+			document.querySelectorAll('.pb-chip').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.world === id)));
+		}
+		document.querySelectorAll('.pb-path').forEach((b) => b.addEventListener('click', () => { set('aip-path', b.dataset.path); showPath(b.dataset.path); }));
+		document.querySelectorAll('.pb-chip').forEach((b) => b.addEventListener('click', () => { set('aip-world', b.dataset.world); showWorld(b.dataset.world); }));
+		const p0 = get('aip-path'); if (p0) showPath(p0);
+		showWorld(get('aip-world') || 'everyday');
+	</script>
+</Layout>

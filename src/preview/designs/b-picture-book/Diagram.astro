@@ -1,0 +1,19 @@
+---
+// A small scene with the whole cast. The lesson's `describe` text is the accessible description.
+import Character from './Character.astro';
+interface Props { caption: string; describe: string }
+const { caption, describe } = Astro.props;
+---
+<figure class="pb-diagram">
+	<div class="pb-scene" role="img" aria-label={describe}>
+		<div class="pb-actor"><Character who="you" size={84} /><span>You</span></div>
+		<svg class="pb-arrow" viewBox="0 0 60 30" aria-hidden="true"><path filter="url(#pb-wobble)" d="M4 15 C20 8 36 22 52 15 M44 8 L54 15 L44 22" fill="none" stroke="#1f2a37" stroke-width="3" stroke-linecap="round"/></svg>
+		<div class="pb-actor"><Character who="notepad" size={70} /><span>Notepad</span></div>
+		<svg class="pb-arrow" viewBox="0 0 60 30" aria-hidden="true"><path filter="url(#pb-wobble)" d="M4 15 C20 8 36 22 52 15 M44 8 L54 15 L44 22" fill="none" stroke="#1f2a37" stroke-width="3" stroke-linecap="round"/></svg>
+		<div class="pb-actor"><Character who="ai" size={84} /><span>AI</span></div>
+		<svg class="pb-arrow" viewBox="0 0 60 30" aria-hidden="true"><path filter="url(#pb-wobble)" d="M4 15 C20 8 36 22 52 15 M44 8 L54 15 L44 22" fill="none" stroke="#1f2a37" stroke-width="3" stroke-linecap="round"/></svg>
+		<div class="pb-actor"><Character who="checker" size={70} /><span>Checker</span></div>
+	</div>
+	<p class="pb-describe">{describe}</p>
+	<figcaption>{caption}</figcaption>
+</figure>
