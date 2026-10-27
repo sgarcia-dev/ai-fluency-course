@@ -1,0 +1,186 @@
+---
+import Base from '../../../preview/designs/c-subway/Base.astro';
+import { site, samples, paths, worlds, allLessons } from '../../../preview/content';
+import { colorFor, sampleSlugs } from '../../../preview/designs/c-subway/lines';
+export function getStaticPaths() {
+	return samples.map((s) => ({ params: { slug: s.slug }, props: { lesson: s } }));
+}
+const { lesson } = Astro.props;
+const base = '/preview/c-subway/';
+// Diagram: split the description into stops along a line.
+const steps = lesson.diagram.describe.split(/(?<=[.!?])\s+(?=[A-Z])/).filter(Boolean);
+const rowH = 62;
+const strip = {
+	paths: paths.map((p) => ({ id: p.id, name: p.name, color: colorFor(p.id), stops: p.lessons.map((n) => {
+		const l = allLessons.find((x) => x.n === n)!;
+		return { n, title: l.title, href: sampleSlugs.has(l.slug) ? `${base}${l.slug}/` : '' };
+	}) })),
+	current: lesson.n,
+};
+---
+<Base title={`${lesson.title} | ${site.name}`}>
+<nav class="strip" id="strip" data-strip={JSON.stringify(strip)} aria-label="Your line">
+	<a href={`${base}#map`} class="back">Back to the map</a>
+	<ol class="strip-line"></ol>
+</nav>
+<main class="read">
+	<p class="meta sign">Lesson {lesson.n} . {lesson.minutes} minutes</p>
+	<h1>{lesson.title}</h1>
+	<aside class="idea"><strong class="sign">The one idea</strong><p>{lesson.idea}</p></aside>
+
+	{lesson.sections.map((s, i) => (
+		<section>
+			<h2>{s.heading}</h2>
+			{s.body.map((p) => <p>{p}</p>)}
+			{i === 0 && (
+				<figure class="diagram">
+					<svg viewBox={`0 0 600 ${steps.length * rowH + 20}`} role="img" aria-label={lesson.diagram.caption}>
+						<line x1="30" x2="30" y1="30" y2={(steps.length - 1) * rowH + 30} stroke="#1D4ED8" stroke-width="10" stroke-linecap="round" />
+						{steps.map((t, j) => (
+							<g>
+								<circle cx="30" cy={j * rowH + 30} r="11" fill="#fff" stroke="#16181d" stroke-width="5" />
+								<foreignObject x="56" y={j * rowH + 6} width="540" height={rowH - 6}>
+									<p class="dstep">{t}</p>
+								</foreignObject>
+							</g>
+						))}
+					</svg>
+					<figcaption>{lesson.diagram.caption}</figcaption>
+				</figure>
+			)}
+		</section>
+	))}
+
+	{lesson.examples && (
+		<section class="ex" id="ex">
+			<h2>See it in your world</h2>
+			<div role="tablist" aria-label="Pick a world" class="tabs">
+				{worlds.map((w, i) => (
+					<button role="tab" id={`tab-${w.id}`} aria-controls={`panel-${w.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-w={w.id}>{w.label}</button>
+				))}
+			</div>
+			{worlds.map((w, i) => {
+				const e = lesson.examples![w.id];
+				return (
+					<div role="tabpanel" id={`panel-${w.id}`} aria-labelledby={`tab-${w.id}`} hidden={i !== 0} class="panel">
+						<p class="lbl before">Before</p><p class="q">{e.before}</p>
+						<p class="lbl after">After</p><p class="q">{e.after}</p>
+						<p><strong>Why it works:</strong> {e.why}</p>
+					</div>
+				);
+			})}
+		</section>
+	)}
+
+	<section class="try">
+		<h2>Try this now: {lesson.tryThis.title}</h2>
+		<ol>{lesson.tryThis.steps.map((s) => <li>{s}</li>)}</ol>
+	</section>
+
+	<section class="check" id="check">
+		<h2>Quick check</h2>
+		<p><strong>{lesson.check.question}</strong></p>
+		<div class="opts">
+			{lesson.check.options.map((o, i) => (
+				<button type="button" data-i={i} data-right={String(i === lesson.check.answer)}>{o}</button>
+			))}
+		</div>
+		<p class="result" aria-live="polite"></p>
+		<p class="explain" hidden>{lesson.check.explain}</p>
+	</section>
+
+	<p class="next"><span class="bullet" aria-hidden="true"></span>Next station. {lesson.next}</p>
+	<p><a href={`${base}#map`}>Back to the map</a> . <a href={site.feedbackUrl}>Send feedback on this lesson</a></p>
+</main>
+
+<script>
+	const nav = document.getElementById('strip')!;
+	const data = JSON.parse(nav.dataset.strip!);
+	const ol = nav.querySelector('ol')!;
+	let id = '';
+	try { id = localStorage.getItem('aip-path') || ''; } catch {}
+	const p = data.paths.find((x: any) => x.id === id && x.stops.some((s: any) => s.n === data.current));
+	if (p) {
+		nav.style.setProperty('--c', p.color);
+		const h = document.createElement('li'); h.className = 'lname'; h.textContent = p.name + ' line'; ol.append(h);
+		for (const s of p.stops) {
+			const li = document.createElement('li');
+			const el = document.createElement(s.href && s.n !== data.current ? 'a' : 'span');
+			if (el instanceof HTMLAnchorElement) el.href = s.href;
+			el.className = 'sdot' + (s.n === data.current ? ' cur' : '');
+			el.title = s.title;
+			el.setAttribute('aria-label', `Lesson ${s.n}: ${s.title}${s.n === data.current ? ', you are here' : ''}`);
+			li.append(el); ol.append(li);
+		}
+	} else {
+		const li = document.createElement('li');
+		li.innerHTML = 'No line picked yet. <a href="/preview/c-subway/#map">Pick your line on the map</a>.';
+		ol.append(li);
+	}
+	// Tabs
+	const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role=tab]')];
+	function sel(t: HTMLButtonElement, save = true) {
+		tabs.forEach((x) => {
+			const on = x === t;
+			x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1;
+			document.getElementById(x.getAttribute('aria-controls')!)!.hidden = !on;
+		});
+		if (save) try { localStorage.setItem('aip-world', t.dataset.w!); } catch {}
+	}
+	tabs.forEach((t, i) => {
+		t.addEventListener('click', () => sel(t));
+		t.addEventListener('keydown', (e) => {
+			const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+			if (d) { const n = tabs[(i + d + tabs.length) % tabs.length]; sel(n); n.focus(); }
+		});
+	});
+	try { const w = localStorage.getItem('aip-world'); const t = tabs.find((x) => x.dataset.w === w); if (t) sel(t, false); } catch {}
+	// Check
+	const res = document.querySelector<HTMLElement>('.result')!;
+	document.querySelectorAll<HTMLButtonElement>('.opts button').forEach((b, _, all) => b.addEventListener('click', () => {
+		all.forEach((x) => x.classList.remove('picked', 'right', 'wrong'));
+		const ok = b.dataset.right === 'true';
+		b.classList.add('picked', ok ? 'right' : 'wrong');
+		res.textContent = ok ? 'Right.' : 'Not quite. Try another one.';
+		res.className = 'result ' + (ok ? 'ok' : 'no');
+		document.querySelector<HTMLElement>('.explain')!.hidden = !ok;
+	}));
+</script>
+
+<style is:global>
+	.strip{--c:#16181d;border-bottom:1px solid #e5e7eb;padding:.6rem 1.25rem;display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;align-items:center;font-size:.9rem}
+	.strip-line{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;row-gap:.4rem}
+	.strip-line li{display:flex;align-items:center}
+	.strip-line .lname{font-weight:700;margin-right:.6rem}
+	.strip-line li+li:not(:nth-child(2))::before{content:"";width:.8rem;height:6px;background:var(--c)}
+	.sdot{display:block;width:1rem;height:1rem;border-radius:50%;border:3px solid var(--c);background:#fff}
+	a.sdot{background:#fde68a}
+	.sdot.cur{width:1.5rem;height:1.5rem;background:var(--c);box-shadow:0 0 0 3px #fff,0 0 0 5px #16181d}
+	.dstep{margin:0;font:1rem/1.35 'Atkinson Hyperlegible',sans-serif;color:#16181d}
+</style>
+<style>
+	.read{max-width:40rem;margin:0 auto;padding:2rem 1.25rem 4rem}
+	.meta{font-weight:700;color:#4b5060;margin:0}
+	h1{font-size:clamp(2rem,6vw,2.8rem);margin:.3rem 0 1.2rem}
+	h2{font-size:1.4rem;margin:2.2rem 0 .6rem}
+	.idea{background:#fff7d6;border-left:8px solid #16181d;padding:.8rem 1rem;border-radius:4px}
+	.idea p{margin:.3rem 0 0;font-size:1.15rem}
+	.diagram{margin:1.5rem 0;padding:1rem;border:3px solid #16181d;border-radius:12px}
+	.diagram svg{width:100%;height:auto;display:block}
+	figcaption{font-weight:700;margin-top:.6rem}
+	.tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.8rem}
+	.tabs button{font:inherit;font-weight:700;border:2px solid #16181d;background:#fff;color:#16181d;border-radius:999px;padding:.35rem .9rem;cursor:pointer}
+	.tabs button[aria-selected=true]{background:#16181d;color:#fff}
+	.lbl{font-weight:700;margin:.8rem 0 .2rem;text-transform:uppercase;font-size:.8rem;letter-spacing:.06em}
+	.before{color:#9f1239}.after{color:#0B6E4F}
+	.q{background:#f3f4f6;padding:.6rem .8rem;border-radius:8px;margin:0;overflow-wrap:anywhere}
+	.try{border:3px solid #0B6E4F;border-radius:12px;padding:0 1rem .5rem;margin-top:2rem}
+	.opts{display:grid;gap:.5rem}
+	.opts button{font:inherit;text-align:left;padding:.6rem .9rem;border:2px solid #6b7280;border-radius:10px;background:#fff;color:#16181d;cursor:pointer}
+	.opts button.right{border-color:#0B6E4F;background:#dcfce7}
+	.opts button.wrong{border-color:#9f1239;background:#ffe4e6}
+	.result.ok{color:#0B6E4F;font-weight:700}.result.no{color:#9f1239;font-weight:700}
+	.next{display:flex;gap:.6rem;align-items:center;font-weight:700;border-top:6px solid #16181d;padding-top:1rem;margin-top:2.5rem}
+	.bullet{flex:none;width:1.2rem;height:1.2rem;border-radius:50%;border:4px solid #16181d;background:#fff}
+</style>
+</Base>

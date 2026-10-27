@@ -1,0 +1,238 @@
+---
+import Base from '../../../preview/designs/c-subway/Base.astro';
+import { site, paths, parts, worlds, lessonByNumber, allLessons } from '../../../preview/content';
+import { layout, colorFor, sampleSlugs, pathsFor } from '../../../preview/designs/c-subway/lines';
+const L = layout();
+const base = '/preview/c-subway/';
+const partOf = (n: number) => parts.find((p) => p.lessons.some((l) => l.n === n))!;
+---
+<Base title={`${site.name}: the map`}>
+<header class="hero">
+	<p class="brand sign"><span class="dot" aria-hidden="true"></span>{site.name}</p>
+	<h1>{site.tagline}</h1>
+	<p class="pitch">{site.pitch}</p>
+	<p class="status"><strong>Note:</strong> {site.status}</p>
+</header>
+
+<main id="map" class="network" data-path="" data-ideas={JSON.stringify(Object.fromEntries(allLessons.map((l) => [l.n, l.idea])))}>
+	<section class="picker" aria-labelledby="pick-h">
+		<h2 id="pick-h" class="sign">Pick your line</h2>
+		<div class="lines" role="group" aria-label="Lines">
+			{paths.map((p) => (
+				<button type="button" class="line-btn" data-line={p.id} aria-pressed="false" style={`--c:${colorFor(p.id)}`}>
+					<span class="bullet" aria-hidden="true"></span>
+					<span><strong>{p.says}</strong><small>{p.name} line, {p.lessons.length} stops</small></span>
+				</button>
+			))}
+		</div>
+	</section>
+
+	<figure class="overview">
+		<svg viewBox={`0 0 ${L.width} ${L.height}`} role="group" aria-label="Network map of all lessons">
+			{L.zones.map((z, i) => (
+				<g>
+					<rect x={z.x0} y="8" width={z.x1 - z.x0} height={L.height - 16} rx="10" fill={i % 2 ? '#f3f4f6' : '#fafafa'} />
+					<text x={z.x0 + 8} y="30" class="zone-n">ZONE {z.n}</text>
+					<text x={z.x0 + 8} y="48" class="zone-t">{z.title}</text>
+				</g>
+			))}
+			{L.lines.map((l) => (
+				<line class="track" data-line={l.id} x1={l.x0} x2={l.x1} y1={l.y} y2={l.y} stroke={l.color} stroke-width="10" stroke-linecap="round" />
+			))}
+			{L.stations.map((s) => {
+				const href = sampleSlugs.has(s.slug) ? `${base}${s.slug}/` : undefined;
+				const label = `Lesson ${s.n}: ${s.title}${href ? '. Sample, open it' : ''}`;
+				const inter = s.lanes.length > 1;
+				const body = (
+					<>
+						<title>{label}</title>
+						{inter ? (
+							<rect x={s.x - 10} y={s.y0 - 10} width="20" height={s.y1 - s.y0 + 20} rx="10" fill="#fff" stroke="#16181d" stroke-width="4" />
+						) : (
+							s.lanes.map((i) => <circle cx={s.x} cy={L.lines[i].y} r="7" fill="#fff" stroke={L.lines[i].color} stroke-width="4" />)
+						)}
+						{href && <circle cx={s.x} cy={s.y0 - 22} r="5" fill="#16181d" />}
+						<text x={s.x} y={L.height - 14} class="num">{s.n}</text>
+					</>
+				);
+				return href ? (
+					<a href={href} class="st" data-n={s.n} data-on={s.ids.join(' ')} aria-label={label}>{body}</a>
+				) : (
+					<g class="st" tabindex="0" role="button" data-n={s.n} data-on={s.ids.join(' ')} aria-label={label}>{body}</g>
+				);
+			})}
+			{L.lines.map((l) => {
+				const st = L.stations.find((s) => s.n === l.first)!;
+				return (
+					<g class="here" data-line={l.id} aria-hidden="true">
+						<rect x={st.x - 4} y={l.y - 58} width="104" height="26" rx="13" fill="#16181d" />
+						<text x={st.x + 48} y={l.y - 40} class="here-t">You are here</text>
+						<path d={`M${st.x + 4} ${l.y - 33} l6 10 l6 -10z`} fill="#16181d" />
+					</g>
+				);
+			})}
+		</svg>
+		<figcaption>Overview. Dots above a stop mark the two sample lessons. White stops with a black ring are interchanges, shared by more than one line.</figcaption>
+		<p class="info" id="info" aria-live="polite"></p>
+	</figure>
+
+	<section class="chosen" aria-live="polite">
+		<p class="empty">Pick a line above to see its stops.</p>
+		{paths.map((p) => (
+			<div class="route" data-line={p.id} style={`--c:${colorFor(p.id)}`} hidden>
+				<h2 class="sign route-h"><span class="bullet" aria-hidden="true"></span>{p.name} line</h2>
+				<fieldset class="worlds">
+					<legend>Where will you use it? Examples follow your choice.</legend>
+					{worlds.map((w) => (
+						<label><input type="radio" name={`world-${p.id}`} value={w.id} /> {w.label}</label>
+					))}
+				</fieldset>
+				<ol class="stops">
+					{p.lessons.map((n, i) => {
+						const l = lessonByNumber(n);
+						const others = pathsFor(n).filter((id) => id !== p.id);
+						return (
+							<li class:list={['stop', { inter: others.length, sample: sampleSlugs.has(l.slug) }]}>
+								{i === 0 && <span class="you sign">You are here</span>}
+								<span class="zone">Zone {partOf(n).n}</span>
+								{sampleSlugs.has(l.slug) ? (
+									<a class="stop-t" href={`${base}${l.slug}/`}>{l.title} <span class="tag">Read sample</span></a>
+								) : (
+									<span class="stop-t">{l.title} <span class="tag soon">Coming soon</span></span>
+								)}
+								<span class="idea">{l.idea}</span>
+								{others.length > 0 && (
+									<span class="change">Change here for {others.map((id) => (
+										<span class="mini" style={`--c:${colorFor(id)}`}>{paths.find((q) => q.id === id)!.name}</span>
+									))}</span>
+								)}
+							</li>
+						);
+					})}
+				</ol>
+			</div>
+		))}
+	</section>
+</main>
+
+<section class="band">
+	<h2>Why this exists</h2>
+	{site.why.map((p) => <p>{p}</p>)}
+</section>
+<section class="band">
+	<h2>How it is different</h2>
+	<ul class="diff">
+		{site.different.map((d, i) => (
+			<li style={`--c:${colorFor(paths[i % paths.length].id)}`}><h3>{d.title}</h3><p>{d.body}</p></li>
+		))}
+	</ul>
+</section>
+<section class="band">
+	<h2>About the author</h2>
+	<p>{site.author.story}</p>
+	<p><a href={site.author.url}>{site.author.name}</a></p>
+</section>
+<section class="band cta">
+	<h2>Tell me what you think</h2>
+	<p>Met me at a meetup? I would love to hear what worked for you and what did not. One line is plenty.</p>
+	<p><a class="btn" href={site.feedbackUrl}>Send feedback</a></p>
+	<p class="small">{site.nameNote}</p>
+</section>
+
+<script>
+	const root = document.getElementById('map')!;
+	const info = document.getElementById('info')!;
+	const btns = [...root.querySelectorAll<HTMLButtonElement>('.line-btn')];
+	const routes = [...root.querySelectorAll<HTMLElement>('.route')];
+	function choose(id: string, save = true) {
+		root.dataset.path = id;
+		btns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.line === id)));
+		routes.forEach((r) => (r.hidden = r.dataset.line !== id));
+		root.querySelector<HTMLElement>('.empty')!.hidden = !!id;
+		root.querySelectorAll<SVGElement>('.st').forEach((s) => s.classList.toggle('dim', !!id && !(s.dataset.on || '').split(' ').includes(id)));
+		if (save) try { localStorage.setItem('aip-path', id); } catch {}
+	}
+	function setWorld(w: string) {
+		root.querySelectorAll<HTMLInputElement>('.worlds input').forEach((i) => (i.checked = i.value === w));
+		try { localStorage.setItem('aip-world', w); } catch {}
+	}
+	btns.forEach((b) => b.addEventListener('click', () => choose(b.dataset.line!)));
+	root.querySelectorAll<HTMLInputElement>('.worlds input').forEach((i) => i.addEventListener('change', () => setWorld(i.value)));
+	root.querySelectorAll<SVGGElement>('g.st').forEach((g) => {
+		const show = () => { info.textContent = (g.querySelector('title')?.textContent || '') + '. ' + (ideas[g.dataset.n!] || '') + ' Coming soon.'; };
+		g.addEventListener('click', show);
+		g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(); } });
+	});
+	const ideas: Record<string, string> = JSON.parse(root.dataset.ideas || '{}');
+	try {
+		const p = localStorage.getItem('aip-path');
+		if (p && btns.some((b) => b.dataset.line === p)) choose(p, false);
+		const w = localStorage.getItem('aip-world');
+		root.querySelectorAll<HTMLInputElement>('.worlds input').forEach((i) => (i.checked = i.value === (w || 'everyday')));
+	} catch {}
+</script>
+
+<style>
+	.hero,.network,.band{max-width:72rem;margin:0 auto;padding:0 1.25rem}
+	.hero{padding-top:2.5rem;padding-bottom:1.5rem}
+	.brand{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1.1rem;margin:0}
+	.dot{width:1.4rem;height:1.4rem;border-radius:50%;border:5px solid #16181d;background:#fff}
+	h1{font-size:clamp(2.4rem,7vw,4.5rem);font-weight:800;margin:.6rem 0 .8rem;letter-spacing:-.02em}
+	.pitch{font-size:1.25rem;max-width:40rem;margin:0 0 1rem}
+	.status{font-size:.95rem;background:#fff7d6;border-left:6px solid #16181d;padding:.5rem .8rem;max-width:40rem}
+	.picker h2{font-size:1.5rem;margin:1.5rem 0 .8rem}
+	.lines{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.6rem}
+	.line-btn{display:flex;gap:.8rem;align-items:center;text-align:left;font:inherit;color:#16181d;background:#fff;border:3px solid var(--c);border-radius:999px;padding:.6rem 1rem;cursor:pointer;transition:background .15s}
+	.line-btn small{display:block;font-size:.85rem;color:#4b5060}
+	.line-btn[aria-pressed=true]{background:var(--c);color:#fff}
+	.line-btn[aria-pressed=true] small{color:#fff}
+	.bullet{flex:none;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--c);border:4px solid #fff;box-shadow:0 0 0 3px var(--c);display:inline-block}
+	.overview{margin:1.5rem 0 0}
+	.overview svg{display:block;width:100%;height:auto}
+	.overview figcaption,.small{font-size:.9rem;color:#4b5060}
+	.info{min-height:1.6em;font-weight:700}
+	.zone-n{font:800 11px 'Inter Tight',sans-serif;fill:#4b5060;letter-spacing:.08em}
+	.zone-t{font:800 14px 'Inter Tight',sans-serif;fill:#16181d}
+	.num{font:700 12px 'Inter Tight',sans-serif;fill:#4b5060;text-anchor:middle}
+	.here-t{font:800 12px 'Inter Tight',sans-serif;fill:#fff;text-anchor:middle}
+	.st{cursor:pointer;outline:none}
+	.st:focus-visible rect,.st:focus-visible circle{stroke:#f59e0b;stroke-width:6}
+	.st:hover rect,.st:hover circle{fill:#fde68a}
+	.track,.st{transition:opacity .2s}
+	.here{display:none}
+	.network:not([data-path=""]) .track{opacity:.15}
+	.network[data-path=new] .track[data-line=new],.network[data-path=hit-or-miss] .track[data-line=hit-or-miss],
+	.network[data-path=daily] .track[data-line=daily],.network[data-path=builder] .track[data-line=builder]{opacity:1}
+	.network[data-path=new] .here[data-line=new],.network[data-path=hit-or-miss] .here[data-line=hit-or-miss],
+	.network[data-path=daily] .here[data-line=daily],.network[data-path=builder] .here[data-line=builder]{display:inline}
+	.st.dim{opacity:.25}
+	.empty{font-weight:700;padding:1rem;border:2px dashed #9ca3af;border-radius:12px}
+	.route-h{display:flex;align-items:center;gap:.8rem;font-size:1.8rem;margin:1.5rem 0 .5rem}
+	.worlds{border:0;padding:0;margin:0 0 1rem;display:flex;flex-wrap:wrap;gap:.4rem 1rem}
+	.worlds legend{font-weight:700;margin-bottom:.3rem}
+	.worlds label{display:flex;gap:.35rem;align-items:center;cursor:pointer}
+	.stops{list-style:none;margin:0;padding:0 0 0 2.5rem;position:relative;max-width:44rem}
+	.stops::before{content:"";position:absolute;left:.75rem;top:.7rem;bottom:.7rem;width:10px;border-radius:5px;background:var(--c)}
+	.stop{position:relative;padding:.4rem 0 1.1rem;display:flex;flex-direction:column}
+	.stop::before{content:"";position:absolute;left:-2.25rem;top:.55rem;width:1.1rem;height:1.1rem;border-radius:50%;background:#fff;border:4px solid var(--c)}
+	.stop.inter::before{border-color:#16181d;border-width:5px;width:1.3rem;height:1.3rem;left:-2.35rem}
+	.zone{font-size:.8rem;font-weight:700;color:#4b5060;text-transform:uppercase;letter-spacing:.06em}
+	.stop-t{font:800 1.2rem 'Inter Tight',sans-serif;color:#16181d}
+	a.stop-t{color:#16181d;text-decoration-color:var(--c);text-decoration-thickness:3px;text-underline-offset:4px}
+	.tag{display:inline-block;font:700 .75rem 'Atkinson Hyperlegible',sans-serif;background:#16181d;color:#fff;border-radius:999px;padding:.1rem .55rem;vertical-align:middle}
+	.tag.soon{background:#e5e7eb;color:#374151}
+	.idea{color:#374151}
+	.change{font-size:.85rem;color:#374151;display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+	.mini{background:var(--c);color:#fff;border-radius:4px;padding:0 .4rem;font-weight:700}
+	.you{align-self:flex-start;background:#16181d;color:#fff;border-radius:999px;padding:.1rem .7rem;font-size:.8rem;margin-bottom:.2rem}
+	.band{margin-top:3rem}
+	.band h2{font-size:2rem;margin:0 0 1rem}
+	.band p{max-width:40rem}
+	.diff{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1rem}
+	.diff li{border-top:10px solid var(--c);border-radius:6px;padding:.8rem 0}
+	.diff h3{margin:0 0 .3rem}
+	.cta{padding-bottom:4rem}
+	.btn{display:inline-block;background:#16181d;color:#fff;font-weight:700;padding:.7rem 1.4rem;border-radius:999px;text-decoration:none}
+	@media (max-width:48rem){.overview{display:none}.lines{grid-template-columns:1fr}}
+</style>
+</Base>
