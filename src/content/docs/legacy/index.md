@@ -1,4 +1,6 @@
 ---
+banner:
+  content: 'This is the original version of the course. <a href="/">See the new course</a>, rebuilt as short lessons with your own path.'
 title: AI Fluency
 description: Learn the method behind AI tools once, then use any of them well, and pay the right price for it.
 ---

@@ -1,8 +1,8 @@
 ---
-import Diagram from '../../../preview/diagrams/Diagram.astro';
-import Base from '../../../preview/designs/subway-v2/Base.astro';
-import { site, samples, worlds } from '../../../preview/content';
-import { lines, base } from '../../../preview/designs/subway-v2/data';
+import Diagram from '../../preview/diagrams/Diagram.astro';
+import Base from '../../preview/designs/subway-v2/Base.astro';
+import { site, samples, worlds } from '../../preview/content';
+import { lines, base } from '../../preview/designs/subway-v2/data';
 export function getStaticPaths() {
 	return samples.map((s) => ({ params: { slug: s.slug }, props: { lesson: s } }));
 }
@@ -96,7 +96,7 @@ const strip = { current: lesson.n, lines: lines.map((l) => ({ id: l.id, name: l.
 		}
 	} else {
 		const li = document.createElement('li');
-		li.innerHTML = 'No line yet. <a href="/preview/subway-v2/#pick">Find your line on the map</a>.';
+		li.innerHTML = 'No line yet. <a href="/#pick">Find your line on the map</a>.';
 		ol.append(li);
 	}
 	// World switch

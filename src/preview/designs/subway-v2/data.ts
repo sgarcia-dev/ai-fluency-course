@@ -1,7 +1,7 @@
 // Data for subway v2. Everything comes from the shared preview content.
 import { paths, allLessons, samples } from '../../content';
 
-export const base = '/preview/subway-v2/';
+export const base = '/';
 export const lineColors: Record<string, string> = {
 	new: '#FFD400',
 	'hit-or-miss': '#FF6A44',
@@ -13,7 +13,7 @@ export const colorFor = (id: string) => lineColors[id] ?? '#0A0A0A';
 export const inkOn = (id: string) => (id === 'daily' || id === 'builder' ? '#FFFFFF' : '#0A0A0A');
 
 export const sampleSlugs = new Set(samples.map((s) => s.slug));
-export const hrefFor = (slug: string) => (sampleSlugs.has(slug) ? `${base}${slug}/` : '');
+export const hrefFor = (slug: string) => (sampleSlugs.has(slug) ? `/lessons/${slug}/` : '');
 
 type Full = { n: number; slug: string; title: string; idea: string; covers?: string[]; minutes?: number };
 export const stop = (n: number) => {

@@ -1,8 +1,8 @@
 ---
-import Base from '../../../preview/designs/subway-v2/Base.astro';
-import Station from '../../../preview/designs/subway-v2/Station.astro';
-import { site } from '../../../preview/content';
-import { lines, goals } from '../../../preview/designs/subway-v2/data';
+import Base from '../preview/designs/subway-v2/Base.astro';
+import Station from '../preview/designs/subway-v2/Station.astro';
+import { site } from '../preview/content';
+import { lines, goals } from '../preview/designs/subway-v2/data';
 const data = { lines: lines.map((l) => ({ id: l.id, name: l.name, color: l.color, ink: l.ink, count: l.stops.length, minutes: l.minutes, first: l.first, ns: l.stops.map((s) => s.n) })), goals };
 ---
 <Base title={`${site.name}: the map`}>
