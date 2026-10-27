@@ -1,0 +1,360 @@
+---
+// Path picker 2: "Three quick questions". One question per screen, then a result.
+// Questions ask what the reader has actually done, never "rate yourself".
+import { paths, lessonByNumber, worlds, site, samples } from '../../../preview/content';
+
+const readable = samples.map((s) => s.n); // lessons that can be read now (4 and 9)
+const MIN_PER_LESSON = 10;
+
+function timeText(count: number) {
+	const mins = count * MIN_PER_LESSON;
+	const h = Math.floor(mins / 60);
+	const m = mins % 60;
+	if (h === 0) return `about ${m} minutes`;
+	return m === 0 ? `about ${h} hour${h > 1 ? 's' : ''}` : `about ${h} hr ${m} min`;
+}
+
+const panels = paths.map((p) => ({
+	id: p.id,
+	name: p.name,
+	says: p.says,
+	count: p.lessons.length,
+	time: timeText(p.lessons.length),
+	lessons: p.lessons.map((n) => ({ ...lessonByNumber(n), readable: readable.includes(n) })),
+}));
+
+const freqOptions = [
+	{ id: 'never', label: 'Never, or just once' },
+	{ id: 'few', label: 'A few times' },
+	{ id: 'most', label: 'Most days' },
+];
+const doneOptions = [
+	{ id: 'rewrite', label: 'Asked it to rewrite something' },
+	{ id: 'caught', label: 'Caught it making something up' },
+	{ id: 'document', label: 'Given it a document or example to work from' },
+	{ id: 'multistep', label: 'Set it up to do a multi-step job on its own' },
+	{ id: 'code', label: 'Used it to write or fix code' },
+];
+const worldHints: Record<string, string> = {
+	everyday: 'Messages, trips, forms, questions at home',
+	office: 'Email, documents, meetings, reports',
+	code: 'Writing, fixing or reviewing software',
+};
+---
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>Three quick questions | {site.name} path picker 2</title>
+		<style>
+			:root { --accent: #1a4fd6; --ink: #1c1f26; --muted: #565d6b; --line: #d5d9e0; --soft: #eef2fd; }
+			* { box-sizing: border-box; }
+			body { margin: 0; font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: #fff; }
+			main { max-width: 40rem; margin: 0 auto; padding: 1rem 1rem 4rem; }
+			a { color: var(--accent); }
+			:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+			.top { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.95rem; margin-bottom: 1.5rem; }
+			.top a { display: inline-flex; align-items: center; min-height: 44px; }
+			h1, h2 { line-height: 1.2; margin: 0 0 0.75rem; }
+			h1 { font-size: 1.6rem; } h2 { font-size: 1.4rem; }
+			h1:focus, h2:focus { outline: none; }
+			.lead { color: var(--muted); margin: 0 0 1.25rem; }
+			.progress { margin-bottom: 1.25rem; }
+			.progress p { margin: 0 0 0.4rem; font-size: 0.95rem; color: var(--muted); font-weight: 600; }
+			.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+			.bar span { display: block; height: 100%; background: var(--accent); transition: width 0.25s; }
+			fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+			legend { padding: 0; font-size: 1.4rem; font-weight: 700; line-height: 1.25; margin-bottom: 1rem; }
+			.opts { display: grid; gap: 0.6rem; }
+			.opt, .btn { font: inherit; min-height: 44px; border-radius: 8px; cursor: pointer; }
+			.opt { display: flex; align-items: center; gap: 0.75rem; width: 100%; text-align: left; padding: 0.7rem 1rem; border: 2px solid var(--line); background: #fff; color: var(--ink); }
+			.opt:hover { border-color: var(--accent); }
+			.opt small { display: block; color: var(--muted); font-size: 0.9rem; }
+			.opt[aria-pressed="true"], .opt:has(input:checked) { border-color: var(--accent); background: var(--soft); }
+			.opt input { width: 1.4rem; height: 1.4rem; flex: none; accent-color: var(--accent); margin: 0; }
+			label.opt:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+			.nav { display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap; }
+			.btn { padding: 0.6rem 1.25rem; border: 2px solid var(--accent); background: #fff; color: var(--accent); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+			.btn.primary { background: var(--accent); color: #fff; }
+			.btn:hover { filter: brightness(0.94); }
+			.btn.quiet { border-color: transparent; text-decoration: underline; }
+			.note { color: var(--muted); font-size: 0.95rem; margin-top: 0.75rem; }
+			.result .kicker { margin: 0; color: var(--muted); font-size: 0.95rem; font-weight: 600; }
+			.reason { font-size: 1.1rem; margin: 0 0 1rem; }
+			.facts { display: flex; gap: 0.5rem 1.5rem; flex-wrap: wrap; padding: 0.75rem 1rem; background: var(--soft); border-radius: 8px; margin: 0 0 1.25rem; font-weight: 600; }
+			ol.lessons { list-style: none; padding: 0; margin: 0 0 1.25rem; border-top: 1px solid var(--line); }
+			ol.lessons li { padding: 0.7rem 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 2rem 1fr; gap: 0 0.5rem; }
+			.num { color: var(--muted); font-variant-numeric: tabular-nums; }
+			.t { font-weight: 600; }
+			.idea { color: var(--muted); font-size: 0.95rem; display: block; }
+			.tag { display: inline-block; margin-left: 0.4rem; padding: 0 0.5rem; font-size: 0.8rem; font-weight: 700; color: #0b5a2b; background: #dff3e6; border-radius: 99px; white-space: nowrap; }
+			.others { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+			.others h3 { font-size: 1.1rem; margin: 0 0 0.6rem; }
+			.opt .tiny { margin-left: auto; font-size: 0.85rem; color: var(--muted); }
+			.status { margin-top: 0.75rem; font-weight: 600; }
+			[hidden] { display: none !important; }
+			@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+			@media (max-width: 400px) { main { padding-inline: 0.75rem; } legend, h2 { font-size: 1.25rem; } }
+		</style>
+	</head>
+	<body>
+		<main id="picker">
+			<div class="top">
+				<a href="/preview/">&larr; Back to the preview</a>
+				<span>{site.name}</span>
+			</div>
+
+			<div class="progress" id="progress">
+				<p id="progress-text" aria-live="polite">Question 1 of 3</p>
+				<div class="bar" aria-hidden="true"><span id="bar" style="width:33%"></span></div>
+			</div>
+
+			<noscript><p class="note">This picker needs JavaScript. Without it, see the <a href="/preview/">preview page</a>.</p></noscript>
+
+			<!-- Question 1: how often -->
+			<section data-step="1" aria-labelledby="q1">
+				<fieldset>
+					<legend id="q1" tabindex="-1">In the last month, how often did you use an AI chat app?</legend>
+					<div class="opts" data-q="freq">
+						{freqOptions.map((o) => <button type="button" class="opt" data-value={o.id} aria-pressed="false">{o.label}</button>)}
+					</div>
+				</fieldset>
+				<div class="nav"><a class="btn quiet" href="/preview/">Leave the questions</a></div>
+			</section>
+
+			<!-- Question 2: what have you done (tick all that apply) -->
+			<section data-step="2" aria-labelledby="q2" hidden>
+				<fieldset>
+					<legend id="q2" tabindex="-1">Which of these have you done? Tick all that apply.</legend>
+					<div class="opts" id="done-list">
+						{doneOptions.map((o) => (
+							<label class="opt"><input type="checkbox" name="done" value={o.id} /><span>{o.label}</span></label>
+						))}
+						<label class="opt"><input type="checkbox" name="done" value="none" /><span>None of these yet</span></label>
+					</div>
+				</fieldset>
+				<div class="nav">
+					<button type="button" class="btn" data-back>Back</button>
+					<button type="button" class="btn primary" id="q2-next">Next</button>
+				</div>
+				<p class="note" id="q2-note" hidden>Tick at least one box, or "None of these yet".</p>
+			</section>
+
+			<!-- Question 3: where will you use it -->
+			<section data-step="3" aria-labelledby="q3" hidden>
+				<fieldset>
+					<legend id="q3" tabindex="-1">Where will you use AI the most?</legend>
+					<div class="opts" data-q="world">
+						{worlds.map((w) => (
+							<button type="button" class="opt" data-value={w.id} aria-pressed="false">
+								<span>{w.label}<small>{worldHints[w.id]}</small></span>
+							</button>
+						))}
+					</div>
+				</fieldset>
+				<div class="nav"><button type="button" class="btn" data-back>Back</button></div>
+			</section>
+
+			<!-- Result: one panel per path, JS shows the right one -->
+			<section class="result" id="result" aria-labelledby="result-title" hidden>
+				{panels.map((p) => (
+					<div data-panel={p.id} hidden>
+						<p class="kicker">Your path</p>
+						<h2 tabindex="-1" data-title>{p.name}</h2>
+						<p class="reason" data-reason></p>
+						<p class="facts"><span>{p.count} lessons</span><span>{p.time} in total</span><span>About {MIN_PER_LESSON} min each</span></p>
+						<ol class="lessons">
+							{p.lessons.map((l) => (
+								<li>
+									<span class="num">{l.n}</span>
+									<span>
+										<span class="t">{l.title}{l.readable && <span class="tag">Readable now</span>}</span>
+										<span class="idea">{l.idea}</span>
+									</span>
+								</li>
+							))}
+						</ol>
+						<div class="nav">
+							<button type="button" class="btn primary" data-start>Start</button>
+							<button type="button" class="btn" data-others>See the other paths</button>
+						</div>
+					</div>
+				))}
+				<p class="status" id="status" role="status"></p>
+				<div class="others" id="others" hidden>
+					<h3>Pick a different path</h3>
+					<div class="opts">
+						{panels.map((p) => (
+							<button type="button" class="opt" data-switch={p.id} aria-pressed="false">
+								<span>{p.name}<small>{p.says}</small></span>
+								<span class="tiny">{p.count} lessons</span>
+							</button>
+						))}
+					</div>
+				</div>
+				<div class="nav"><button type="button" class="btn quiet" id="again">Answer the questions again</button></div>
+			</section>
+
+			<p class="note">Your answers stay on this device. {site.status}</p>
+		</main>
+
+		<script is:inline>
+			(function () {
+				var answers = { freq: null, done: [], world: null };
+				var step = 1;
+				var chosen = null; // path id on screen
+				var $ = function (s, r) { return (r || document).querySelector(s); };
+				var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+				var steps = $$('[data-step]');
+				var result = $('#result');
+
+				function save(key, val) {
+					try { localStorage.setItem(key, val); } catch (e) { /* storage blocked: carry on */ }
+				}
+
+				// ---- Rules: answers -> path -------------------------------------------
+				// We trust what people did over how they describe themselves.
+				// 1. "new":         never (or once) used a chat app and ticked fewer than 2 things,
+				//                   or used it a few times and ticked nothing.
+				// 2. "builder":     has used it for code, used it at least a few times, and either
+				//                   picked Code as the main place or has set up multi-step jobs.
+				// 3. "daily":       has set up a multi-step job, or uses it most days and has both
+				//                   given it a document and caught it making things up.
+				// 4. "hit-or-miss": everyone else (uses it, but has not gone past the basics).
+				function pickPath(a) {
+					var d = a.done;
+					var n = d.length;
+					var has = function (x) { return d.indexOf(x) !== -1; };
+					if ((a.freq === 'never' && n < 2) || (a.freq === 'few' && n === 0)) return 'new';
+					if (has('code') && a.freq !== 'never' && (a.world === 'code' || has('multistep'))) return 'builder';
+					if (has('multistep') || (a.freq === 'most' && has('document') && has('caught'))) return 'daily';
+					return 'hit-or-miss';
+				}
+
+				// One plain sentence that says why, built from the same answers.
+				function reasonFor(id, a) {
+					var has = function (x) { return a.done.indexOf(x) !== -1; };
+					var how = a.freq === 'most' ? 'most days' : a.freq === 'few' ? 'a few times' : 'hardly at all';
+					if (id === 'new') {
+						return a.freq === 'never'
+							? 'Because you have used an AI chat app once or never, and that is a good place to start. We begin with what it is and how to use it safely.'
+							: 'Because you have tried an AI chat app a few times but have not yet done much with it. We start with the basics, including how to spot a wrong answer.';
+					}
+					if (id === 'builder') {
+						return 'Because you have used AI to write or fix code' + (a.world === 'code' ? ', and code is where you will use it most' : ' and have given it multi-step jobs') + '. These lessons are about building with it.';
+					}
+					if (id === 'daily') {
+						return has('multistep')
+							? 'Because you have already set AI up to do a multi-step job on its own. The next step is handing it bigger work, and checking it well.'
+							: 'Because you use it most days, you give it documents to work from, and you have caught it making things up. You are ready to hand it bigger jobs.';
+					}
+					return 'Because you have used AI ' + how + ' but have not given it bigger jobs yet. The next step is getting good results more of the time, not just sometimes.';
+				}
+
+				// ---- Screens ---------------------------------------------------------
+				function show(n, quiet) {
+					step = n;
+					steps.forEach(function (s) { s.hidden = Number(s.getAttribute('data-step')) !== n; });
+					result.hidden = true;
+					$('#progress').hidden = false;
+					$('#progress-text').textContent = 'Question ' + n + ' of 3';
+					$('#bar').style.width = Math.round((n / 3) * 100) + '%';
+					var legend = $('[data-step="' + n + '"] legend');
+					if (legend && !quiet) legend.focus({ preventScroll: false });
+				}
+
+				function showPath(id, picked) {
+					chosen = id;
+					steps.forEach(function (s) { s.hidden = true; });
+					$('#progress').hidden = true;
+					result.hidden = false;
+					$$('[data-panel]').forEach(function (p) {
+						var on = p.getAttribute('data-panel') === id;
+						p.hidden = !on;
+						if (on) {
+							$('[data-reason]', p).textContent = picked
+								? 'You chose this path yourself. You can change it any time.'
+								: reasonFor(id, answers);
+						}
+					});
+					$$('[data-switch]').forEach(function (b) {
+						b.setAttribute('aria-pressed', b.getAttribute('data-switch') === id ? 'true' : 'false');
+					});
+					$('#status').textContent = '';
+					$('#others').hidden = true;
+					save('aip-path', id);
+					if (answers.world) save('aip-world', answers.world);
+					var h = $('[data-panel="' + id + '"] [data-title]');
+					if (h) h.focus();
+				}
+
+				// Single-pick questions move on as soon as you choose.
+				$$('[data-q]').forEach(function (group) {
+					var key = group.getAttribute('data-q');
+					$$('.opt', group).forEach(function (b) {
+						b.addEventListener('click', function () {
+							answers[key] = b.getAttribute('data-value');
+							$$('.opt', group).forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+							if (key === 'freq') show(2);
+							else showPath(pickPath(answers), false);
+						});
+					});
+				});
+
+				// Question 2: "None of these yet" clears the others, and ticking anything clears "None".
+				var boxes = $$('#done-list input');
+				boxes.forEach(function (box) {
+					box.addEventListener('change', function () {
+						$('#q2-note').hidden = true;
+						if (box.checked) {
+							boxes.forEach(function (o) {
+								if (o !== box && (box.value === 'none' || o.value === 'none')) o.checked = false;
+							});
+						}
+					});
+				});
+				$('#q2-next').addEventListener('click', function () {
+					var ticked = boxes.filter(function (b) { return b.checked; }).map(function (b) { return b.value; });
+					if (!ticked.length) { $('#q2-note').hidden = false; return; }
+					answers.done = ticked.filter(function (v) { return v !== 'none'; });
+					show(3);
+				});
+
+				$$('[data-back]').forEach(function (b) {
+					b.addEventListener('click', function () { show(step - 1); });
+				});
+
+				$$('[data-others]').forEach(function (b) {
+					b.addEventListener('click', function () {
+						var o = $('#others');
+						o.hidden = !o.hidden;
+						if (!o.hidden) $('.opt', o).focus();
+					});
+				});
+				$$('[data-switch]').forEach(function (b) {
+					b.addEventListener('click', function () { showPath(b.getAttribute('data-switch'), b.getAttribute('data-switch') !== pickPath(answers)); });
+				});
+
+				$$('[data-start]').forEach(function (b) {
+					b.addEventListener('click', function () {
+						save('aip-path', chosen);
+						if (answers.world) save('aip-world', answers.world);
+						$('#status').textContent = 'Saved. In the full course this opens your first lesson. For now, lessons marked "Readable now" are the two samples.';
+					});
+				});
+
+				$('#again').addEventListener('click', function () {
+					answers = { freq: null, done: [], world: null };
+					$$('.opt[aria-pressed]').forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
+					boxes.forEach(function (b) { b.checked = false; });
+					show(1);
+				});
+
+				show(1, true);
+				window.scrollTo(0, 0);
+			})();
+		</script>
+	</body>
+</html>
