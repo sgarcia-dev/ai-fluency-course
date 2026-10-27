@@ -1,0 +1,55 @@
+---
+// Two ways to get green: lower the bar (not allowed) or raise the code (pass).
+import { samples } from '../../content';
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'tests-are-the-quality-gate')?.figures?.find((f) => f.id === 'bar')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 520 300" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b bad-t" x="130" y="26" text-anchor="middle">Lower the bar</text>
+			<path class="line" d="M30 70 L230 70" stroke-dasharray="6 6" />
+			<text class="m" x="130" y="62" text-anchor="middle">toBe(115)</text>
+			<path class="bs" d="M130 78 L130 140" /><polygon class="ah-b" points="121,136 130,152 139,136" />
+			<rect class="bad" x="30" y="156" width="200" height="8" />
+			<text class="m bad-t" x="130" y="184" text-anchor="middle">toBeGreaterThan(100)</text>
+			<rect class="paper line" x="80" y="196" width="100" height="60" />
+			<text class="t" x="130" y="232" text-anchor="middle">code</text>
+			<text class="t b bad-t" x="130" y="288" text-anchor="middle">✗ not allowed</text>
+
+			<path class="line" d="M260 20 L260 290" stroke-dasharray="5 6" />
+
+			<text class="t b good-t" x="390" y="26" text-anchor="middle">Raise the code</text>
+			<rect class="good" x="290" y="66" width="200" height="8" />
+			<text class="m" x="390" y="58" text-anchor="middle">toBe(115)</text>
+			<rect class="good line" x="340" y="80" width="100" height="60" />
+			<text class="t b w" x="390" y="116" text-anchor="middle">code</text>
+			<path class="line" d="M340 236 L440 236" stroke-dasharray="4 5" />
+			<path class="gs" d="M390 230 L390 156" /><polygon class="ah-g" points="381,160 390,144 399,160" />
+			<text class="t b good-t" x="390" y="288" text-anchor="middle">✓ pass</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 38rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.gs { stroke: var(--dg-good, #2e8b57); stroke-width: 4; fill: none; stroke-linecap: round; }
+	.bs { stroke: var(--dg-bad, #c0392b); stroke-width: 4; fill: none; stroke-linecap: round; }
+	.ah-g { fill: var(--dg-good, #2e8b57); }
+	.ah-b { fill: var(--dg-bad, #c0392b); }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 18px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.m { fill: var(--dg-ink, #1f2a37); font-size: 15px; font-family: ui-monospace, monospace; }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>

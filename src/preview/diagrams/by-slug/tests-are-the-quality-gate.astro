@@ -1,0 +1,58 @@
+---
+// The gate: red goes back to the agent with the error, green goes on to your review.
+import { samples } from '../../content';
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'tests-are-the-quality-gate')?.diagram.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const posts = ['types', 'tests', 'build'];
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 520 250" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<rect class="paper line" x="10" y="80" width="120" height="70" />
+			<text class="t b" x="70" y="110" text-anchor="middle">Agent's</text>
+			<text class="t b" x="70" y="134" text-anchor="middle">change</text>
+			<path class="line" d="M130 115 L176 115" />
+			<polygon points="176,108 188,115 176,122" class="t" />
+			<rect class="acc line" x="190" y="50" width="130" height="130" />
+			<text class="t b" x="255" y="40" text-anchor="middle">The gate</text>
+			{posts.map((p, i) => (
+				<g>
+					<rect class="paper line" x="202" y={62 + i * 38} width="106" height="30" />
+					<text class="t" x="255" y={83 + i * 38} text-anchor="middle">{p}</text>
+				</g>
+			))}
+			<path class="gs" d="M320 115 L378 115" />
+			<polygon class="ah-g" points="376,106 392,115 376,124" />
+			<text class="t b good-t" x="350" y="104" text-anchor="middle">green</text>
+			<rect class="good line" x="394" y="80" width="116" height="70" />
+			<text class="t b w" x="452" y="110" text-anchor="middle">Your</text>
+			<text class="t b w" x="452" y="134" text-anchor="middle">review</text>
+			<path class="bs" d="M255 180 C255 230, 70 230, 70 160" />
+			<polygon class="ah-b" points="61,164 70,150 79,164" />
+			<text class="t b bad-t" x="162" y="242" text-anchor="middle">red: back, with the error</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 38rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.gs { stroke: var(--dg-good, #2e8b57); stroke-width: 4; fill: none; stroke-linecap: round; }
+	.bs { stroke: var(--dg-bad, #c0392b); stroke-width: 4; fill: none; stroke-linecap: round; }
+	.ah-g { fill: var(--dg-good, #2e8b57); }
+	.ah-b { fill: var(--dg-bad, #c0392b); }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 18px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.m { fill: var(--dg-ink, #1f2a37); font-size: 15px; font-family: ui-monospace, monospace; }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
