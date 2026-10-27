@@ -11,13 +11,13 @@ export const lesson: Lesson = {
 			heading: 'The loop under the hood',
 			body: [
 				'A coding agent is an AI that can read files, edit them and run commands on its own. Strip away the interface and it does one thing over and over: read the code, make a plan, edit files, run something, read the result, and go again.',
-				'That loop is the whole trick. It is also why an agent can do an hour of work in five minutes, or an hour of damage in five minutes. The loop does not know which one it is doing. It only knows what it was told and what the last command printed.',
+				'That loop is why an agent can do an hour of work in five minutes, or an hour of damage. It cannot tell which. It only knows what you told it and what the last command printed.',
 			],
 		},
 		{
 			heading: 'Two cheap places to step in',
 			body: [
-				'You could watch every edit. You will not, and you should not have to. Instead, step in at the two spots where a minute of your time saves the most.',
+				'You could watch every edit. You will not. Instead, step in at the two spots where a minute of your time saves the most.',
 				'First, the plan. Ask the agent to say what it will change, and in which files, before it touches anything. Reading five lines of plan is much cheaper than reading five hundred lines of diff (the list of changed lines). A wrong plan caught here costs nothing.',
 				'Second, the check. You decide what "done" means, ideally as tests or a command that passes or fails. "Done when: the test suite passes and the new test for empty input passes." Now the agent has a finish line it cannot argue with, and so do you.',
 			],
@@ -61,6 +61,66 @@ export const lesson: Lesson = {
 				'Add validation to the signup form so empty and badly formed emails are rejected. First, show me your plan: which files you will change and what tests you will add. Wait for my OK. Done when: the full test suite passes, there are new tests for empty and bad emails, and no existing tests are edited.',
 			why: '"Make sure it works" lets the agent decide when to stop. A plan you approve and a command that passes or fails put you in charge of both ends of the loop.',
 		},
+	},
+	worked: {
+		title: 'One bug, start to finish',
+		intro: 'A real-sized task in a web app. Watch where you spend your minutes: the request, the plan, one stop. The agent does the rest.',
+		steps: [
+			{
+				label: '1. Ask, with a finish line',
+				you: 'Bug: the date filter drops items from the last day of the month. Before you edit anything, show me your plan. Done when: `npm test -- date-filter` passes, a new test covers this bug, and you touch no unrelated files.',
+			},
+			{
+				label: '2. The agent plans',
+				ai: 'Plan: 1) Read src/filters/dateFilter.ts and its test file. 2) Add a test for an item dated Jan 31. 3) Fix the end-of-range check. 4) Also tidy up the date utils while I am there.',
+			},
+			{
+				label: '3. You fix the plan in one line',
+				you: 'Skip step 4. Write the test first and show me it failing.',
+				note: 'Ten seconds of reading just saved you a surprise refactor.',
+			},
+			{
+				label: '4. Failing test, then passing',
+				code: `it('keeps items from the last day of the month', () => {
+  const items = [{ id: 1, date: '2026-01-31T18:00:00' }];
+  const result = filterByMonth(items, 2026, 1);
+  expect(result).toHaveLength(1);
+});
+
+$ npm test -- date-filter
+  FAIL  date-filter.test.ts
+  x keeps items from the last day of the month
+    Expected length: 1, Received length: 0
+
+# after the fix (range now ends at the end of Jan 31, not its start)
+$ npm test -- date-filter
+  PASS  date-filter.test.ts (6 tests)`,
+				note: 'The red run proves the test catches the bug. The green run proves the fix.',
+			},
+			{
+				label: '5. The off-track moment',
+				ai: 'One older test still fails on a time zone edge case. I can relax that assertion to compare dates only, and then everything passes.',
+			},
+			{
+				label: '6. Your stop line',
+				you: 'No. Do not change existing tests. Tell me why it fails and what you think the real fix is.',
+				note: 'Green tests only count if they are the tests you trust.',
+			},
+			{
+				label: '7. Save it as a skill',
+				code: `fix-a-bug.md
+
+When I ask you to fix a bug:
+1. Reproduce it with a failing test first. Show me the failure.
+2. Give me a short plan (files, change, test) before any edits.
+3. Change only what the plan names.
+4. Run the check command I gave you and show the output.
+5. Never weaken, skip or delete an existing test.
+6. If two attempts fail, stop and ask. Do not try a third.
+7. When done, list the files you changed.`,
+				note: 'Put a file like this in your tool\'s instructions or skills folder. Next bug, you say "fix this bug" and the rules come along.',
+			},
+		],
 	},
 	tryThis: {
 		title: 'Plan first, then the finish line',
