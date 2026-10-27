@@ -10,8 +10,8 @@ export const lesson: Lesson = {
 		{
 			heading: 'Two ways to do the same job',
 			body: [
-				'Say you need a one-page breakdown of three competitors. The micromanager asks for one section, reads it, fixes it, then asks for the next. Two hours later the page is fine, but they did most of the thinking. Every step waited on them.',
-				'The manager writes one ask instead: "A one-page breakdown of these three competitors. Cover price, who they sell to, and their top three features. Use these five sources. Flag anything you could not check." Then they walk away. They come back to a near-final draft and only check the flagged parts.',
+				'Say you need a one-page breakdown of three competitors. The micromanager asks for one section, reads it, fixes it, then asks for the next. Two hours later the page is fine, but every step waited on them.',
+				'The manager writes one ask instead: "A one-page breakdown of these three competitors. Cover price, who they sell to, and their top three features. Use these five sources. Flag anything you could not check." Then they walk away, come back to a near-final draft, and check the flagged parts.',
 				'Same person, same tool. One handed over keystrokes. The other handed over a problem.',
 			],
 		},
@@ -19,8 +19,8 @@ export const lesson: Lesson = {
 			heading: 'What a good handoff needs',
 			body: [
 				'A clear outcome and the inputs. Say what you want at the end and what it should work from. "A one-page plan, using these notes" beats "help me plan".',
-				'The context it needs. Who it is for, what matters, what to avoid. It cannot read your mind, so give it the few facts a new helper would ask about.',
-				'A check that is not the AI. The AI will always say it did a great job. So pick a test you can run yourself: a list of must-haves, a number that has to add up, tests that have to pass.',
+				'The context it needs. Who it is for, what matters, what to avoid. Give it the few facts a new helper would ask about.',
+				'A check that is not the AI. It will always say it did a great job. So pick a test you can run yourself: a list of must-haves, a number that has to add up, tests that have to pass.',
 			],
 		},
 		{
@@ -33,7 +33,7 @@ export const lesson: Lesson = {
 		{
 			heading: 'Check the work like a manager',
 			body: [
-				'When the result comes back, do not just skim it and smile. Hold it up against your "done when" list. Look first at anything it flagged as unsure.',
+				'Do not just skim the result and smile. Hold it up against your "done when" list. Look first at anything it flagged as unsure.',
 				'If it missed, say which check failed. That is clearer than "try again", and it teaches you what to write in the next handoff.',
 			],
 		},
@@ -65,6 +65,36 @@ export const lesson: Lesson = {
 				'Let users add a birthday to their profile. Context: the profile form and its tests are in the profile folder. Done when: the date saves, shows on the profile page, all tests pass, and there is a new test for an empty date. Stop and ask if: you need to change the database. Reply with your plan before writing code.',
 			why: 'It names the result and a check that is not the AI (the tests), and asks for the plan before any code.',
 		},
+	},
+	worked: {
+		title: 'A real Friday job: 40 comments into one page',
+		intro: 'Your boss wants the customer comments summed up for Monday\'s meeting. They sit in a spreadsheet, one per row. Here is the whole handoff, start to finish.',
+		steps: [
+			{
+				label: '1. The brief you paste in',
+				you: 'Goal: a one-page summary of the 40 customer comments in the attached spreadsheet.\nWho it is for: my team at Monday\'s meeting. They have five minutes to read it.\nInputs: the "Comments" column. Ignore the other columns.\nDone when: it fits on one page, it lists the top 3 complaints and top 3 praises, each point shows how many comments said it, and it quotes one real comment per point.\nStop and ask if: a comment is unclear or you are not sure where it fits.\nReply with your plan first. Do not write the summary yet.',
+				note: 'Five parts: goal, reader, inputs, done when, stop if. The "done when" list is what you will check against later.',
+			},
+			{
+				label: '2. The AI replies with a plan',
+				ai: 'Goal: a one-page summary of 40 comments for a five-minute read.\nPlan:\n1. Read every comment and tag it.\n2. Sort them by date, then count.\n3. Pick the top 3 complaints and top 3 praises.\n4. Add counts and one quote each.\nOne question: rows 12 and 31 say "test test". Should I count them?',
+				note: 'A plan takes 20 seconds to read. Here you spot a problem before any work is done.',
+			},
+			{
+				label: '3. Your one-line fix',
+				you: 'Group by theme, not by date, and skip the two test entries. Go.',
+				note: 'One sentence steers the whole job. Fixing a finished page would take much longer.',
+			},
+			{
+				label: '4. A bit of the result',
+				ai: 'Top complaints\n1. Slow delivery (11 of 38). "Took two weeks, no update."\n2. Hard to reach support (7 of 38). "I waited 40 minutes on hold."\n3. Confusing invoices (5 of 38).\n\nTop praises\n1. Friendly staff (9 of 38). "Maria fixed it in one call."',
+			},
+			{
+				label: '5. Your two-minute check',
+				you: 'Point 3 under complaints has no quote. Add one real comment for it.',
+				note: 'You went down the "done when" list: one page, yes. Top 3 each, yes. Counts, yes. A quote per point, no. So you name the failed check in one line, not "try again".',
+			},
+		],
 	},
 	tryThis: {
 		title: 'Get the plan first',

@@ -34,17 +34,17 @@ const card = ['Goal', 'Context', 'Done when'];
 				{card.map((k, i) => <text class="t" x="20" y={68 + i * 28}>{k}</text>)}
 			</g>
 			<path class="line" d="M126 90 L156 90" marker-end={`url(#${fid}-a)`} />
-			<circle class="paper line" cx="220" cy="100" r="58" />
-			<path class="line dash" d="M220 54 A46 46 0 1 1 186 70" marker-end={`url(#${fid}-a)`} />
-			<text class="t b" x="220" y="82" text-anchor="middle">AI</text>
-			<text class="t" x="220" y="104" text-anchor="middle">plan, work,</text>
-			<text class="t" x="220" y="124" text-anchor="middle">check</text>
-			<path class="line" d="M220 160 L220 192" marker-end={`url(#${fid}-a)`} />
+			<rect class="paper line" x="162" y="40" width="128" height="100" />
+			<text class="t b" x="226" y="68" text-anchor="middle">AI</text>
+			<text class="t" x="226" y="94" text-anchor="middle">plans, works,</text>
+			<text class="t" x="226" y="116" text-anchor="middle">checks itself</text>
+			<path class="line" d="M226 144 L226 190" marker-end={`url(#${fid}-a)`} />
 			<rect class="paper line" x="150" y="198" width="140" height="44" />
-			<text class="t b" x="170" y="226">Result</text>
-			<circle class="good line" cx="262" cy="220" r="14" />
-			<path class="tick w" d="M255 220 l5 5 l9 -10" />
-			<text class="t muted" x="10" y="226">You check</text>
+			<text class="t b" x="166" y="226">Result</text>
+			<circle class="good line" cx="264" cy="220" r="13" />
+			<path class="tick w" d="M257 220 l5 5 l9 -10" />
+			<text class="t muted" x="10" y="226">You check it</text>
+			<path class="line thin" d="M108 221 L144 221" marker-end={`url(#${fid}-a)`} />
 			<text class="t b good-t" x="150" y="270" text-anchor="middle">You manage the result</text>
 		</g>
 	</svg>
