@@ -8,49 +8,97 @@
      "n": 1,
      "slug": "what-is-this-thing",
      "title": "What is this thing?",
-     "idea": "It is a very well-read guesser, not a search engine or a person."
+     "idea": "It is a very well-read guesser, not a search engine or a person.",
+     "covers": [
+      "What an AI chat really is, in plain words",
+      "Why it guesses instead of looking things up",
+      "Why it is not a person, even when it sounds like one"
+     ],
+     "minutes": 6
     },
     {
      "n": 2,
      "slug": "your-first-real-conversation",
      "title": "Your first real conversation",
-     "idea": "Try it now on something you need today."
+     "idea": "Try it now on something you need today.",
+     "covers": [
+      "How to start a chat about something you need today",
+      "How to ask follow-up questions to get it right",
+      "What a good back-and-forth feels like"
+     ],
+     "minutes": 6
     },
     {
      "n": 3,
      "slug": "what-not-to-share",
      "title": "What not to share",
-     "idea": "What happens to what you type, and simple rules."
+     "idea": "What happens to what you type, and simple rules.",
+     "covers": [
+      "What can happen to the words you type",
+      "Which kinds of details to keep to yourself",
+      "A few simple rules to stay safe"
+     ],
+     "minutes": 7
     },
     {
      "n": 4,
      "slug": "sure-of-itself-still-wrong",
      "title": "Sure of itself, still wrong",
-     "idea": "It sounds confident even when it makes things up."
+     "idea": "It sounds confident even when it makes things up.",
+     "covers": [
+      "Why AI sounds just as sure when it is wrong",
+      "Why its tone tells you nothing about the truth",
+      "How to check an answer with proof from outside it"
+     ],
+     "minutes": 7
     },
     {
      "n": 5,
      "slug": "spotting-ai-scams-and-fakes",
      "title": "Spotting AI scams and fakes",
-     "idea": "Fake voices, fake photos, fake urgency."
+     "idea": "Fake voices, fake photos, fake urgency.",
+     "covers": [
+      "How scammers use fake voices and photos",
+      "Warning signs like sudden pressure to act now",
+      "Simple checks before you trust or pay"
+     ],
+     "minutes": 8
     },
     {
      "n": 6,
      "slug": "five-everyday-jobs-it-does-well",
      "title": "Five everyday jobs it does well",
-     "idea": "Rewrite, summarize, explain, plan, brainstorm."
+     "idea": "Rewrite, summarize, explain, plan, brainstorm.",
+     "covers": [
+      "Five everyday jobs AI handles well",
+      "How to ask for a rewrite, summary or plan",
+      "Where each job tends to go wrong"
+     ],
+     "minutes": 8
     },
     {
      "n": 7,
      "slug": "talk-instead-of-type",
      "title": "Talk instead of type",
-     "idea": "Speaking gives it better context, faster."
+     "idea": "Speaking gives it better context, faster.",
+     "covers": [
+      "Why speaking gives it more to work with",
+      "How to talk through a problem out loud",
+      "When typing is still the better choice"
+     ],
+     "minutes": 5
     },
     {
      "n": 8,
      "slug": "which-app-should-i-use",
      "title": "Which app should I use?",
-     "idea": "The free ones are fine. Skills carry over between them."
+     "idea": "The free ones are fine. Skills carry over between them.",
+     "covers": [
+      "Why the free apps are good enough to start",
+      "What really differs between the apps",
+      "Why your skills carry over to any of them"
+     ],
+     "minutes": 6
     }
    ],
    "for": "People new to AI"
@@ -63,67 +111,133 @@
      "n": 9,
      "slug": "say-what-done-looks-like",
      "title": "Say what “done” looks like",
-     "idea": "A vague ask gets confident work on the wrong thing."
+     "idea": "A vague ask gets confident work on the wrong thing.",
+     "covers": [
+      "Why a vague ask gets polished work on the wrong thing",
+      "Three things to say: what you want, who it is for, when it is done",
+      "How to add a \"Done when\" line to any request"
+     ],
+     "minutes": 8
     },
     {
      "n": 10,
      "slug": "the-right-context-not-all-of-it",
      "title": "The right context, not all of it",
-     "idea": "Too little and it guesses; too much buries what mattered."
+     "idea": "Too little and it guesses; too much buries what mattered.",
+     "covers": [
+      "Why too little context makes it guess",
+      "Why too much buries what matters",
+      "How to pick the few facts it really needs"
+     ],
+     "minutes": 7
     },
     {
      "n": 11,
      "slug": "show-one-good-example",
      "title": "Show one good example",
-     "idea": "One example beats a paragraph of description."
+     "idea": "One example beats a paragraph of description.",
+     "covers": [
+      "Why one example beats a long description",
+      "How to pick a good example to share",
+      "How to ask it to match your style"
+     ],
+     "minutes": 6
     },
     {
      "n": 12,
      "slug": "check-it-with-real-proof",
      "title": "Check it with real proof",
-     "idea": "Trust a source, a test or a calculator, not its tone."
+     "idea": "Trust a source, a test or a calculator, not its tone.",
+     "covers": [
+      "Why its tone is not proof",
+      "How to check with a source, a test or a calculator",
+      "Which answers need checking most"
+     ],
+     "minutes": 8
     },
     {
      "n": 13,
      "slug": "ask-for-the-plan-first",
      "title": "Ask for the plan first",
-     "idea": "Fixing a plan costs one sentence; fixing work costs an hour."
+     "idea": "Fixing a plan costs one sentence; fixing work costs an hour.",
+     "covers": [
+      "Why to ask for a plan before the work",
+      "How to fix a plan in one sentence",
+      "When to skip the plan and just ask"
+     ],
+     "minutes": 6
     },
     {
      "n": 14,
      "slug": "when-to-start-a-fresh-chat",
      "title": "When to start a fresh chat",
-     "idea": "Long chats get muddled. Start clean, bring a summary."
+     "idea": "Long chats get muddled. Start clean, bring a summary.",
+     "covers": [
+      "Why long chats get muddled",
+      "How to tell when it is time to start over",
+      "How to carry a short summary into a new chat"
+     ],
+     "minutes": 6
     },
     {
      "n": 15,
      "slug": "how-it-actually-works",
      "title": "How it actually works",
-     "idea": "Ten minutes on what is happening inside, and why it matters."
+     "idea": "Ten minutes on what is happening inside, and why it matters.",
+     "covers": [
+      "What happens inside when it writes an answer",
+      "Why it predicts words instead of looking them up",
+      "How this explains its strengths and mistakes"
+     ],
+     "minutes": 10
     },
     {
      "n": 16,
      "slug": "bigger-isn-t-better",
      "title": "Bigger isn't better",
-     "idea": "Use the cheapest, fastest model that does the job."
+     "idea": "Use the cheapest, fastest model that does the job.",
+     "covers": [
+      "Why the priciest model is rarely the right pick",
+      "How to match a model to the job",
+      "When stepping up is worth it"
+     ],
+     "minutes": 7
     },
     {
      "n": 17,
      "slug": "read-the-hype",
      "title": "Read the hype",
-     "idea": "Benchmarks can be gamed. Test on your own work."
+     "idea": "Benchmarks can be gamed. Test on your own work.",
+     "covers": [
+      "Why big test scores can mislead",
+      "How claims about new models get inflated",
+      "How to test a model on your own tasks"
+     ],
+     "minutes": 7
     },
     {
      "n": 18,
      "slug": "save-what-works",
      "title": "Save what works",
-     "idea": "Write it down once so next time takes one line."
+     "idea": "Write it down once so next time takes one line.",
+     "covers": [
+      "How to save a request that worked well",
+      "Where to keep your saved requests",
+      "How to reuse them in one line next time"
+     ],
+     "minutes": 6
     },
     {
      "n": 19,
      "slug": "ai-at-work-who-owns-the-result",
      "title": "AI at work: who owns the result",
-     "idea": "You do. What to tell your team and your manager."
+     "idea": "You do. What to tell your team and your manager.",
+     "covers": [
+      "Why you own anything AI helps you make",
+      "What to tell your team and your manager",
+      "How to use it at work without losing trust"
+     ],
+     "minutes": 8
     }
    ],
    "for": "Everyone"
@@ -136,49 +250,97 @@
      "n": 20,
      "slug": "stop-prompting-start-delegating",
      "title": "Stop prompting, start delegating",
-     "idea": "Hand over the goal and the finish line, not the steps."
+     "idea": "Hand over the goal and the finish line, not the steps.",
+     "covers": [
+      "The difference between giving steps and giving a goal",
+      "How to describe the finish line clearly",
+      "How to check the work it hands back"
+     ],
+     "minutes": 8
     },
     {
      "n": 21,
      "slug": "instructions-it-always-reads",
      "title": "Instructions it always reads",
-     "idea": "Set your context once, for every chat."
+     "idea": "Set your context once, for every chat.",
+     "covers": [
+      "How to set standing instructions once",
+      "What to put in them and what to leave out",
+      "How they shape every new chat"
+     ],
+     "minutes": 7
     },
     {
      "n": 22,
      "slug": "saved-procedures",
      "title": "Saved procedures",
-     "idea": "Turn a job you repeat into a recipe it follows."
+     "idea": "Turn a job you repeat into a recipe it follows.",
+     "covers": [
+      "How to spot a job you repeat often",
+      "How to turn it into a written recipe",
+      "How to get it to follow the recipe each time"
+     ],
+     "minutes": 8
     },
     {
      "n": 23,
      "slug": "connecting-it-to-your-tools",
      "title": "Connecting it to your tools",
-     "idea": "Email, calendar, files: what connecting means and the risks."
+     "idea": "Email, calendar, files: what connecting means and the risks.",
+     "covers": [
+      "What it means to connect AI to email, calendar or files",
+      "What it can see and do once connected",
+      "The risks, and how to limit them"
+     ],
+     "minutes": 9
     },
     {
      "n": 24,
      "slug": "helpers-working-in-parallel",
      "title": "Helpers working in parallel",
-     "idea": "Split big work into pieces that do not depend on each other."
+     "idea": "Split big work into pieces that do not depend on each other.",
+     "covers": [
+      "How to split big work into separate pieces",
+      "Which pieces can run at the same time",
+      "How to bring the results back together"
+     ],
+     "minutes": 8
     },
     {
      "n": 25,
      "slug": "letting-it-act-safely",
      "title": "Letting it act safely",
-     "idea": "Permissions, limits and when to say stop."
+     "idea": "Permissions, limits and when to say stop.",
+     "covers": [
+      "How permissions limit what it can do",
+      "Which actions need your OK first",
+      "When and how to tell it to stop"
+     ],
+     "minutes": 8
     },
     {
      "n": 26,
      "slug": "the-real-cost-math",
      "title": "The real cost math",
-     "idea": "Where the money goes, and how to spend less for the same result."
+     "idea": "Where the money goes, and how to spend less for the same result.",
+     "covers": [
+      "Where the money really goes",
+      "Why longer chats and bigger models cost more",
+      "How to get the same result for less"
+     ],
+     "minutes": 9
     },
     {
      "n": 27,
      "slug": "switch-tools-without-starting-over",
      "title": "Switch tools without starting over",
-     "idea": "Learn the method, not the buttons."
+     "idea": "Learn the method, not the buttons.",
+     "covers": [
+      "Why methods last longer than buttons",
+      "How to move your instructions to a new tool",
+      "What to test after you switch"
+     ],
+     "minutes": 6
     }
    ],
    "for": "People who use AI daily"
@@ -191,43 +353,85 @@
      "n": 28,
      "slug": "what-a-harness-is",
      "title": "What a harness is",
-     "idea": "The model is the engine; the harness is the car."
+     "idea": "The model is the engine; the harness is the car.",
+     "covers": [
+      "What a harness is and what it adds to a model",
+      "Why the same model acts differently in different tools",
+      "What to look for when picking one"
+     ],
+     "minutes": 8
     },
     {
      "n": 29,
      "slug": "the-file-it-always-reads",
      "title": "The file it always reads",
-     "idea": "A project file that makes every session start smart."
+     "idea": "A project file that makes every session start smart.",
+     "covers": [
+      "What goes in a project file the agent always reads",
+      "How it makes every session start with context",
+      "How to keep the file short and current"
+     ],
+     "minutes": 8
     },
     {
      "n": 30,
      "slug": "plan-act-check",
      "title": "Plan, act, check",
-     "idea": "The loop every coding agent runs, and where you step in."
+     "idea": "The loop every coding agent runs, and where you step in.",
+     "covers": [
+      "The plan, act, check loop every coding agent runs",
+      "Where you should step in and review",
+      "How to stop the loop going off track"
+     ],
+     "minutes": 9
     },
     {
      "n": 31,
      "slug": "tests-are-the-quality-gate",
      "title": "Tests are the quality gate",
-     "idea": "Proof outside the AI, made automatic."
+     "idea": "Proof outside the AI, made automatic.",
+     "covers": [
+      "Why tests are proof that does not come from the AI",
+      "How to make the agent run tests every time",
+      "How to keep it from weakening the tests"
+     ],
+     "minutes": 10
     },
     {
      "n": 32,
      "slug": "let-it-set-itself-up",
      "title": "Let it set itself up",
-     "idea": "Have the AI write its own config and skills."
+     "idea": "Have the AI write its own config and skills.",
+     "covers": [
+      "How to have the AI write its own setup files",
+      "How to turn your habits into reusable skills",
+      "How to review what it wrote"
+     ],
+     "minutes": 9
     },
     {
      "n": 33,
      "slug": "running-agent-teams",
      "title": "Running agent teams",
-     "idea": "A lead that directs cheap helpers."
+     "idea": "A lead that directs cheap helpers.",
+     "covers": [
+      "How a lead agent directs cheaper helpers",
+      "How to split work so helpers do not collide",
+      "How to check what the team produced"
+     ],
+     "minutes": 11
     },
     {
      "n": 34,
      "slug": "test-models-on-your-own-work",
      "title": "Test models on your own work",
-     "idea": "Your own small benchmark beats any leaderboard."
+     "idea": "Your own small benchmark beats any leaderboard.",
+     "covers": [
+      "How to build a small test from your own tasks",
+      "How to compare models fairly on it",
+      "Why your results beat any public ranking"
+     ],
+     "minutes": 10
     }
    ],
    "for": "Engineers"
