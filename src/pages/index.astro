@@ -125,7 +125,13 @@ const xEnd = (t: { pts: number[] }) => Math.max(...t.pts);
 
 	function show(step: 'step1' | 'step2' | 'ticket', focus = true) {
 		for (const s of ['step1', 'step2', 'ticket']) { const el = $(s); el.hidden = s !== step; el.classList.toggle('enter', s === step); }
-		if (focus) { const h = $(step).querySelector<HTMLElement>('h2, #tk-name'); h?.focus({ preventScroll: true }); }
+		if (focus) {
+			const h = $(step).querySelector<HTMLElement>('h2, #tk-name');
+			h?.focus({ preventScroll: true });
+			// The steps differ in height, so bring the new one into view instead of leaving the reader mid-page.
+			const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+			$(step).scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
+		}
 	}
 	function syncGoals() {
 		document.querySelectorAll<HTMLButtonElement>('.goal').forEach((b) => {
