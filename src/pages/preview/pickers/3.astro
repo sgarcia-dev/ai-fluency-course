@@ -78,7 +78,7 @@ SAMPLE_NUMBERS.forEach((n) => lessonByNumber(n));
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="robots" content="noindex" />
 		<title>{site.name}: start from your goal</title>
-		<style>
+		<style is:global>
 			:root { --accent: #1a4fd6; --ink: #1d2230; --muted: #4f5666; --line: #d5d9e2; --soft: #f3f5fa; }
 			* { box-sizing: border-box; }
 			body { margin: 0; font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: #fff; }
@@ -414,7 +414,7 @@ SAMPLE_NUMBERS.forEach((n) => lessonByNumber(n));
 				renderGoals();
 			})();
 		</script>
-		<style>
+		<style is:global>
 			.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 		</style>
 	</body>
