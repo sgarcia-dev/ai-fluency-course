@@ -1,0 +1,61 @@
+---
+// Two runners on one simple track; the quick one finishes and retries.
+import { samples } from '../../content';
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'bigger-isn-t-better')?.diagram.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const steps = ['Quick', 'Big'];
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 300 380" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b" x="10" y="22">Rewrite this email</text>
+			<!-- tracks -->
+			<path class="line dash" d="M20 90 L270 90 M20 170 L270 170" />
+			<path class="line" d="M270 40 L270 190" />
+			<text class="t muted" x="270" y="210" text-anchor="middle">Finish</text>
+			<text class="t muted" x="145" y="110" text-anchor="middle">halfway</text>
+			<!-- big slow runner -->
+			<circle class="bad line" cx="145" cy="62" r="24" />
+			<rect class="acc line" x="62" y="40" width="50" height="26" />
+			<text class="t b" x="87" y="59" text-anchor="middle">$$$</text>
+			<circle class="paper line" cx="198" cy="56" r="14" />
+			<path class="line thin" d="M198 56 L198 47 M198 56 L205 60" />
+			<!-- small quick runner -->
+			<circle class="good line" cx="252" cy="152" r="13" />
+			<path class="line thin" d="M224 146 L234 146 M220 156 L232 156" />
+			<path class="tick" d="M30 146 l5 5 l9 -11 M54 146 l5 5 l9 -11 M78 146 l5 5 l9 -11" />
+			<text class="t b good-t" x="30" y="132">Tried 3 times</text>
+			<!-- ladder -->
+			<path class="line" d="M40 240 L40 340 M100 240 L100 340" />
+			{steps.map((s, i) => (
+				<g>
+					<path class="line" d={`M40 ${318 - i * 50} L100 ${318 - i * 50}`} />
+					<text class={i ? 't b' : 't b good-t'} x="112" y={323 - i * 50}>{s}</text>
+				</g>
+			))}
+			<text class="t b" x="160" y="290">Start quick.</text>
+			<text class="t" x="160" y="312">Step up only</text>
+			<text class="t" x="160" y="332">when it fails.</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.thin { stroke-width: 1.5; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.tick { fill: none; stroke: var(--dg-good, #2e8b57); stroke-width: 2.5; stroke-linecap: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
