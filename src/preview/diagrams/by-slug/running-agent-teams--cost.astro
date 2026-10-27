@@ -1,0 +1,44 @@
+---
+// Cost: big model alone vs mid lead plus quick helpers.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'running-agent-teams')?.figures?.find((f) => f.id === 'cost')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 200" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter>
+		<marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--dg-ink, #1f2a37)" /></marker></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b" x="20" y="24">Big model does it all</text>
+			<rect class="bad line" x="20" y="34" width="300" height="38" />
+			<text class="t b w" x="170" y="59" text-anchor="middle">about 10</text>
+			<text class="t b" x="20" y="116">Mid lead + 3 quick helpers</text>
+			<rect class="acc line" x="20" y="126" width="54" height="38" />
+			<text class="t b" x="47" y="151" text-anchor="middle">lead</text>
+			{[0, 1, 2].map((i) => <rect class="good line" x={80 + i * 22} y="126" width="18" height="38" />)}
+			<text class="t b" x="152" y="151">about 3 to 4</text>
+			<text class="t muted" x="170" y="192" text-anchor="middle">Same feature, same checks</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>

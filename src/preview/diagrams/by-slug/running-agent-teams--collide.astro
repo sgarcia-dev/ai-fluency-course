@@ -1,0 +1,53 @@
+---
+// Collision: two writers on one file vs owned files.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'running-agent-teams')?.figures?.find((f) => f.id === 'collide')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 260" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter>
+		<marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--dg-ink, #1f2a37)" /></marker></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b bad-t" x="85" y="24" text-anchor="middle">Same file</text>
+			<text class="t b good-t" x="255" y="24" text-anchor="middle">Own files</text>
+			<path class="dash" d="M170 10 L170 250" />
+			{[35, 135].map((x) => (<g><circle class="paper line" cx={x} cy="66" r="22" /><text class="t b" x={x} y="72" text-anchor="middle">H</text></g>))}
+			<path class="line" d="M45 88 L78 140" marker-end="url(#ah)" />
+			<path class="line" d="M125 88 L92 140" marker-end="url(#ah)" />
+			<rect class="bad line" x="45" y="146" width="80" height="60" />
+			<text class="t b w" x="85" y="183" text-anchor="middle">file</text>
+			<text class="t b bad-t" x="85" y="234" text-anchor="middle">conflict!</text>
+			{[[205, 'A'], [305, 'B']].map(([x, n]) => (
+				<g>
+					<circle class="paper line" cx={x} cy="66" r="22" /><text class="t b" x={x} y="72" text-anchor="middle">H</text>
+					<path class="line" d={`M${x} 88 L${x} 140`} marker-end="url(#ah)" />
+					<rect class="good line" x={Number(x) - 30} y="146" width="60" height="60" />
+					<text class="t b w" x={x} y="183" text-anchor="middle">{n}</text>
+				</g>
+			))}
+			<text class="t b good-t" x="255" y="234" text-anchor="middle">no clash</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
