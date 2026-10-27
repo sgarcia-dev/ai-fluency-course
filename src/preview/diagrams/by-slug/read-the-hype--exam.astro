@@ -1,0 +1,72 @@
+---
+// Your own small exam: 5 tasks, old vs new, with time and cost.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'read-the-hype')?.figures?.find((f) => f.id === 'exam')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const rows = [
+	{ job: 'Weekly report', old: 1, nu: 0 },
+	{ job: 'Client reply', old: 1, nu: 1 },
+	{ job: 'Sum a table', old: 1, nu: 1 },
+	{ job: 'Fix a date bug', old: 1, nu: 1 },
+	{ job: 'Recipe for six', old: 1, nu: 0 },
+];
+const mark = (ok: number, cx: number, y: number) => ok
+	? { c: 'good line', d: `M${cx - 6} ${y} l4 4 l8 -9` }
+	: { c: 'bad line', d: `M${cx - 5} ${y - 5} l10 10 M${cx + 5} ${y - 5} l-10 10` };
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 420" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<rect class="paper line" x="6" y="6" width="328" height="408" />
+			<text class="t b" x="20" y="36">Your small exam</text>
+			<text class="t b" x="230" y="66" text-anchor="middle">Old</text>
+			<text class="t b" x="296" y="66" text-anchor="middle">New</text>
+			{rows.map((r, i) => {
+				const y = 100 + i * 42;
+				const a = mark(r.old, 230, y);
+				const b = mark(r.nu, 296, y);
+				return (
+					<g>
+						<text class="t" x="20" y={y + 6}>{r.job}</text>
+						<circle class={a.c} cx="230" cy={y} r="13" /><path class="tick" d={a.d} />
+						<circle class={b.c} cx="296" cy={y} r="13" /><path class="tick" d={b.d} />
+					</g>
+				);
+			})}
+			<path class="line dash" d="M16 304 L324 304" />
+			<text class="t" x="20" y="330">Right</text>
+			<text class="t b good-t" x="230" y="330" text-anchor="middle">5/5</text>
+			<text class="t b bad-t" x="296" y="330" text-anchor="middle">3/5</text>
+			<text class="t" x="20" y="356">Time</text>
+			<text class="t" x="230" y="356" text-anchor="middle">4 min</text>
+			<text class="t bad-t" x="296" y="356" text-anchor="middle">9 min</text>
+			<text class="t" x="20" y="382">Cost</text>
+			<text class="t" x="230" y="382" text-anchor="middle">10¢</text>
+			<text class="t bad-t" x="296" y="382" text-anchor="middle">40¢</text>
+			<rect class="acc" x="196" y="388" width="134" height="22" />
+			<text class="t b" x="263" y="405" text-anchor="middle">Keep the old</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>

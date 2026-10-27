@@ -1,0 +1,59 @@
+---
+// The hype cycle: a launch claim shrinks on its way to your real work.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'read-the-hype')?.figures?.find((f) => f.id === 'cycle')?.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const steps = [
+	{ name: 'Launch post', h: 190 },
+	{ name: 'Demo', h: 170 },
+	{ name: 'Vibes posts', h: 165 },
+	{ name: 'Your work', h: 80 },
+];
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 300" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<path class="badfade" d="M50 50 L320 50 L320 160 Z" />
+			<text class="t b bad-t" x="240" y="84">the hype</text>
+			{steps.map((s, i) => {
+				const x = 14 + i * 82;
+				const last = i === steps.length - 1;
+				return (
+					<g>
+						<rect class={last ? 'acc line' : 'soft'} x={x} y={240 - s.h} width="64" height={s.h} />
+						{i === 0 && <text class="t b" x={x + 32} y={240 - s.h - 10} text-anchor="middle">Best ever!</text>}
+						{last && <text class="t b" x={x + 32} y={240 - s.h - 10} text-anchor="middle">?</text>}
+					</g>
+				);
+			})}
+			<text class="t" x="46" y="266" text-anchor="middle">Launch</text>
+			<text class="t" x="128" y="266" text-anchor="middle">Demo</text>
+			<text class="t" x="210" y="266" text-anchor="middle">Vibes</text>
+			<text class="t b" x="292" y="266" text-anchor="middle">Your work</text>
+			<text class="t muted" x="170" y="292" text-anchor="middle">How good it sounds</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.badfade { fill: var(--dg-bad, #c0392b); opacity: 0.18; }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>

@@ -1,0 +1,68 @@
+---
+// Leaderboard vs your work: B tops the scoreboard, A wins your tasks.
+import { samples } from "../../content";
+interface Props { wobble?: boolean }
+const { wobble = false } = Astro.props;
+const label = samples.find((s) => s.slug === 'read-the-hype')?.diagram.describe ?? '';
+const fid = `dgw-${Math.random().toString(36).slice(2, 8)}`;
+const rows = [
+	{ name: 'Model A', marks: [1, 1, 0, 1, 1], win: true },
+	{ name: 'Model B', marks: [0, 1, 0, 0, 0], win: false },
+];
+---
+<div class="dg-wrap" role="img" aria-label={label}>
+	<svg class="dg" viewBox="0 0 340 330" width="100%" aria-hidden="true">
+		<defs><filter id={fid}><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" /><feDisplacementMap in="SourceGraphic" scale="3" /></filter></defs>
+		<g filter={wobble ? `url(#${fid})` : undefined}>
+			<text class="t b" x="20" y="24">Public scoreboard</text>
+			<text class="t" x="20" y="64">Model B</text>
+			<rect class="soft" x="100" y="44" width="200" height="30" />
+			<text class="t b" x="310" y="66">1st</text>
+			<text class="t" x="20" y="108">Model A</text>
+			<rect class="soft" x="100" y="88" width="160" height="30" />
+			<text class="t" x="270" y="110">2nd</text>
+
+			<path class="line dash" d="M10 146 L330 146" />
+
+			<text class="t b" x="20" y="182">Your 5 tasks</text>
+			{rows.map((r, i) => {
+				const y = 220 + i * 50;
+				return (
+					<g>
+						{r.win && <rect class="acc" x="10" y={y - 24} width="320" height="44" />}
+						<text class="t b" x="20" y={y + 6}>{r.name}</text>
+						{r.marks.map((m, j) => {
+							const cx = 120 + j * 34;
+							return m ? (
+								<g><circle class="good line" cx={cx} cy={y} r="13" /><path class="tick" d={`M${cx - 6} ${y} l4 4 l8 -9`} /></g>
+							) : (
+								<g><circle class="bad line" cx={cx} cy={y} r="13" /><path class="tick" d={`M${cx - 5} ${y - 5} l10 10 M${cx + 5} ${y - 5} l-10 10`} /></g>
+							);
+						})}
+						<text class="t b" x="320" y={y + 6} text-anchor="end">{r.marks.reduce((a, b) => a + b, 0)}/5</text>
+					</g>
+				);
+			})}
+			<text class="t b" x="170" y="318" text-anchor="middle">The test is not your job.</text>
+		</g>
+	</svg>
+</div>
+<style>
+	.dg-wrap { max-width: 32rem; font-family: var(--dg-font, system-ui, sans-serif); }
+	.dg { display: block; width: 100%; height: auto; }
+	.line { stroke: var(--dg-ink, #1f2a37); stroke-width: var(--dg-stroke, 2.5); stroke-linecap: round; stroke-linejoin: round; fill: none; }
+	.dash { stroke-dasharray: 5 6; stroke: var(--dg-muted, #5b6573); }
+	.paper { fill: var(--dg-paper, #fff); }
+	.acc { fill: var(--dg-accent, #f2c14e); }
+	.good { fill: var(--dg-good, #2e8b57); }
+	.bad { fill: var(--dg-bad, #c0392b); }
+	.soft { fill: var(--dg-muted, #5b6573); opacity: 0.3; }
+	.tick { fill: none; stroke: var(--dg-paper, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+	.t { fill: var(--dg-ink, #1f2a37); font-size: 17px; font-family: var(--dg-font, system-ui, sans-serif); }
+	.b { font-weight: 700; }
+	.w { fill: var(--dg-paper, #fff); }
+	.muted { fill: var(--dg-muted, #5b6573); }
+	.good-t { fill: var(--dg-good, #2e8b57); }
+	.bad-t { fill: var(--dg-bad, #c0392b); }
+	rect { rx: var(--dg-radius, 8px); }
+</style>
